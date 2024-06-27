@@ -1,38 +1,36 @@
 <script lang="ts">
-  type MonsterProps = {
-    atk: number;
-    def: number | null;
-    position: 'ATK' | 'DEF';
-  };
-  let { atk = $bindable(0), def = $bindable(), position = $bindable('ATK') }: MonsterProps = $props();
+  import { type MonsterProps } from '$lib/damageCalc.svelte';
+  import { Switch } from '@skeletonlabs/skeleton-svelte';
 
-  $inspect({ atk, def, position });
+  let { monster = $bindable() }: { monster: MonsterProps } = $props();
+
+  const setPosition = (e: boolean) => {
+    monster.position = e ? 'DEF' : 'ATK';
+  };
 </script>
 
-<article>
+<article class="space-y-2">
   <div class="inline-flex gap-4">
     <label class="label" for="atk">
       <span class="label-text">ATK</span>
-      <input class="input" type="number" id="atk" bind:value={atk} />
+      <input class="input text-sm" type="number" id="atk" bind:value={monster.atk} />
     </label>
 
     <label class="label" for="atk">
       <span class="label-text">DEF</span>
-      <input class="input" type="number" id="atk" bind:value={def} />
+      <input class="input text-sm" type="number" id="atk" bind:value={monster.def} />
     </label>
   </div>
 
   <label class="label" for="position">
-    <span class="label-text">Position</span>
-    <div class="flex gap-4">
-      <label class="flex items-center space-x-2">
-        <p>ATK</p>
-        <input type="radio" name="pos" id="pos" class="radio" value="atk" bind:group={position} />
-      </label>
-      <label class="flex items-center space-x-2">
-        <p>DEF</p>
-        <input type="radio" name="pos" id="pos" class="radio" value="def" bind:group={position} />
-      </label>
-    </div>
+    <label class="flex items-center space-x-2">
+      <p>{monster.position} Position</p>
+      <Switch id="position" name="position" checked={monster.position === 'DEF'} onCheckedChange={setPosition} />
+    </label>
+
+    <label class="flex items-center space-x-2">
+      <p>Piercing</p>
+      <Switch id="piercing" name="piercing" bind:checked={monster.hasPiercing} />
+    </label>
   </label>
 </article>

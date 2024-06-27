@@ -1,5 +1,6 @@
 import { skeleton } from '@skeletonlabs/skeleton/plugin';
 import * as themes from '@skeletonlabs/skeleton/themes';
+import forms from '@tailwindcss/forms';
 import { join } from 'path';
 
 export default {
@@ -11,6 +12,7 @@ export default {
         extend: {},
     },
     plugins: [
+        forms,
         skeleton({
             themes: [ themes.cerberus, themes.catppuccin ]
         })
