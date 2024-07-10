@@ -5,10 +5,7 @@ import typography from '@tailwindcss/typography';
 import { join } from 'path';
 
 export default {
-    content: [
-        './src/**/*.{html,js,svelte,ts}',
-        join(require.resolve('@skeletonlabs/skeleton-svelte'), '../**/*.{html,js,svelte,ts}')
-    ],
+    content: ['./src/**/*.{html,js,svelte,ts}', join(require.resolve('@skeletonlabs/skeleton-svelte'), '../**/*.{html,js,svelte,ts}')],
     theme: {
         extend: {},
     },
@@ -16,7 +13,7 @@ export default {
         forms,
         typography,
         skeleton({
-            themes: [ themes.cerberus, themes.catppuccin ]
-        })
-    ]
-}
+            themes: [themes.cerberus, themes.catppuccin],
+        }),
+    ],
+};
