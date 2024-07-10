@@ -34,37 +34,37 @@
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.convertToEffectDamage} />
-            <p>(04): Battle damage is treated as effect damage</p>
+            <p>(04): Battle damage you deal is treated as effect damage</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.convertToHealing} />
-            <p>(05): The player gains Life Points instead of taking battle damage</p>
+            <p>(05): You gain Life Points instead of taking battle damage</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.preventDamage} />
-            <p>(06): Battle damage becomes 0</p>
+            <p>(06): Battle damage you deal becomes 0</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.halveDamage} />
-            <p>(07): Battle damage is halved</p>
+            <p>(07): Battle damage you deal is halved</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.doubleDamage} />
-            <p>(08): Battle damage is doubled</p>
+            <p>(08): Battle damage you deal is doubled</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.setToSpecificValue} />
-            <p>(09): Battle damage becomes</p>
+            <p>(09): Battle damage you deal becomes</p>
             <input class="input !inline w-20 !text-sm" type="number" bind:value={modifiers.specificValue} />
         </label>
     </li>

@@ -4,7 +4,6 @@
     import Monster from './Monster.svelte';
 
     const calc = createDamageCalculator();
-    $inspect({ calc });
 
     let open = $state<boolean>(true);
 </script>
@@ -15,11 +14,11 @@
         <article class="grid grid-cols-[auto_auto] justify-start gap-4">
             <section>
                 <h4 class="h4">Player A</h4>
-                {@render battleResult(calc.battleResult.attackingPlayer)}
+                {@render battleResult(calc.battleResult.playerA)}
             </section>
             <section>
                 <h4 class="h4">Player B</h4>
-                {@render battleResult(calc.battleResult.defendingPlayer)}
+                {@render battleResult(calc.battleResult.playerB)}
             </section>
         </article>
     </div>
