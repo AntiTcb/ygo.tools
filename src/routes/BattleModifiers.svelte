@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type BattleModifiers } from '$lib/damageCalc.svelte';
+    import { BattleModifiers } from '$lib/damageCalc.svelte';
 
     let { modifiers = $bindable<BattleModifiers>() }: { modifiers: BattleModifiers } = $props();
 </script>
@@ -39,25 +39,25 @@
     </li>
     <li>
         <label class="flex items-center space-x-2">
-            <input class="checkbox" type="checkbox" bind:checked={modifiers.convertToHealing} />
+            <input class="checkbox" type="checkbox" bind:checked={modifiers.convertDamageTakenToHealing} />
             <p>(05): You gain Life Points instead of taking battle damage</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
-            <input class="checkbox" type="checkbox" bind:checked={modifiers.preventDamage} />
+            <input class="checkbox" type="checkbox" bind:checked={modifiers.cannotDealDamage} />
             <p>(06): Battle damage you deal becomes 0</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
-            <input class="checkbox" type="checkbox" bind:checked={modifiers.halveDamage} />
+            <input class="checkbox" type="checkbox" bind:checked={modifiers.dealHalfDamage} />
             <p>(07): Battle damage you deal is halved</p>
         </label>
     </li>
     <li>
         <label class="flex items-center space-x-2">
-            <input class="checkbox" type="checkbox" bind:checked={modifiers.doubleDamage} />
+            <input class="checkbox" type="checkbox" bind:checked={modifiers.dealDoubleDamage} />
             <p>(08): Battle damage you deal is doubled</p>
         </label>
     </li>
@@ -73,13 +73,13 @@
             <input class="checkbox" type="checkbox" bind:checked={modifiers.preventIfConditionMet} />
             <p>(10): You do not take battle damage if it is:</p>
             <div class="flex gap-2 py-2 md:py-0">
-                <select class="select w-24 text-sm">
-                    <option value="lt">&lt;</option>
-                    <option value="lte">&leq;</option>
-                    <option value="gt">&gt;</option>
-                    <option value="gte">&geq;</option>
+                <select class="select w-24 text-sm" bind:value={modifiers.comparison}>
+                    <option value="<">&lt;</option>
+                    <option value="<=">&leq;</option>
+                    <option value=">">&gt;</option>
+                    <option value=">=">&geq;</option>
                 </select>
-                <input class="input !w-20 !text-sm" type="number" />
+                <input class="input !w-20 !text-sm" type="number" bind:value={modifiers.preventionDamageValue} />
             </div>
         </label>
     </li>

@@ -4,6 +4,7 @@
     import Monster from './Monster.svelte';
 
     const calc = createDamageCalculator();
+    $inspect(calc, calc.attackingMonster, calc.defendingMonster, calc.playerAModifiers, calc.playerBModifiers, calc.battleResult);
 
     let open = $state<boolean>(true);
 </script>
@@ -28,7 +29,7 @@
 
         <details bind:open>
             <summary class="text-xl font-bold">Modifiers</summary>
-            <BattleModifiers bind:modifiers={calc.battleModifiers.playerA} />
+            <BattleModifiers bind:modifiers={calc.playerAModifiers} />
         </details>
     </div>
     <div id="defending" class="card">
@@ -37,7 +38,7 @@
 
         <details bind:open>
             <summary class="text-xl font-bold">Modifiers</summary>
-            <BattleModifiers bind:modifiers={calc.battleModifiers.playerB} />
+            <BattleModifiers bind:modifiers={calc.playerBModifiers} />
         </details>
     </div>
 </div>

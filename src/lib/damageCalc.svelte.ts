@@ -11,10 +11,10 @@ export class BattleModifiers {
     redirectToOpponent: boolean = false;
     alsoInflictedToOpponent: boolean = false;
     convertToEffectDamage: boolean = false;
-    convertToHealing: boolean = false;
-    preventDamage: boolean = false;
-    halveDamage: boolean = false;
-    doubleDamage: boolean = false;
+    convertDamageTakenToHealing: boolean = false;
+    cannotDealDamage: boolean = false;
+    dealHalfDamage: boolean = false;
+    dealDoubleDamage: boolean = false;
     setToSpecificValue: boolean = false;
     specificValue: number = 0;
     preventIfConditionMet: boolean = false;
@@ -43,7 +43,8 @@ export class BattleModifiers {
 export class DamageCalculator {
     attackingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
     defendingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
-    battleModifiers = $state<{ playerA: BattleModifiers; playerB: BattleModifiers }>({ playerA: new BattleModifiers(), playerB: new BattleModifiers() });
+    playerAModifiers = $state<BattleModifiers>(new BattleModifiers());
+    playerBModifiers = $state<BattleModifiers>(new BattleModifiers());
     battleResult = $derived.by(() => this.calculateBattleDamage());
 
     calculateBattleDamage() {
@@ -83,14 +84,14 @@ export class DamageCalculator {
         }
 
         // 01: Inflicts double battle damage
-        if (this.battleModifiers.playerA.inflictsDoubleDamage) {
+        if (this.playerAModifiers.inflictsDoubleDamage) {
             bDamage *= 2;
-        } else if (this.battleModifiers.playerB.inflictsDoubleDamage) {
+        } else if (this.playerBModifiers.inflictsDoubleDamage) {
             aDamage *= 2;
         }
 
         // 02: Battle damage is taken by both players
-        if (this.battleModifiers.playerA.damageToBothPlayers || this.battleModifiers.playerB.damageToBothPlayers) {
+        if (this.playerAModifiers.damageToBothPlayers || this.playerBModifiers.damageToBothPlayers) {
             if (aDamage > 0) {
                 bDamage = aDamage;
             } else if (bDamage > 0) {
@@ -99,81 +100,84 @@ export class DamageCalculator {
         }
 
         // 03: Your opponent takes the battle damage instead
-        if (this.battleModifiers.playerA.redirectToOpponent) {
+        if (this.playerAModifiers.redirectToOpponent) {
             bRedirectedDamage = aDamage;
             aDamage = 0;
         }
-        if (this.battleModifiers.playerB.redirectToOpponent) {
+        if (this.playerBModifiers.redirectToOpponent) {
             aRedirectedDamage = bDamage;
             bDamage = 0;
         }
         // 03.5: Battle damage you take is also inflicted to your opponent
-        if (this.battleModifiers.playerA.alsoInflictedToOpponent) {
+        if (this.playerAModifiers.alsoInflictedToOpponent) {
             bRedirectedDamage += aDamage;
         }
-        if (this.battleModifiers.playerB.alsoInflictedToOpponent) {
+        if (this.playerBModifiers.alsoInflictedToOpponent) {
             aRedirectedDamage += bDamage;
         }
 
         // 04: Battle damage is treated as effect damage.
-        if (this.battleModifiers.playerA.convertToEffectDamage) {
+        if (this.playerAModifiers.convertToEffectDamage) {
             bEffectDamage = bDamage;
             bDamage = 0;
-        } else if (this.battleModifiers.playerB.convertToEffectDamage) {
+        }
+        if (this.playerBModifiers.convertToEffectDamage) {
             aEffectDamage = aDamage;
             aDamage = 0;
         }
-        // 05: The player gains Life Points instead of taking battle damage.
-        if (this.battleModifiers.playerA.convertToHealing) {
+        // 05:A The player gains Life Points instead of taking battle damage.
+        if (this.playerAModifiers.convertDamageTakenToHealing) {
             aDamage = -aDamage;
+        }
+
+        // 05:B The player gains Life Points instead of taking battle damage.
+        if (this.playerBModifiers.convertDamageTakenToHealing) {
+            bDamage = -bDamage;
+        }
+
+        // 06: Battle damage becomes 0.
+        if (this.playerBModifiers.cannotDealDamage) {
+            aDamage = 0;
         } else {
-            // 06: Battle damage becomes 0.
-            if (this.battleModifiers.playerA.preventDamage) {
+            // 07: Battle damage is halved.
+            if (this.playerBModifiers.dealHalfDamage) {
+                aDamage /= 2;
+                bRedirectedDamage /= 2;
+            }
+            // 08: Battle damage is doubled.
+            if (this.playerBModifiers.dealDoubleDamage) {
+                aDamage *= 2;
+            }
+            // 09: Battle damage becomes X (X being a predetermined value).
+            if (this.playerBModifiers.setToSpecificValue) {
+                aDamage = this.playerBModifiers.specificValue;
+            }
+            // 10: You do not take battle damage if it is more or less than X.
+            if (this.playerAModifiers.preventIfConditionMet && this.playerAModifiers.preventionCondition(aDamage)) {
                 aDamage = 0;
-            } else {
-                // 07: Battle damage is halved.
-                if (this.battleModifiers.playerB.halveDamage) {
-                    aDamage /= 2;
-                }
-                // 08: Battle damage is doubled.
-                if (this.battleModifiers.playerB.doubleDamage) {
-                    aDamage *= 2;
-                }
-                // 09: Battle damage becomes X (X being a predetermined value).
-                if (this.battleModifiers.playerB.setToSpecificValue) {
-                    aDamage = this.battleModifiers.playerB.specificValue;
-                }
-                // 10: You do not take battle damage if it is more or less than X.
-                if (this.battleModifiers.playerA.preventIfConditionMet && this.battleModifiers.playerA.preventionCondition(aDamage)) {
-                    aDamage = 0;
-                }
             }
         }
 
-        // 05:B
-        if (this.battleModifiers.playerB.convertToHealing) {
-            bDamage = -bDamage;
+        // 06: Battle damage becomes 0.
+        if (this.playerAModifiers.cannotDealDamage) {
+            bDamage = 0;
         } else {
-            // 06
-            if (this.battleModifiers.playerB.preventDamage) {
+            // 07: Battle damage is halved.
+            if (this.playerAModifiers.dealHalfDamage) {
+                bDamage /= 2;
+                aRedirectedDamage /= 2;
+            }
+            // 08: Battle damage is doubled.
+            if (this.playerAModifiers.dealDoubleDamage) {
+                bDamage *= 2;
+            }
+            // 09: Battle damage becomes X (X being a predetermined value).
+            if (this.playerAModifiers.setToSpecificValue) {
+                bDamage = this.playerAModifiers.specificValue;
+            }
+            // 10: You do not take battle damage if it is more or less than X.
+            if (this.playerBModifiers.preventIfConditionMet && this.playerBModifiers.preventionCondition(bDamage)) {
                 bDamage = 0;
-            } else {
-                // 07
-                if (this.battleModifiers.playerA.halveDamage) {
-                    bDamage /= 2;
-                }
-                // 08
-                if (this.battleModifiers.playerA.doubleDamage) {
-                    bDamage *= 2;
-                }
-                // 09
-                if (this.battleModifiers.playerA.setToSpecificValue) {
-                    bDamage = this.battleModifiers.playerA.specificValue;
-                }
-                // 10
-                if (this.battleModifiers.playerB.preventIfConditionMet && this.battleModifiers.playerB.preventionCondition(bDamage)) {
-                    bDamage = 0;
-                }
             }
         }
 

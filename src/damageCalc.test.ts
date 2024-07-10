@@ -191,7 +191,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -220,7 +220,7 @@ describe('Modifiers:', () => {
                     hasPiercing: true,
                 };
 
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -249,8 +249,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -279,7 +279,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -308,7 +308,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -340,7 +340,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -369,7 +369,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -398,7 +398,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -427,8 +427,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerB.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerBModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -457,7 +457,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -489,7 +489,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -518,7 +518,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -547,7 +547,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -576,7 +576,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -608,7 +608,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -637,7 +637,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -666,8 +666,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -696,8 +696,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -729,7 +729,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.convertToEffectDamage = true;
+                damageCalc.playerAModifiers.convertToEffectDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -758,7 +758,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.convertToEffectDamage = true;
+                damageCalc.playerBModifiers.convertToEffectDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -790,7 +790,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.convertToHealing = true;
+                damageCalc.playerAModifiers.convertDamageTakenToHealing = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -819,7 +819,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.convertToHealing = true;
+                damageCalc.playerAModifiers.convertDamageTakenToHealing = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -838,7 +838,7 @@ describe('Modifiers:', () => {
 
         // 06: Battle damage becomes 0.
         describe('06: Battle damage becomes 0', () => {
-            test('(1800 ATK | [06]) vs (2000 ATK) should be (PlayerA: 0 damage)', () => {
+            test('(1800 ATK | [06]) vs (2000 ATK) should be (PlayerA: 200 damage)', () => {
                 damageCalc.attackingMonster = {
                     atk: 1800,
                     def: 0,
@@ -852,7 +852,65 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.preventDamage = true;
+                damageCalc.playerAModifiers.cannotDealDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 200,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK) vs (1800 ATK | [06]) should be (PlayerB: 200 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1800,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerBModifiers.cannotDealDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 200,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK | [06]) vs (1000 ATK) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.cannotDealDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -867,7 +925,7 @@ describe('Modifiers:', () => {
                     },
                 });
             });
-            test('(2000 ATK) vs (1800 ATK | [06]) should be (PlayerB: 0 damage)', () => {
+            test('(2000 ATK) vs (3000 ATK | [06]) should be no damage', () => {
                 damageCalc.attackingMonster = {
                     atk: 2000,
                     def: 0,
@@ -875,13 +933,13 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
                 damageCalc.defendingMonster = {
-                    atk: 1800,
+                    atk: 3000,
                     def: 0,
                     position: 'ATK',
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventDamage = true;
+                damageCalc.playerBModifiers.cannotDealDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -914,7 +972,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.halveDamage = true;
+                damageCalc.playerAModifiers.dealHalfDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -943,7 +1001,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.halveDamage = true;
+                damageCalc.playerBModifiers.dealHalfDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -976,7 +1034,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.doubleDamage = true;
+                damageCalc.playerAModifiers.dealDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1005,7 +1063,7 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.doubleDamage = true;
+                damageCalc.playerBModifiers.dealDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1038,8 +1096,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.setToSpecificValue = true;
-                damageCalc.battleModifiers.playerA.specificValue = 100;
+                damageCalc.playerAModifiers.setToSpecificValue = true;
+                damageCalc.playerAModifiers.specificValue = 100;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1068,8 +1126,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.setToSpecificValue = true;
-                damageCalc.battleModifiers.playerB.specificValue = 100;
+                damageCalc.playerBModifiers.setToSpecificValue = true;
+                damageCalc.playerBModifiers.specificValue = 100;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1102,9 +1160,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '<'
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<'
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1133,9 +1191,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerA.comparison = '>'
-                damageCalc.battleModifiers.playerA.preventionDamageValue = 250;
+                damageCalc.playerAModifiers.preventIfConditionMet = true;
+                damageCalc.playerAModifiers.comparison = '>'
+                damageCalc.playerAModifiers.preventionDamageValue = 250;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1164,9 +1222,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '>=';
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '>=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1195,9 +1253,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '<=';
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1226,9 +1284,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '<'
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<'
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1257,9 +1315,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerA.comparison = '>'
-                damageCalc.battleModifiers.playerA.preventionDamageValue = 250;
+                damageCalc.playerAModifiers.preventIfConditionMet = true;
+                damageCalc.playerAModifiers.comparison = '>'
+                damageCalc.playerAModifiers.preventionDamageValue = 250;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1288,9 +1346,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '>=';
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '>=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1319,9 +1377,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.preventIfConditionMet = true;
-                damageCalc.battleModifiers.playerB.comparison = '<=';
-                damageCalc.battleModifiers.playerB.preventionDamageValue = 2000;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1355,8 +1413,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1385,8 +1443,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1415,8 +1473,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.damageToBothPlayers = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.damageToBothPlayers = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1448,8 +1506,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1478,8 +1536,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1508,8 +1566,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1538,8 +1596,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1569,10 +1627,10 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1604,8 +1662,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1634,8 +1692,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1664,8 +1722,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1696,8 +1754,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.convertToEffectDamage = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.convertToEffectDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1726,8 +1784,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.convertToEffectDamage = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.convertToEffectDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1743,6 +1801,642 @@ describe('Modifiers:', () => {
                 });
             });
         });
+        describe('[01, 05]:', () => {
+            test('(2000 ATK | [01]) vs (1000 ATK | [05]) should be (PlayerB: -2000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.convertDamageTakenToHealing = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: -2000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(1000 ATK | [05]) vs (2000 ATK | [01]) should be (PlayerA: -2000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.convertDamageTakenToHealing = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: -2000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+        describe('[01, 06]:', () => {
+            test('(2000 ATK | [01]) vs (1000 ATK | [06]) should be (PlayerB: 2000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.cannotDealDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 2000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK | [01, 06]) vs (1000 ATK) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.cannotDealDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(4000 ATK | [01, 06]) vs (2000 ATK | [01, 06]) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 4000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.cannotDealDamage = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.cannotDealDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+        describe('[01, 07]:', () => {
+            test('(2000 ATK | [01, 07]) vs (1000 ATK) should be (PlayerB: 1000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.dealHalfDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 1000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK) vs (3000 ATK | [01, 07]) should be (PlayerA: 1000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 3000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.dealHalfDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 1000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+        describe('[01, 08]:', () => {
+            test('(2000 ATK | [01, 08]) vs (1000 ATK) should be (PlayerB: 4000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.dealDoubleDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 4000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK) vs (3000 ATK | [01, 08]) should be (PlayerA: 4000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 3000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.dealDoubleDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 4000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+        describe('[01, 09]:', () => {
+            test('(2000 ATK | [01, 09:100]) vs (1000 ATK) should be (PlayerB: 100 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.setToSpecificValue = true;
+                damageCalc.playerAModifiers.specificValue = 100;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 100,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK) vs (3000 ATK | [01, 09:100]) should be (PlayerB: 100 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 3000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.setToSpecificValue = true;
+                damageCalc.playerBModifiers.specificValue = 100;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 100,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+        describe('[01, 10]:', () => {
+            test('(2000 ATK | [01]) vs (1500 ATK | [10:<:2000]) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1500,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<'
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(1500 ATK | [10:>:250]) vs (2000 ATK | [01]) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 1500,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.preventIfConditionMet = true;
+                damageCalc.playerAModifiers.comparison = '>'
+                damageCalc.playerAModifiers.preventionDamageValue = 250;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK | [01]) vs (0 ATK | [10:>=:2000]) should be no damage', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '>=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK | [01]) vs (0 ATK | [10:<=:2000]) should be (PlayerB: 4000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 4000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(2000 ATK | [01]) vs (0 ATK | [10:<:2000]) should be (PlayerB: 4000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 2000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<'
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 4000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(1500 ATK | [10:>:250]) vs (1600 ATK | [01]) should be (PlayerA: 200 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 1500,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 1600,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.preventIfConditionMet = true;
+                damageCalc.playerAModifiers.comparison = '>'
+                damageCalc.playerAModifiers.preventionDamageValue = 250;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 200,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(1000 ATK | [01]) vs (0 ATK | [10:>=:2000]) should be (PlayerB: 0 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '>=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+            test('(3000 ATK | [01]) vs (0 ATK | [10:<=:2000]) should be (PlayerB: 6000 damage)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 3000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.preventIfConditionMet = true;
+                damageCalc.playerBModifiers.comparison = '<=';
+                damageCalc.playerBModifiers.preventionDamageValue = 2000;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 6000,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+
+        describe('[03, 07]:', () => {
+            test('(1000 ATK | [07]) vs (0 ATK | [03]) should be (PlayerA: 500 redirected)', () => {
+                damageCalc.attackingMonster = {
+                    atk: 1000,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+                damageCalc.defendingMonster = {
+                    atk: 0,
+                    def: 0,
+                    position: 'ATK',
+                    hasPiercing: false,
+                };
+
+                damageCalc.playerAModifiers.dealHalfDamage = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
+
+                expect(damageCalc.battleResult).toStrictEqual({
+                    playerA: {
+                        battleDamage: 0,
+                        redirectedDamage: 500,
+                        effectDamage: 0,
+                    },
+                    playerB: {
+                        battleDamage: 0,
+                        redirectedDamage: 0,
+                        effectDamage: 0,
+                    },
+                });
+            });
+        });
+
         describe('01, 02, 03:', () => {
             test('(2000 ATK | [01, 02]) vs (1000 ATK | [03]) should be (PlayerA: 2000 damage, 2000 redirected)', () => {
                 damageCalc.attackingMonster = {
@@ -1758,9 +2452,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerB.redirectToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerBModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1791,8 +2485,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1821,8 +2515,8 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerB.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.inflictsDoubleDamage = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1853,9 +2547,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1884,9 +2578,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1915,10 +2609,10 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1947,9 +2641,9 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerB.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerBModifiers.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
@@ -1980,11 +2674,11 @@ describe('Modifiers:', () => {
                     hasPiercing: false,
                 };
 
-                damageCalc.battleModifiers.playerA.inflictsDoubleDamage = true;
-                damageCalc.battleModifiers.playerA.damageToBothPlayers = true;
-                damageCalc.battleModifiers.playerA.redirectToOpponent = true;
-                damageCalc.battleModifiers.playerA.alsoInflictedToOpponent = true;
-                damageCalc.battleModifiers.playerB.alsoInflictedToOpponent = true;
+                damageCalc.playerAModifiers.inflictsDoubleDamage = true;
+                damageCalc.playerAModifiers.damageToBothPlayers = true;
+                damageCalc.playerAModifiers.redirectToOpponent = true;
+                damageCalc.playerAModifiers.alsoInflictedToOpponent = true;
+                damageCalc.playerBModifiers.alsoInflictedToOpponent = true;
 
                 expect(damageCalc.battleResult).toStrictEqual({
                     playerA: {
