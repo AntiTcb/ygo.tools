@@ -6,20 +6,20 @@ export type MonsterProps = {
 };
 
 export class BattleModifiers {
-    inflictsDoubleDamage: boolean = false;
-    damageToBothPlayers: boolean = false;
-    redirectToOpponent: boolean = false;
-    alsoInflictedToOpponent: boolean = false;
-    convertToEffectDamage: boolean = false;
-    convertDamageTakenToHealing: boolean = false;
-    cannotDealDamage: boolean = false;
-    dealHalfDamage: boolean = false;
-    dealDoubleDamage: boolean = false;
-    setToSpecificValue: boolean = false;
-    specificValue: number = 0;
-    preventIfConditionMet: boolean = false;
-    comparison: '>' | '>=' | '<' | '<=' = '>';
-    preventionDamageValue: number = 0;
+    inflictsDoubleDamage: boolean = $state(false);
+    damageToBothPlayers: boolean = $state(false);
+    redirectToOpponent: boolean = $state(false);
+    alsoInflictedToOpponent: boolean = $state(false);
+    convertToEffectDamage: boolean = $state(false);
+    convertDamageTakenToHealing: boolean = $state(false);
+    cannotDealDamage: boolean = $state(false);
+    dealHalfDamage: boolean = $state(false);
+    dealDoubleDamage: boolean = $state(false);
+    setToSpecificValue: boolean = $state(false);
+    specificValue: number = $state(0);
+    preventIfConditionMet: boolean = $state(false);
+    comparison: '>' | '>=' | '<' | '<=' = $state('>');
+    preventionDamageValue: number = $state(0);
 
     preventionCondition(battleDamage: number): boolean {
         switch (this.comparison) {
@@ -43,8 +43,8 @@ export class BattleModifiers {
 export class DamageCalculator {
     attackingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
     defendingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
-    playerAModifiers = $state<BattleModifiers>(new BattleModifiers());
-    playerBModifiers = $state<BattleModifiers>(new BattleModifiers());
+    playerAModifiers = new BattleModifiers();
+    playerBModifiers = new BattleModifiers();
     battleResult = $derived.by(() => this.calculateBattleDamage());
 
     calculateBattleDamage() {
