@@ -4,15 +4,15 @@
     import Monster from './Monster.svelte';
 
     const calc = createDamageCalculator();
-    $inspect(calc, calc.attackingMonster, calc.defendingMonster, calc.playerAModifiers, calc.playerBModifiers, calc.battleResult);
 
     let open = $state<boolean>(true);
+    let showExamples = $state<boolean>(false);
 </script>
 
 <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
     <div id="result" class="card col-span-2">
         <header class="h3">Battle Result:</header>
-        <article class="grid grid-cols-[auto_auto] justify-start gap-4">
+        <article class="grid grid-cols-[auto_auto] justify-start divide-x *:px-2">
             <section>
                 <h4 class="h4">Player A</h4>
                 {@render battleResult(calc.battleResult.playerA)}
@@ -23,13 +23,21 @@
             </section>
         </article>
     </div>
+
+    <div class="card col-span-2">
+        <label class="flex items-center space-x-2">
+            <input type="checkbox" class="checkbox" bind:checked={showExamples} />
+            <p class="italic">Show card examples</p>
+        </label>
+    </div>
+
     <div id="attacking" class="card">
         <h4 class="h4">Player A: Attacking Monster</h4>
         <Monster bind:monster={calc.attackingMonster} />
 
         <details bind:open>
             <summary class="text-xl font-bold">Modifiers</summary>
-            <BattleModifiers bind:modifiers={calc.playerAModifiers} />
+            <BattleModifiers bind:modifiers={calc.playerAModifiers} bind:showExamples />
         </details>
     </div>
     <div id="defending" class="card">
@@ -38,7 +46,7 @@
 
         <details bind:open>
             <summary class="text-xl font-bold">Modifiers</summary>
-            <BattleModifiers bind:modifiers={calc.playerBModifiers} />
+            <BattleModifiers bind:modifiers={calc.playerBModifiers} bind:showExamples />
         </details>
     </div>
 </div>
