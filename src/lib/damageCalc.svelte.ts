@@ -72,6 +72,15 @@ export class DamageCalculator {
     playerBModifiers = new BattleModifiers();
     battleResult = $derived.by(() => this.calculateBattleDamage());
 
+    static fromJson(json: { attackingMonster: MonsterProps; defendingMonster: MonsterProps; playerAModifiers: BattleModifiers; playerBModifiers: BattleModifiers }) {
+        const calc = new DamageCalculator();
+        calc.attackingMonster = json.attackingMonster;
+        calc.defendingMonster = json.defendingMonster;
+        calc.playerAModifiers = json.playerAModifiers;
+        calc.playerBModifiers = json.playerBModifiers;
+        return calc;
+    }
+
     calculateBattleDamage(): BattleResult {
         const result = {
             playerA: {

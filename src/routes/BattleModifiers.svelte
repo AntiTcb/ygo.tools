@@ -166,7 +166,7 @@
         <label class="flex items-center space-x-2">
             <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageYouDoBecomesSpecificValue} />
             <p>(09): Battle damage you deal becomes</p>
-            <input class="input !inline w-20 !text-sm" type="number" bind:value={modifiers.specificValue} />
+            <input class="input !inline w-20 !text-sm" type="number" min="0" bind:value={modifiers.specificValue} />
         </label>
         {@render cardExamples([
             {

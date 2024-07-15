@@ -12,12 +12,12 @@
     <div class="grid grid-cols-[auto] justify-start gap-2 sm:grid-cols-[auto_auto]">
         <label class="label" for="atk">
             <span class="label-text">ATK</span>
-            <input class="input inline w-32 text-sm" type="number" id="atk" bind:value={monster.atk} />
+            <input class="input inline w-32 text-sm" type="number" id="atk" min="0" bind:value={monster.atk} />
         </label>
 
-        <label class="label" for="atk">
+        <label class="label" for="def">
             <span class="label-text">DEF</span>
-            <input class="input inline w-32 text-sm" type="number" id="atk" bind:value={monster.def} />
+            <input class="input inline w-32 text-sm" type="number" id="def" min="0" bind:value={monster.def} />
         </label>
 
         <p>
