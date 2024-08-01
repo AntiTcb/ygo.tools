@@ -9,11 +9,14 @@
             }
         }
     ],
-    "plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
+    "plugins": [
+        "prettier-plugin-svelte",
+        "prettier-plugin-tailwindcss"
+    ],
     "printWidth": 150,
     "singleAttributePerLine": false,
     "singleQuote": true,
-    "tabWidth": 4,
+    "tabWidth": 2,
     "trailingComma": "all",
     "useTabs": false
 }

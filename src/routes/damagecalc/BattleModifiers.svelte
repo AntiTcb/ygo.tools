@@ -7,7 +7,6 @@
     }: { modifiers: BattleModifiers; showExamples: boolean } = $props();
 
     const setPreventedDamageType = () => {
-        // cycle through battle, effect, any
         modifiers.preventedDamageType =
             modifiers.preventedDamageType === 'battle' ? 'effect' : modifiers.preventedDamageType === 'effect' ? 'any' : 'battle';
     };
