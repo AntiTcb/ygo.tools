@@ -15,7 +15,7 @@
     {@render NavTiles()}
   </Sidebar>
 
-  <main>
+  <main class="min-h-[100vh]">
     <Header />
     <section class="p-2">
       {@render children()}

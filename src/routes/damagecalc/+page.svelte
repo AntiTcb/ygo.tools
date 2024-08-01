@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createDamageCalculator } from '$lib/damageCalc.svelte';
+    import { createDamageCalculator, type BattleResult } from '$lib/damageCalc.svelte';
     import BattleModifiers from './BattleModifiers.svelte';
     import Monster from './Monster.svelte';
 
@@ -51,18 +51,19 @@
     </div>
 </div>
 
-{#snippet battleResult({ battleDamage, effectDamage, redirectedDamage }: { battleDamage: number; effectDamage: number; redirectedDamage: number })}
+{#snippet battleResult({ battleDamage, effectDamage, redirectedDamage, lifeGained }: BattleResult)}
     <ul>
-        {#if battleDamage < 0}
-            <li class="text-green-600">Life Gained: {Math.abs(battleDamage)}</li>
+        {#if lifeGained}
+            <li class="text-green-600">Life Gained: {lifeGained}</li>
         {:else}
-            <li>Battle Damage: {battleDamage}</li>
+            {#if effectDamage}
+                <li>Effect Damage: {effectDamage}</li>
+            {:else}
+                <li>Battle Damage: {battleDamage}</li>
+            {/if}
         {/if}
         {#if redirectedDamage}
             <li>Redirected Damage: {redirectedDamage}</li>
-        {/if}
-        {#if effectDamage}
-            <li>Effect Damage: {effectDamage}</li>
         {/if}
     </ul>
 {/snippet}
