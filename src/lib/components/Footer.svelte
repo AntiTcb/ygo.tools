@@ -12,6 +12,6 @@
   });
 </script>
 
-<Nav.Bar bind:value classes="sticky bottom-0 lg:hidden block" height="max-h-32" tilesClasses="max-w-24" background="bg-surface-950">
+<Nav.Bar bind:value classes="sticky bottom-0 lg:hidden block" height="max-h-24" tilesClasses="max-w-24" background="bg-surface-950">
   {@render children()}
 </Nav.Bar>

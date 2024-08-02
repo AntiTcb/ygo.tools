@@ -15,6 +15,7 @@ const config = {
         alias: {
             $components: './src/lib/components',
             $runes: './src/lib/runes',
+            $static: './static'
         }
     },
 };
