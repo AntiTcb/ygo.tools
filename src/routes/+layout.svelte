@@ -12,8 +12,6 @@
   let currentPage = $derived.by(() => $page.url.pathname);
 </script>
 
-"
-
 <div class="grid grid-cols-[1fr] bg-surface-800 lg:grid-cols-[auto_1fr]">
   {#if currentPage !== '/'}
     <Sidebar>
