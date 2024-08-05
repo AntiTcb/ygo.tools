@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createDamageCalculator } from '$lib/damageCalc.svelte';
   import Seo from 'sk-seo';
+  import SwapIcon from '~icons/mdi/swap-horizontal';
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
 
@@ -8,6 +9,17 @@
 
   let open = $state<boolean>(true);
   let showExamples = $state<boolean>(false);
+
+  const swap = () => {
+    // swap monsters and modifiers
+    const tempMonster = calc.attackingMonster;
+    calc.attackingMonster = calc.defendingMonster;
+    calc.defendingMonster = tempMonster;
+
+    const tempModifiers = calc.playerAModifiers;
+    calc.playerAModifiers = calc.playerBModifiers;
+    calc.playerBModifiers = tempModifiers;
+  };
 </script>
 
 <Seo
@@ -60,7 +72,10 @@
   </div>
 
   <div id="attacking" class="card">
-    <h4 class="h4">Player A: Attacking Monster</h4>
+    <div class="flex justify-between">
+      <h4 class="h4">Player A: Attacking Monster</h4>
+      <button type="button" class="btn btn-sm preset-filled" onclick={swap}><SwapIcon class="size-[24px]" /> Swap</button>
+    </div>
     <Monster bind:monster={calc.attackingMonster} />
 
     <details bind:open>
