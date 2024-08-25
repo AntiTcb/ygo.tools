@@ -1,0 +1,71 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+
+jobs:
+  e2e:
+    if: ${{ false }}
+    name: Playwright (E2E)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        id: pnpm-install
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile --strict-peer-dependencies
+          pnpm exec playwright install chromium
+
+      - name: Run end-to-end tests
+        run: |
+          pnpm test:e2e
+
+  unit:
+    name: Vitest (unit)
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        id: pnpm-install
+        with:
+          version: 9
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          # cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile --strict-peer-dependencies
+
+      - name: Run unit tests
+        run: |
+          pnpm test:unit
