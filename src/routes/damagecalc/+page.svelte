@@ -51,9 +51,14 @@
           <td>{calc.battleResult.playerB.effectDamage}</td>
         </tr>
         <tr>
-          <td>Redirected Damage</td>
+          <td>Redirected Battle Damage</td>
           <td>{calc.battleResult.playerA.redirectedDamage}</td>
           <td>{calc.battleResult.playerB.redirectedDamage}</td>
+        </tr>
+        <tr>
+          <td>Redirected Effect Damage</td>
+          <td>{calc.battleResult.playerA.redirectedEffectDamage}</td>
+          <td>{calc.battleResult.playerB.redirectedEffectDamage}</td>
         </tr>
         <tr>
           <td>Life Gained</td>
