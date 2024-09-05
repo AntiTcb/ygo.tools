@@ -8,7 +8,7 @@
   let cardNameIds: any[] = $state([]);
   let searchState = $state({
     name: '',
-    effectText: 'Synchro Summoned',
+    effectText: '',
     regexEffectSearch: false,
     hideEffectText: false,
   });
