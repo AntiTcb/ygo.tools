@@ -100,7 +100,4 @@
 </div>
 
 <style lang="postcss">
-  .card {
-    @apply p-4 preset-filled-surface-100-900;
-  }
 </style>

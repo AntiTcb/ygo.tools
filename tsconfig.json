@@ -17,6 +17,7 @@
     },
     "include": [
         "src/**/*",
-        "src/routes/sitemap[[page]].xml/+server.ts"
+        "src/routes/sitemap[[page]].xml/+server.ts",
+        ".svelte-kit/ambient.d.ts"
     ],
 }

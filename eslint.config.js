@@ -18,13 +18,13 @@ export default ts.config(
         projectService: './tsconfig.json',
         programs: false,
         extraFileExtensions: ['.svelte'],
-        tsconfigRootDir: import.meta.dirname
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.browser,
-        ...globals.node
-      }
-    }
+        ...globals.node,
+      },
+    },
   },
   {
     files: ['**/*.svelte'],
@@ -33,14 +33,14 @@ export default ts.config(
         parser: ts.parser,
         extraFileExtensions: ['.svelte'],
         svelteFeatures: {
-          experimentalGenerics: true
-        }
-      }
-    }
+          experimentalGenerics: true,
+        },
+      },
+    },
   },
   {
     files: ['**/*.config.*'],
-    extends: [ts.configs.disableTypeChecked]
+    extends: [ts.configs.disableTypeChecked],
   },
   {
     ignores: [
@@ -56,8 +56,8 @@ export default ts.config(
       'setupPlaywright.ts',
       '*.config.js',
       '*.config.ts',
-      'static/scripts/librespeed/speedtest_worker.js'
-    ]
+      'src/lib/db/database.types.ts',
+    ],
   },
   {
     rules: {
@@ -69,8 +69,8 @@ export default ts.config(
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
+          caughtErrorsIgnorePattern: '^_',
+        },
       ],
       // Type-aware
       '@typescript-eslint/no-unnecessary-condition': 'off',
@@ -98,35 +98,35 @@ export default ts.config(
           selector: 'default',
           format: ['camelCase', 'snake_case'],
           leadingUnderscore: 'allow',
-          trailingUnderscore: 'allow'
+          trailingUnderscore: 'allow',
         },
         {
           selector: 'variable',
           format: ['camelCase', 'UPPER_CASE'],
           leadingUnderscore: 'allow',
-          trailingUnderscore: 'allow'
+          trailingUnderscore: 'allow',
         },
         {
           selector: 'variable',
           modifiers: ['exported'],
-          format: ['camelCase', 'PascalCase']
+          format: ['camelCase', 'PascalCase'],
         },
         {
           selector: 'typeLike',
-          format: ['PascalCase']
+          format: ['PascalCase'],
         },
         {
           selector: 'import',
-          format: ['camelCase', 'PascalCase']
+          format: ['camelCase', 'PascalCase'],
         },
         {
           selector: 'enumMember',
-          format: null
+          format: null,
         },
         {
           selector: ['objectLiteralProperty', 'objectLiteralMethod'],
-          format: null
-        }
+          format: null,
+        },
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'eol-last': 'warn',
@@ -141,7 +141,7 @@ export default ts.config(
       curly: ['warn', 'multi-line'],
       'no-debugger': 'warn',
       'func-style': ['warn', 'expression', { allowArrowFunctions: true }],
-      'svelte/no-at-html-tags': 'off'
-    }
-  }
+      'svelte/no-at-html-tags': 'off',
+    },
+  },
 );
