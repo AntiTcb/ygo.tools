@@ -9,23 +9,23 @@ import { defineConfig } from 'vitest/config';
 const useMkcert = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
-    optimizeDeps: {
-        entries: ['src/**/*.svelte'],
-    },
-    plugins: [
-        enhancedImages(),
-        sveltekit(),
-        useMkcert ? mkcert() : null,
-        Icons({
-            compiler: 'svelte',
-            autoInstall: true,
-            customCollections: {
-                custom: FileSystemIconLoader('src/lib/assets/images/icons'),
-            },
-        }),
-        purgeCss(),
-    ],
-    test: {
-        include: ['src/**/*.{test,spec}.{js,ts}'],
-    },
+  optimizeDeps: {
+    entries: ['src/**/*.svelte'],
+  },
+  plugins: [
+    enhancedImages(),
+    sveltekit(),
+    useMkcert ? mkcert() : null,
+    Icons({
+      compiler: 'svelte',
+      autoInstall: true,
+      customCollections: {
+        custom: FileSystemIconLoader('src/lib/assets/images/icons'),
+      },
+    }),
+    purgeCss(),
+  ],
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}'],
+  },
 });
