@@ -86,8 +86,6 @@
   });
 </script>
 
-<pre class="pre"><code class="code">{JSON.stringify(data.cards.length, null, 2)}</code></pre>
-
 <div class="card mx-auto my-2 w-full space-y-4">
   <label class="label">
     <Search class="input" debounce={500} on:type={(e) => (searchState.name = e.detail)} on:clear={() => (searchState.name = '')}>
