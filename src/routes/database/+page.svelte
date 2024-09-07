@@ -117,7 +117,10 @@
 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
   {#each cards.slice(0, 1000) as card}
     <div class="card flex flex-grow-0 flex-col items-center">
+        <button type="button" class="cursor-copy" onclick={() =>
+        copy(card.name)}>
       <img class="aspect-[6/8.5] max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
+      </button>
       <article>
         <button type="button" class="text-center font-bold cursor-copy" onclick={() =>
         copy(card.name)}>{card.name}</button>
