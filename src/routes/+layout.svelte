@@ -5,6 +5,7 @@
   import Sidebar from '$components/Sidebar.svelte';
   import { setArtworksState } from '$lib/assets/yugiohArtwork.svelte';
   import { Nav } from '@skeletonlabs/skeleton-svelte';
+  import { Toaster } from 'svelte-sonner';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
   import '../app.postcss';
@@ -35,6 +36,8 @@
     {@render NavTiles()}
   </Footer>
 {/if}
+
+<Toaster />
 
 {#snippet NavTiles()}
   <Nav.Tile href="/damagecalc" id="damagecalc">

@@ -2,7 +2,7 @@
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { searchCards } from '$lib/db/supabase';
   import Search from 'svelte-search';
-  import CopyIcon from '~icons/lucide/copy';
+  import { toast } from 'svelte-sonner';
 
   let { data } = $props();
 
@@ -43,8 +43,11 @@
   };
 
   const copy = (text: string) => {
-    navigator.clipboard.writeText(text)
-    .then(() => alert('Copied to clipboard'));
+    toast.promise(() => navigator.clipboard.writeText(text), {
+      loading: 'Copying...',
+      success: 'Copied name to clipboard',
+      error: 'Failed to copy',
+    });
   };
 
   let cards = $derived.by(() => {
