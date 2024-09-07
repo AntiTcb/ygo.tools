@@ -2,6 +2,7 @@
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { searchCards } from '$lib/db/supabase';
   import Search from 'svelte-search';
+  import CopyIcon from '~icons/lucide/copy';
 
   let { data } = $props();
 
@@ -110,7 +111,8 @@
     <div class="card flex flex-grow-0 flex-col items-center">
       <img class="aspect-[6/8.5] max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
       <article>
-        <p class="text-center font-bold">{card.name}</p>
+        <p class="text-center font-bold">{card.name} <CopyIcon class="size-[24px]" onclick={() =>
+        navigator.clipboard.writeText(card.name)} /></p>
         <p class="max-h-72 overflow-y-auto text-sm" class:hidden={searchState.hideEffectText}>
           {@html card.effect_text?.replaceAll('\n', '<br />')}
         </p>
