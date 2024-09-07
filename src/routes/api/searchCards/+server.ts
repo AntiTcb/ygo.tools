@@ -8,5 +8,5 @@ export const GET: RequestHandler = async ({ url }) => {
 
   const cards = await searchCards(url.searchParams.get('name')!);
 
-  return json(cards.data?.map((c) => c.name) ?? []);
+  return json(cards.data ?? []);
 };
