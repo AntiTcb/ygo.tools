@@ -45,7 +45,7 @@
   const copy = (text: string) => {
     toast.promise(() => navigator.clipboard.writeText(text), {
       loading: 'Copying...',
-      success: 'Copied name to clipboard',
+      success: `Copied ${text}'s name to clipboard`,
       error: 'Failed to copy',
     });
   };
