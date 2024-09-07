@@ -42,6 +42,11 @@
     }
   };
 
+  const copy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    .then(() => alert('Copied to clipboard'));
+  };
+
   let cards = $derived.by(() => {
     const regex = searchState.regexEffectSearch ? stringToRegex(searchState.effectText) : null;
 
@@ -111,8 +116,8 @@
     <div class="card flex flex-grow-0 flex-col items-center">
       <img class="aspect-[6/8.5] max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
       <article>
-        <p class="text-center font-bold">{card.name} <CopyIcon class="size-[24px]" onclick={() =>
-        navigator.clipboard.writeText(card.name)} /></p>
+        <button type="button" class="text-center font-bold cursor-copy" onclick={() =>
+        copy(card.name)}>{card.name}</button>
         <p class="max-h-72 overflow-y-auto text-sm" class:hidden={searchState.hideEffectText}>
           {@html card.effect_text?.replaceAll('\n', '<br />')}
         </p>
