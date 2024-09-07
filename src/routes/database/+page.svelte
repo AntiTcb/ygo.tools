@@ -2,6 +2,7 @@
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { searchCards } from '$lib/db/supabase';
   import Search from 'svelte-search';
+  import { toast } from 'svelte-sonner';
 
   let { data } = $props();
 
@@ -39,6 +40,14 @@
       console.error('Invalid regex pattern:', error.message);
       return null;
     }
+  };
+
+  const copy = (text: string) => {
+    toast.promise(() => navigator.clipboard.writeText(text), {
+      loading: 'Copying...',
+      success: `Copied ${text}'s name to clipboard`,
+      error: 'Failed to copy',
+    });
   };
 
   let cards = $derived.by(() => {
@@ -108,9 +117,13 @@
 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
   {#each cards.slice(0, 1000) as card}
     <div class="card flex flex-grow-0 flex-col items-center">
+        <button type="button" class="cursor-copy" onclick={() =>
+        copy(card.name)}>
       <img class="aspect-[6/8.5] max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
+      </button>
       <article>
-        <p class="text-center font-bold">{card.name}</p>
+        <button type="button" class="text-center font-bold cursor-copy" onclick={() =>
+        copy(card.name)}>{card.name}</button>
         <p class="max-h-72 overflow-y-auto text-sm" class:hidden={searchState.hideEffectText}>
           {@html card.effect_text?.replaceAll('\n', '<br />')}
         </p>

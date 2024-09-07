@@ -119,6 +119,9 @@ importers:
       svelte-search:
         specifier: ^2.1.0
         version: 2.1.0
+      svelte-sonner:
+        specifier: ^0.3.27
+        version: 0.3.27(svelte@5.0.0-next.205)
       tailwindcss:
         specifier: ^3.4.10
         version: 3.4.10
@@ -2489,6 +2492,11 @@ packages:
 
   svelte-search@2.1.0:
     resolution: {integrity: sha512-3FLIzc6Ok7TTfDmNFsig9KMGRzpGSxUMZd3Sc5sxJlG0XfPpXOSlj4vE+3rXw2NdUfSWGt1K4t7xlvG1kun65g==}
+
+  svelte-sonner@0.3.27:
+    resolution: {integrity: sha512-+PvbuePNTyTNCepCWqKcFeu+Lo27yYuwfSc7zJvrWjCRMJrWAmccPg3j7jO1W13QoN3TySXU5Trb956VBQiM5Q==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0 || ^5.0.0-next.1
 
   svelte@5.0.0-next.205:
     resolution: {integrity: sha512-W0kamGCNps93QRlTxq43qfEaa3Mf1Km99+XcGXF27Ji1e/MykpWyUMhJf3JwvL3XHbyRekJiSEMBRmSJYqsPUQ==}
@@ -4981,6 +4989,10 @@ snapshots:
       typescript: 5.5.4
 
   svelte-search@2.1.0: {}
+
+  svelte-sonner@0.3.27(svelte@5.0.0-next.205):
+    dependencies:
+      svelte: 5.0.0-next.205
 
   svelte@5.0.0-next.205:
     dependencies:
