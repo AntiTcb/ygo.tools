@@ -11,7 +11,7 @@
   author="AntiTcb" />
 
 <div class="h-full">
-  <div class="flex gap-2">
+  <div class="flex flex-wrap gap-2">
     <a
       href="/damagecalc"
       class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">

@@ -35,8 +35,8 @@
       <thead>
         <tr>
           <th class="min-w-32"></th>
-          <th class="!font-bold">Player A</th>
-          <th class="!font-bold">Player B</th>
+          <th class="!text-right !font-bold">Player A</th>
+          <th class="!text-right !font-bold">Player B</th>
         </tr>
       </thead>
       <tbody class="text-right [&>tr>td:first-child]:italic hover:[&>tr]:preset-tonal-primary">

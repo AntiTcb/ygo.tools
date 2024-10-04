@@ -5,6 +5,7 @@ import Icons from 'unplugin-icons/vite';
 import mkcert from 'vite-plugin-mkcert';
 import { purgeCss } from 'vite-plugin-tailwind-purgecss';
 import { defineConfig } from 'vitest/config';
+import process from "node:process";
 
 const useMkcert = process.env.NODE_ENV === 'development';
 
