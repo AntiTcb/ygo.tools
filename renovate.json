@@ -1,0 +1,38 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "addLabels": [
+        "dependencies"
+    ],
+    "dependencyDashboard": true,
+    "extends": [
+        "config:recommended",
+        "group:allNonMajor",
+        ":semanticCommitTypeAll(fix)"
+    ],
+    "ignoreDeps": [
+        "@types/node",
+        "node"
+    ],
+    "packageRules": [
+        {
+            "groupName": "vite",
+            "matchPackageNames": [
+                "vite"
+            ],
+            "matchUpdateTypes": [
+                "major",
+                "minor"
+            ]
+        },
+        {
+            "groupName": "houdini",
+            "matchPackagePrefixes": [
+                "houdini"
+            ],
+            "matchUpdateTypes": [
+                "major"
+            ]
+        }
+    ],
+    "rangeStrategy": "bump"
+}
