@@ -53,7 +53,7 @@
         "prettier-plugin-tailwindcss": "^0.6.8",
         "sk-seo": "^0.4.1",
         "super-sitemap": "^0.15.1",
-        "svelte": "5.0.0-next.205",
+        "svelte": "5.1.9",
         "svelte-check": "^4.0.4",
         "svelte-search": "^2.1.0",
         "svelte-sonner": "^0.3.28",
