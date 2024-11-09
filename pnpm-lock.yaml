@@ -108,8 +108,8 @@ importers:
         specifier: ^0.4.3
         version: 0.4.3
       super-sitemap:
-        specifier: ^0.15.1
-        version: 0.15.1(svelte@5.1.13)
+        specifier: ^1.0.3
+        version: 1.0.3(svelte@5.1.13)
       svelte:
         specifier: ^5.1.13
         version: 5.1.13
@@ -2435,8 +2435,8 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  super-sitemap@0.15.1:
-    resolution: {integrity: sha512-HqJvO/6qnioGSvoNM6xmSMHkM/YqZsV5sFa7YSgj6VLt5NPJL1z/t8PAgJ1tvoHckxxx9kjobS0LyuuEXH6rCw==}
+  super-sitemap@1.0.3:
+    resolution: {integrity: sha512-N6GasBOJolGKFRAS+EcQR9oCs01XBcqHtJqnzjXLQUCH5EIC/+cuTsdIN7wkD2LK/Tm3y2Y0wPZsQceIEKl3sQ==}
     peerDependencies:
       svelte: '>=4.0.0 <6.0.0'
 
@@ -5082,7 +5082,7 @@ snapshots:
       pirates: 4.0.6
       ts-interface-checker: 0.1.13
 
-  super-sitemap@0.15.1(svelte@5.1.13):
+  super-sitemap@1.0.3(svelte@5.1.13):
     dependencies:
       directory-tree: 3.5.2
       fast-xml-parser: 4.5.0
