@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Nav } from '@skeletonlabs/skeleton-svelte';
+  import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import type { Snippet } from 'svelte';
   import HomeIcon from '~icons/mdi/home';
 
@@ -13,7 +13,7 @@
   });
 </script>
 
-<Nav.Rail
+<Navigation.Rail
   bind:value
   tilesJustify="justify-start"
   tilesClasses="p-2"
@@ -21,14 +21,14 @@
   padding="p-0"
   height="h-screen">
   {#snippet header()}
-    <Nav.Tile href="/" id="">
+    <Navigation.Tile href="/" id="">
       <div class="flex flex-col items-center text-center">
         <HomeIcon class="size-[24px]" />
         <span class="text-sm">Home</span>
       </div>
-    </Nav.Tile>
+    </Navigation.Tile>
   {/snippet}
   {#snippet tiles()}
     {@render children()}
   {/snippet}
-</Nav.Rail>
+</Navigation.Rail>

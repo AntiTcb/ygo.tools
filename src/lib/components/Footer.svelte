@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Nav } from '@skeletonlabs/skeleton-svelte';
+  import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import type { Snippet } from 'svelte';
 
   let { children }: { children: Snippet<[]> } = $props();
@@ -12,13 +12,13 @@
   });
 </script>
 
-<Nav.Bar
+<Navigation.Bar
   bind:value
   classes="sticky bottom-0 lg:hidden block"
   height="max-h-24"
   tilesClasses="max-w-24 max-h-28 h-28"
   background="bg-surface-950"
-  tilesItems="items-center"
+  tilesItems="items-stretch"
   tilesJustify="justify-start">
   {@render children()}
-</Nav.Bar>
+</Navigation.Bar>
