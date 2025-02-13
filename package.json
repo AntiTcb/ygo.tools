@@ -48,7 +48,7 @@
         "nprogress": "^0.2.0",
         "postcss": "^8.5.2",
         "postcss-import": "^16.1.0",
-        "prettier": "^3.5.0",
+        "prettier": "^3.5.1",
         "prettier-plugin-svelte": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "sk-seo": "^0.5.3",
