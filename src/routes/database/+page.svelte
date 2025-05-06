@@ -116,18 +116,25 @@
 
 <p>{cards.length} results</p>
 <input type="checkbox" bind:checked={searchState.hideEffectText} /> Hide effect text
-<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+<div class="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
   {#each cards.slice(0, 1000) as card}
-    <div class="card flex flex-grow-0 flex-col items-center">
+    <div class="card flex grow-0 flex-col items-center">
       <button type="button" class="cursor-copy" onclick={() => copy(card.name)}>
         <img class="aspect-[6/8.5] max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
       </button>
-      <article>
+      <article class="grow">
         <button type="button" class="cursor-copy text-center font-bold" onclick={() => copy(card.name)}>{card.name}</button>
         <p class="max-h-72 overflow-y-auto text-sm" class:hidden={searchState.hideEffectText}>
           {@html card.effect_text?.replaceAll('\n', '<br />')}
         </p>
       </article>
+      <div class="flex flex-wrap justify-between gap-2 self-stretch text-sm">
+        <a href={`https://yugipedia.com/wiki/${card.name}`} target="_blank">Yugipedia</a>
+        <a href={`https://db.ygoresources.com/card#${card.id}`} target="_blank">YGOResources</a>
+        <a
+          href={`https://partner.tcgplayer.com/antitcb?subId2=ygotools&u=${encodeURIComponent(`https://shop.tcgplayer.com/yugioh/product/show?newSearch=false&IsProductNameExact=false&ProductName=${card.name}&Type=Cards&orientation=list`)}`}
+          target="_blank">TCGPlayer</a>
+      </div>
     </div>
   {/each}
 </div>

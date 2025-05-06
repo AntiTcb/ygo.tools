@@ -105,7 +105,7 @@
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsConvertedToEffectDamage} />
       <p>
-        (04): Battle damage you <button type="button" class="chip px-1 preset-filled" onclick={setEffectDamageInflictType}
+        (04): Battle damage you <button type="button" class="chip preset-filled px-1" onclick={setEffectDamageInflictType}
           >{modifiers.convertedToEffectDamageInflictType}</button> is treated as effect damage
       </p>
     </label>
@@ -136,7 +136,7 @@
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageBecomesZero} />
       <p>
-        (06): Battle damage you <button type="button" class="chip px-1 preset-filled" onclick={setZeroDamageInflictType}
+        (06): Battle damage you <button type="button" class="chip preset-filled px-1" onclick={setZeroDamageInflictType}
           >{modifiers.battleDamageBecomesZeroInflictType}</button> becomes 0
       </p>
     </label>
@@ -159,7 +159,7 @@
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsHalved} />
       <p>
-        (07): Battle damage you <button type="button" class="chip px-1 preset-filled" onclick={setHalvedDamageInflictType}
+        (07): Battle damage you <button type="button" class="chip preset-filled px-1" onclick={setHalvedDamageInflictType}
           >{modifiers.battleDamageIsHalvedInflictType}</button> is halved
       </p>
     </label>
@@ -178,7 +178,7 @@
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsDoubled} />
       <p>
-        (08): Battle damage you <button type="button" class="chip px-1 preset-filled" onclick={setDoubledDamageInflictType}
+        (08): Battle damage you <button type="button" class="chip preset-filled px-1" onclick={setDoubledDamageInflictType}
           >{modifiers.battleDamageIsDoubledInflictType}</button> is doubled
       </p>
     </label>
@@ -201,10 +201,10 @@
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageBecomesSpecificValue} />
       <p>
-        (09): Battle damage you <button type="button" class="chip px-1 preset-filled" onclick={setSpecificDamageInflictType}
+        (09): Battle damage you <button type="button" class="chip preset-filled px-1" onclick={setSpecificDamageInflictType}
           >{modifiers.specificValueInflictType}</button> becomes
       </p>
-      <input class="input !inline w-20 !text-sm" type="number" min="0" bind:value={modifiers.specificValue} />
+      <input class="input inline! w-20 text-sm!" type="number" min="0" bind:value={modifiers.specificValue} />
     </label>
     {@render cardExamples([
       {
@@ -221,7 +221,7 @@
     <label class="flex flex-row flex-wrap items-center space-x-2 lg:flex-nowrap">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.damageYouTakeIsPreventedIf} />
       <p>
-        (10): You do not take <button type="button" class="chip px-1 preset-filled" onclick={setPreventedDamageType}
+        (10): You do not take <button type="button" class="chip preset-filled px-1" onclick={setPreventedDamageType}
           >{modifiers.preventedDamageType}</button> damage if it is:
       </p>
       <div class="flex gap-2 py-2 md:py-0">
@@ -231,7 +231,7 @@
           <option value=">">&gt;</option>
           <option value=">=">&geq;</option>
         </select>
-        <input class="input !w-20 !text-sm" type="number" bind:value={modifiers.damagePreventionValue} />
+        <input class="input w-20! text-sm!" type="number" bind:value={modifiers.damagePreventionValue} />
       </div>
     </label>
     {@render cardExamples([
@@ -255,6 +255,8 @@
 {/snippet}
 
 <style lang="postcss">
+  @reference '../../app.css'
+
   li {
     @apply py-2;
   }
