@@ -8,7 +8,7 @@
   import { Toaster } from 'svelte-sonner';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
-  import '../app.postcss';
+  import '../app.css';
 
   let { children } = $props();
 
@@ -17,7 +17,7 @@
   const artworks = setArtworksState();
 </script>
 
-<div class="grid grid-cols-[1fr] bg-surface-800 lg:grid-cols-[auto_1fr]">
+<div class="bg-surface-800 grid grid-cols-[1fr] lg:grid-cols-[auto_1fr]">
   {#if currentPage !== '/'}
     <Sidebar>
       {@render NavTiles()}
