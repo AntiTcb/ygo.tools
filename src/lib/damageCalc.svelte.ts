@@ -5,6 +5,8 @@ export type MonsterProps = {
   hasPiercing: boolean;
 };
 
+const defaultMonster = { atk: 0, def: 0, position: 'ATK', hasPiercing: false };
+
 export class BattleModifiers {
   // 01
   inflictsDoubleBattleDamage: boolean = $state(false);
@@ -39,6 +41,12 @@ export class BattleModifiers {
   damagePreventionValue: number = $state(0);
   preventedDamageType: 'battle' | 'effect' | 'any' = $state('battle');
 
+  isModified: boolean = $derived.by(() => {
+    var thisInstance = JSON.stringify(this.getProps());
+    var defaultInstance = JSON.stringify(this.getDefaultProps());
+    return thisInstance !== defaultInstance;
+  });
+
   preventionCondition(damage: number): boolean {
     switch (this.damagePreventionComparison) {
       case '>':
@@ -52,6 +60,58 @@ export class BattleModifiers {
       default:
         return false;
     }
+  }
+
+  getProps(): Record<string, any> {
+    return {
+      inflictsDoubleBattleDamage: this.inflictsDoubleBattleDamage,
+      battleDamageIsTakenByBothPlayers: this.battleDamageIsTakenByBothPlayers,
+      yourOpponentTakesYourBattleDamage: this.yourOpponentTakesYourBattleDamage,
+      battleDamageIsAlsoInflictedToYourOpponent: this.battleDamageIsAlsoInflictedToYourOpponent,
+      battleDamageIsConvertedToEffectDamage: this.battleDamageIsConvertedToEffectDamage,
+      convertedToEffectDamageInflictType: this.convertedToEffectDamageInflictType,
+      damageIsConvertedToHealing: this.damageIsConvertedToHealing,
+      healingDamageType: this.healingDamageType,
+      battleDamageBecomesZero: this.battleDamageBecomesZero,
+      battleDamageBecomesZeroInflictType: this.battleDamageBecomesZeroInflictType,
+      battleDamageIsHalved: this.battleDamageIsHalved,
+      battleDamageIsHalvedInflictType: this.battleDamageIsHalvedInflictType,
+      battleDamageIsDoubled: this.battleDamageIsDoubled,
+      battleDamageIsDoubledInflictType: this.battleDamageIsDoubledInflictType,
+      battleDamageBecomesSpecificValue: this.battleDamageBecomesSpecificValue,
+      specificValue: this.specificValue,
+      specificValueInflictType: this.specificValueInflictType,
+      damageYouTakeIsPreventedIf: this.damageYouTakeIsPreventedIf,
+      damagePreventionComparison: this.damagePreventionComparison,
+      damagePreventionValue: this.damagePreventionValue,
+      preventedDamageType: this.preventedDamageType,
+    };
+  }
+
+  getDefaultProps(): Record<string, any> {
+    return {
+      inflictsDoubleBattleDamage: false,
+      battleDamageIsTakenByBothPlayers: false,
+      yourOpponentTakesYourBattleDamage: false,
+      battleDamageIsAlsoInflictedToYourOpponent: false,
+      battleDamageIsConvertedToEffectDamage: false,
+      convertedToEffectDamageInflictType: 'deal',
+      damageIsConvertedToHealing: false,
+      healingDamageType: 'battle',
+      battleDamageBecomesZero: false,
+      battleDamageBecomesZeroInflictType: 'deal',
+      battleDamageIsHalved: false,
+      battleDamageIsHalvedInflictType: 'deal',
+      battleDamageIsDoubled: false,
+      battleDamageIsDoubledInflictType: 'deal',
+      battleDamageBecomesSpecificValue: false,
+      specificValue: 0,
+      specificValueInflictType: 'deal',
+      damageYouTakeIsPreventedIf: false,
+      damagePreventionComparison: '>',
+      damagePreventionValue: 0,
+      preventedDamageType: 'battle',
+    };
   }
 }
 
@@ -74,6 +134,12 @@ export class DamageCalculator {
   playerAModifiers = $state(new BattleModifiers());
   playerBModifiers = $state(new BattleModifiers());
   battleResult = $derived.by(() => this.calculateBattleDamage());
+  isModified = $derived(
+    this.playerAModifiers.isModified ||
+      this.playerBModifiers.isModified ||
+      JSON.stringify(this.attackingMonster) !== JSON.stringify(defaultMonster) ||
+      JSON.stringify(this.defendingMonster) !== JSON.stringify(defaultMonster),
+  );
 
   static fromJson(json: {
     attackingMonster: MonsterProps;
@@ -398,4 +464,11 @@ export class DamageCalculator {
   }
 }
 
-export const createDamageCalculator = () => new DamageCalculator();
+export const createDamageCalculator = (
+  json: {
+    attackingMonster: MonsterProps;
+    defendingMonster: MonsterProps;
+    playerAModifiers: BattleModifiers;
+    playerBModifiers: BattleModifiers;
+  } | null = null,
+) => (json ? DamageCalculator.fromJson(json) : new DamageCalculator());

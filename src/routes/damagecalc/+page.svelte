@@ -1,11 +1,13 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import { createDamageCalculator } from '$lib/damageCalc.svelte';
+  import { watch } from 'runed';
   import Seo from 'sk-seo';
   import SwapIcon from '~icons/mdi/swap-horizontal';
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
 
-  const calc = createDamageCalculator();
+  const calc = createDamageCalculator(page.url.hash ? JSON.parse(atob(page.url.hash.slice(1))) : null);
 
   let open = $state<boolean>(true);
   let showExamples = $state<boolean>(false);
@@ -20,6 +22,41 @@
     calc.playerAModifiers = calc.playerBModifiers;
     calc.playerBModifiers = tempModifiers;
   };
+
+  watch(
+    () => calc.battleResult,
+    () => {
+      if (!calc.isModified) {
+        history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+
+      const serializedData = btoa(
+        JSON.stringify({
+          attackingMonster: {
+            atk: calc.attackingMonster.atk,
+            def: calc.attackingMonster.def,
+            position: calc.attackingMonster.position,
+            hasPiercing: calc.attackingMonster.hasPiercing,
+          },
+          defendingMonster: {
+            atk: calc.defendingMonster.atk,
+            def: calc.defendingMonster.def,
+            position: calc.defendingMonster.position,
+            hasPiercing: calc.defendingMonster.hasPiercing,
+          },
+          playerAModifiers: calc.playerAModifiers.getProps(),
+          playerBModifiers: calc.playerBModifiers.getProps(),
+        }),
+      );
+      window.location.hash = serializedData;
+    },
+    {
+      lazy: true,
+    },
+  );
+
+  $inspect(calc.playerAModifiers);
 </script>
 
 <Seo
