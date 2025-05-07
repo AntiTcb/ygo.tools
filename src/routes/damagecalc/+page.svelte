@@ -30,16 +30,16 @@
 
 <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
   <div id="result" class="card col-span-2">
-    <header class="h4">Battle Result:</header>
+    <header class="card-header">Battle Result:</header>
     <table class="table-hover table w-auto">
       <thead>
         <tr>
           <th class="min-w-32"></th>
-          <th class="!text-right !font-bold">Player A</th>
-          <th class="!text-right !font-bold">Player B</th>
+          <th class="text-right! font-bold!">Player A</th>
+          <th class="text-right! font-bold!">Player B</th>
         </tr>
       </thead>
-      <tbody class="text-right [&>tr>td:first-child]:italic hover:[&>tr]:preset-tonal-primary">
+      <tbody class="hover:[&>tr]:preset-tonal-primary text-right [&>tr>td:first-child]:italic">
         <tr>
           <td>Battle Damage</td>
           <td>{calc.battleResult.playerA.battleDamage}</td>
@@ -98,6 +98,3 @@
     </details>
   </div>
 </div>
-
-<style lang="postcss">
-</style>

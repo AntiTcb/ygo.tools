@@ -16,7 +16,7 @@
       href="/damagecalc"
       class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
       <article class="space-y-2 p-4">
-        <h5 class="h5 flex flex-shrink-0 flex-nowrap justify-between">
+        <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Damage Calculation Calculator
           <CalculatorIcon class="inline size-[32px] min-w-[28px] hue-rotate-90" />
         </h5>
@@ -27,7 +27,7 @@
       href="/database"
       class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
       <article class="space-y-2 p-4">
-        <h5 class="h5 flex flex-shrink-0 flex-nowrap justify-between">
+        <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Card Database
           <DatabaseIcon class="inline size-[32px] min-w-[28px] hue-rotate-90" />
         </h5>

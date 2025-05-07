@@ -1,5 +1,5 @@
 <script>
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import Footer from '$components/Footer.svelte';
   import Header from '$components/Header.svelte';
   import Sidebar from '$components/Sidebar.svelte';
@@ -8,16 +8,16 @@
   import { Toaster } from 'svelte-sonner';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
-  import '../app.postcss';
+  import '../app.css';
 
   let { children } = $props();
 
-  let currentPage = $derived.by(() => $page.url.pathname);
+  let currentPage = $derived.by(() => page.url.pathname);
 
   const artworks = setArtworksState();
 </script>
 
-<div class="grid grid-cols-[1fr] bg-surface-800 lg:grid-cols-[auto_1fr]">
+<div class="bg-surface-800 grid grid-cols-[1fr] lg:grid-cols-[auto_1fr]">
   {#if currentPage !== '/'}
     <Sidebar>
       {@render NavTiles()}
