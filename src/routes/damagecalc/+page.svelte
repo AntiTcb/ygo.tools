@@ -7,7 +7,7 @@
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
 
-  const calc = createDamageCalculator(page.url.hash ? JSON.parse(atob(page.url.hash.slice(1))) : null);
+  const calc = createDamageCalculator(page.url.hash ? page.url.hash.slice(1) : null);
 
   let open = $state<boolean>(true);
   let showExamples = $state<boolean>(false);
@@ -30,33 +30,12 @@
         history.replaceState({}, '', window.location.pathname);
         return;
       }
-
-      const serializedData = btoa(
-        JSON.stringify({
-          attackingMonster: {
-            atk: calc.attackingMonster.atk,
-            def: calc.attackingMonster.def,
-            position: calc.attackingMonster.position,
-            hasPiercing: calc.attackingMonster.hasPiercing,
-          },
-          defendingMonster: {
-            atk: calc.defendingMonster.atk,
-            def: calc.defendingMonster.def,
-            position: calc.defendingMonster.position,
-            hasPiercing: calc.defendingMonster.hasPiercing,
-          },
-          playerAModifiers: calc.playerAModifiers.getProps(),
-          playerBModifiers: calc.playerBModifiers.getProps(),
-        }),
-      );
-      window.location.hash = serializedData;
+      window.location.hash = calc.encodedString;
     },
     {
       lazy: true,
     },
   );
-
-  $inspect(calc.playerAModifiers);
 </script>
 
 <Seo
