@@ -3,6 +3,8 @@
   import { createDamageCalculator } from '$lib/damageCalc.svelte';
   import { watch } from 'runed';
   import Seo from 'sk-seo';
+  import { toast } from 'svelte-sonner';
+  import ShareIcon from '~icons/mdi/share';
   import SwapIcon from '~icons/mdi/swap-horizontal';
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
@@ -21,6 +23,14 @@
     const tempModifiers = calc.playerAModifiers;
     calc.playerAModifiers = calc.playerBModifiers;
     calc.playerBModifiers = tempModifiers;
+  };
+
+  const copy = (text: string) => {
+    toast.promise(() => navigator.clipboard.writeText(text), {
+      loading: 'Copying link...',
+      success: `Copied link to clipboard!`,
+      error: 'Failed to copy',
+    });
   };
 
   watch(
@@ -147,6 +157,9 @@
         </tbody>
       </table>
     </div>
+    <button type="button" class="btn btn-sm preset-filled" onclick={() => copy(window.location.href)}>
+      <ShareIcon class="size-[24px]" /> Share battle results
+    </button>
   </div>
 
   <div class="card col-span-2">
