@@ -140,6 +140,44 @@ export class DamageCalculator {
       JSON.stringify(this.attackingMonster) !== JSON.stringify(defaultMonster) ||
       JSON.stringify(this.defendingMonster) !== JSON.stringify(defaultMonster),
   );
+  encodedString = $derived.by(() => this.toEncodedString());
+
+  // Property name mappings for compact encoding
+  private static readonly propertyMappings = {
+    // Monster properties
+    atk: 'a',
+    def: 'd',
+    position: 'p',
+    hasPiercing: 'h',
+
+    // Battle modifier properties
+    inflictsDoubleBattleDamage: 'm1',
+    battleDamageIsTakenByBothPlayers: 'm2',
+    yourOpponentTakesYourBattleDamage: 'm3',
+    battleDamageIsAlsoInflictedToYourOpponent: 'm3_5',
+    battleDamageIsConvertedToEffectDamage: 'm4',
+    convertedToEffectDamageInflictType: 'm4t',
+    damageIsConvertedToHealing: 'm5',
+    healingDamageType: 'm5t',
+    battleDamageBecomesZero: 'm6',
+    battleDamageBecomesZeroInflictType: 'm6t',
+    battleDamageIsHalved: 'm7',
+    battleDamageIsHalvedInflictType: 'm7t',
+    battleDamageIsDoubled: 'm8',
+    battleDamageIsDoubledInflictType: 'm8t',
+    battleDamageBecomesSpecificValue: 'm9',
+    specificValue: 'm9v',
+    specificValueInflictType: 'm9t',
+    damageYouTakeIsPreventedIf: 'm10',
+    damagePreventionComparison: 'm10c',
+    damagePreventionValue: 'm10v',
+    preventedDamageType: 'm10t',
+  } as const;
+
+  // Reverse mappings for decoding
+  private static readonly reversePropertyMappings = Object.fromEntries(
+    Object.entries(DamageCalculator.propertyMappings).map(([key, value]) => [value, key]),
+  );
 
   static fromJson(json: {
     attackingMonster: MonsterProps;
@@ -153,6 +191,147 @@ export class DamageCalculator {
     calc.playerAModifiers = json.playerAModifiers;
     calc.playerBModifiers = json.playerBModifiers;
     return calc;
+  }
+
+  toEncodedString(): string {
+    const compactObj: Record<string, any> = {};
+
+    // Process attacking monster
+    const am = this.attackingMonster;
+    const amDefault = { atk: 0, def: 0, position: 'ATK', hasPiercing: false };
+    if (JSON.stringify(am) !== JSON.stringify(amDefault)) {
+      compactObj.am = {};
+      if (am.atk !== amDefault.atk) compactObj.am[DamageCalculator.propertyMappings.atk] = am.atk;
+      if (am.def !== amDefault.def) compactObj.am[DamageCalculator.propertyMappings.def] = am.def;
+      if (am.position !== amDefault.position) compactObj.am[DamageCalculator.propertyMappings.position] = am.position;
+      if (am.hasPiercing !== amDefault.hasPiercing) compactObj.am[DamageCalculator.propertyMappings.hasPiercing] = am.hasPiercing;
+    }
+
+    // Process defending monster
+    const dm = this.defendingMonster;
+    if (JSON.stringify(dm) !== JSON.stringify(amDefault)) {
+      compactObj.dm = {};
+      if (dm.atk !== amDefault.atk) compactObj.dm[DamageCalculator.propertyMappings.atk] = dm.atk;
+      if (dm.def !== amDefault.def) compactObj.dm[DamageCalculator.propertyMappings.def] = dm.def;
+      if (dm.position !== amDefault.position) compactObj.dm[DamageCalculator.propertyMappings.position] = dm.position;
+      if (dm.hasPiercing !== amDefault.hasPiercing) compactObj.dm[DamageCalculator.propertyMappings.hasPiercing] = dm.hasPiercing;
+    }
+
+    // Process player A modifiers
+    const pamProps = this.playerAModifiers.getProps();
+    const defaultPamProps = this.playerAModifiers.getDefaultProps();
+    const pamDiff = this.getDifferences(pamProps, defaultPamProps);
+
+    if (Object.keys(pamDiff).length > 0) {
+      compactObj.pa = this.mapObjectKeys(pamDiff, DamageCalculator.propertyMappings);
+    }
+
+    // Process player B modifiers
+    const pbmProps = this.playerBModifiers.getProps();
+    const defaultPbmProps = this.playerBModifiers.getDefaultProps();
+    const pbmDiff = this.getDifferences(pbmProps, defaultPbmProps);
+
+    if (Object.keys(pbmDiff).length > 0) {
+      compactObj.pb = this.mapObjectKeys(pbmDiff, DamageCalculator.propertyMappings);
+    }
+
+    if (Object.keys(compactObj).length === 0) {
+      return '';
+    }
+
+    return btoa(JSON.stringify(compactObj));
+  }
+
+  static fromEncodedString(encoded: string): DamageCalculator {
+    try {
+      const compactObj = JSON.parse(atob(encoded));
+      const calc = new DamageCalculator();
+
+      // Process attacking monster
+      if (compactObj.am) {
+        const am: Partial<MonsterProps> = {};
+        for (const [key, value] of Object.entries(compactObj.am)) {
+          const fullKey = DamageCalculator.reversePropertyMappings[key] as keyof MonsterProps;
+          if (fullKey) (am[fullKey] as any) = value;
+        }
+        calc.attackingMonster = {
+          atk: am.atk ?? 0,
+          def: am.def ?? 0,
+          position: am.position ?? 'ATK',
+          hasPiercing: am.hasPiercing ?? false,
+        };
+      }
+
+      // Process defending monster
+      if (compactObj.dm) {
+        const dm: Partial<MonsterProps> = {};
+        for (const [key, value] of Object.entries(compactObj.dm)) {
+          const fullKey = DamageCalculator.reversePropertyMappings[key] as keyof MonsterProps;
+          if (fullKey) (dm[fullKey] as any) = value;
+        }
+        calc.defendingMonster = {
+          atk: dm.atk ?? 0,
+          def: dm.def ?? 0,
+          position: dm.position ?? 'ATK',
+          hasPiercing: dm.hasPiercing ?? false,
+        };
+      }
+
+      // Process player A modifiers
+      if (compactObj.pa) {
+        const expandedPa = this.expandObjectKeys(compactObj.pa, DamageCalculator.reversePropertyMappings);
+        for (const [key, value] of Object.entries(expandedPa)) {
+          (calc.playerAModifiers as any)[key] = value;
+        }
+      }
+
+      // Process player B modifiers
+      if (compactObj.pb) {
+        const expandedPb = this.expandObjectKeys(compactObj.pb, DamageCalculator.reversePropertyMappings);
+        for (const [key, value] of Object.entries(expandedPb)) {
+          (calc.playerBModifiers as any)[key] = value;
+        }
+      }
+
+      return calc;
+    } catch (e) {
+      console.error('Error decoding calculator state:', e);
+      return new DamageCalculator();
+    }
+  }
+
+  private getDifferences(obj: Record<string, any>, defaultObj: Record<string, any>): Record<string, any> {
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (JSON.stringify(value) !== JSON.stringify(defaultObj[key])) {
+        result[key] = value;
+      }
+    }
+
+    return result;
+  }
+
+  private mapObjectKeys(obj: Record<string, any>, mapping: Record<string, string>): Record<string, any> {
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      const mappedKey = mapping[key] || key;
+      result[mappedKey] = value;
+    }
+
+    return result;
+  }
+
+  private static expandObjectKeys(obj: Record<string, any>, mapping: Record<string, string>): Record<string, any> {
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      const expandedKey = mapping[key] || key;
+      result[expandedKey] = value;
+    }
+
+    return result;
   }
 
   calculateBattleDamage(): BattleResult {
@@ -465,10 +644,21 @@ export class DamageCalculator {
 }
 
 export const createDamageCalculator = (
-  json: {
-    attackingMonster: MonsterProps;
-    defendingMonster: MonsterProps;
-    playerAModifiers: BattleModifiers;
-    playerBModifiers: BattleModifiers;
-  } | null = null,
-) => (json ? DamageCalculator.fromJson(json) : new DamageCalculator());
+  json:
+    | {
+        attackingMonster: MonsterProps;
+        defendingMonster: MonsterProps;
+        playerAModifiers: BattleModifiers;
+        playerBModifiers: BattleModifiers;
+      }
+    | string
+    | null = null,
+) => {
+  // Handle base64 encoded string
+  if (typeof json === 'string') {
+    return DamageCalculator.fromEncodedString(json);
+  }
+
+  // Handle JSON object or null
+  return json ? DamageCalculator.fromJson(json) : new DamageCalculator();
+};
