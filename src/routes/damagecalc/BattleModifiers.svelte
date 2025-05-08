@@ -34,7 +34,7 @@
 </script>
 
 <ul class="divide-y-2">
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.inflictsDoubleBattleDamage} />
       <p>(01): This card inflicts double battle damage</p>
@@ -50,7 +50,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsTakenByBothPlayers} />
       <p>(02): Battle damage is taken by both players</p>
@@ -62,7 +62,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.yourOpponentTakesYourBattleDamage} />
       <p>(03): Your opponent takes any battle damage you would take instead</p>
@@ -82,7 +82,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsAlsoInflictedToYourOpponent} />
       <p title="This is applied after the previous rule despite having the same ordering number">
@@ -102,7 +102,7 @@
       ])}
     {/if}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsConvertedToEffectDamage} />
       <p>
@@ -117,7 +117,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.damageIsConvertedToHealing} />
       <p>(05): You gain Life Points instead of taking battle damage</p>
@@ -133,7 +133,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageBecomesZero} />
       <p>
@@ -156,7 +156,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsHalved} />
       <p>
@@ -175,7 +175,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageIsDoubled} />
       <p>
@@ -198,7 +198,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex items-center space-x-2">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.battleDamageBecomesSpecificValue} />
       <p>
@@ -218,7 +218,7 @@
       },
     ])}
   </li>
-  <li class="py-2">
+  <li class="py-1">
     <label class="flex flex-row flex-wrap items-center space-x-2 lg:flex-nowrap">
       <input class="checkbox" type="checkbox" bind:checked={modifiers.damageYouTakeIsPreventedIf} />
       <p>
