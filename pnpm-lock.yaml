@@ -105,8 +105,8 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0(svelte@5.33.1)
       sk-seo:
-        specifier: ^0.5.3
-        version: 0.5.3
+        specifier: ^0.5.4
+        version: 0.5.4
       super-sitemap:
         specifier: ^1.0.3
         version: 1.0.3(svelte@5.33.1)
@@ -120,8 +120,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       svelte-sonner:
-        specifier: ^1.0.2
-        version: 1.0.2(svelte@5.33.1)
+        specifier: ^1.0.3
+        version: 1.0.3(svelte@5.33.1)
       tailwindcss:
         specifier: ^4.1.7
         version: 4.1.7
@@ -2419,8 +2419,8 @@ packages:
     resolution: {integrity: sha512-P8O+4pAt95XqmTlvvPdbmBggjAgSE0LQnhSEYUKYKepN176b/8K9zcVrrqhuLu5EUQyeCYy/56J9FzxvzvMavg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  sk-seo@0.5.3:
-    resolution: {integrity: sha512-v2wOLS8EzbnHcIU/hA16tkLldSo0MR+I5bMbQ8TVGjukrZpoM7sXXqe7DCTMHveZXKlNrHfTcmtKrZNLF9IdcQ==}
+  sk-seo@0.5.4:
+    resolution: {integrity: sha512-+FxJj+3O17jgzem4bzwU1ucdJjkPw57W9RiKxnqm7foKKTNzYPHeCVl+6rvV0n9MTigmzKzDY15tZ6stQ8L4ZA==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -2488,8 +2488,8 @@ packages:
   svelte-search@2.1.1:
     resolution: {integrity: sha512-DpjZyk4Z7KsLJb3ZFGAS0zDEMrJZ/cBZT2UelHSED4ZTMnTLLV0+M0j7mKitHZnH+du8wdYyymJHDuja4CKLnQ==}
 
-  svelte-sonner@1.0.2:
-    resolution: {integrity: sha512-hoidgv7hrk3XNZzjXj6/frsvZOiUOtf7Tn2du/hTu1G9PchJGEoy4EpIKyfhVKBiBrxaNFaYPFxN4pHLHCoe/w==}
+  svelte-sonner@1.0.3:
+    resolution: {integrity: sha512-vm/+GxgOOv2mnQYH1iUtBN/pLvFmlHthpK9YqsqIUJZbq4+HT6zopHk4S/1vHKvLTyjgo9vzqA0Z+Z2sPQ/nTQ==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -4994,7 +4994,7 @@ snapshots:
 
   sjcl-es@2.0.0: {}
 
-  sk-seo@0.5.3: {}
+  sk-seo@0.5.4: {}
 
   source-map-js@1.2.1: {}
 
@@ -5058,7 +5058,7 @@ snapshots:
 
   svelte-search@2.1.1: {}
 
-  svelte-sonner@1.0.2(svelte@5.33.1):
+  svelte-sonner@1.0.3(svelte@5.33.1):
     dependencies:
       runed: 0.26.0(svelte@5.33.1)
       svelte: 5.33.1
