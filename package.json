@@ -31,7 +31,7 @@
         "@skeletonlabs/skeleton": "3.2.2",
         "@skeletonlabs/skeleton-svelte": "4.9.0",
         "@supabase/supabase-js": "^2.90.1",
-        "@sveltejs/adapter-auto": "^6.1.1",
+        "@sveltejs/adapter-auto": "^7.0.0",
         "@sveltejs/adapter-cloudflare": "^7.2.5",
         "@sveltejs/enhanced-img": "^0.9.2",
         "@sveltejs/kit": "^2.47.2",
