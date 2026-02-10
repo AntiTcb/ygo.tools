@@ -1,0 +1,25 @@
+{
+    "$schema": "./node_modules/wrangler/config-schema.json",
+    "name": "ygotools",
+    "compatibility_date": "2026-02-10",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "main": ".svelte-kit/cloudflare/_worker.js",
+    "assets": {
+        "binding": "ASSETS",
+        "directory": ".svelte-kit/cloudflare"
+    },
+    "workers_dev": true,
+    "preview_urls": true,
+    "vars": {
+        "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
+        "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
+    },
+    "observability": {
+        "logs": {
+            "enabled": false,
+            "invocation_logs": true
+        }
+    }
+}

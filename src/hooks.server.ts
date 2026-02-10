@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
+  console.log('hooks', { public: env.PUBLIC_SUPABASE_URL, secret: secretEnv.SUPABASE_SERVICE_KEY });
   event.locals.supabase = createServerClient(env.PUBLIC_SUPABASE_URL, secretEnv.SUPABASE_SERVICE_KEY, {
     cookies: {
       getAll() {

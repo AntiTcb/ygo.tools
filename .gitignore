@@ -5,6 +5,7 @@ node_modules
 .vercel
 /.svelte-kit
 /build
+.wrangler
 
 # OS
 .DS_Store
@@ -19,3 +20,6 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Cloudflare Types
+/worker-configuration.d.ts
