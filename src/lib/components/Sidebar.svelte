@@ -13,7 +13,7 @@
   });
 </script>
 
-<Navigation.Rail
+<Navigation
   bind:value
   tilesJustify="justify-start"
   tilesClasses="p-2"
@@ -31,4 +31,4 @@
   {#snippet tiles()}
     {@render children()}
   {/snippet}
-</Navigation.Rail>
+</Navigation>

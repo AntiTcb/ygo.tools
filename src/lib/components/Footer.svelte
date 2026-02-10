@@ -12,7 +12,7 @@
   });
 </script>
 
-<Navigation.Bar
+<Navigation
   bind:value
   classes="sticky bottom-0 lg:hidden block"
   height="max-h-24"
@@ -21,4 +21,4 @@
   tilesItems="items-stretch"
   tilesJustify="justify-start">
   {@render children()}
-</Navigation.Bar>
+</Navigation>
