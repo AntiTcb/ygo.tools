@@ -28,6 +28,12 @@
                 "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
                 "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
             },
-        }
+            "routes": [
+                {
+                    "custom_domain": true,
+                    "pattern": "ygo.tools",
+                }
+            ],
+        },
     }
 }
