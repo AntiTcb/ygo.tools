@@ -1,4 +1,6 @@
 import 'unplugin-icons/types/svelte';
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
+import type { Database } from './lib/db/database.types';
 
 declare global {
   namespace App {
@@ -12,7 +14,9 @@ declare global {
       caches: CacheStorage & { default: Cache };
     }
     // interface Error {}
-    // interface Locals {}
+    interface Locals {
+      supabase: SupabaseClient<Database>;
+    }
     // interface PageData {}
     // interface PageState {}
     // interface Platform {}

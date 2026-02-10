@@ -10,13 +10,20 @@ const pkg = JSON.parse(json);
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   preprocess: vitePreprocess(),
-
+  compilerOptions: {
+    experimental: {
+      async: true,
+    },
+  },
   kit: {
     adapter: adapter(),
     alias: {
       $components: './src/lib/components',
       $runes: './src/lib/runes',
       $static: './static',
+    },
+    experimental: {
+      remoteFunctions: true,
     },
     version: {
       name: pkg.version,

@@ -41,3 +41,11 @@
     @apply border-surface-200 dark:border-surface-700 border shadow-none;
   }
 }
+
+.select,
+.input,
+.textarea,
+.input-group {
+  background-color: var(--color-surface-50-950);
+  color: var(--color-surface-950-50);
+}
