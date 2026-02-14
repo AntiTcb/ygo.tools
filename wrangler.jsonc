@@ -10,7 +10,7 @@
         "binding": "ASSETS",
         "directory": ".svelte-kit/cloudflare"
     },
-    "workers_dev": true,
+    "workers_dev": false,
     "preview_urls": true,
     "vars": {
         "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
@@ -18,7 +18,7 @@
     },
     "observability": {
         "logs": {
-            "enabled": false,
+            "enabled": true,
             "invocation_logs": true
         }
     },
