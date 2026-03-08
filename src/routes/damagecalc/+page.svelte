@@ -81,9 +81,9 @@
             <td>{calc.battleResult.playerA.lifeGained}</td>
             <td
               >{calc.battleResult.playerA.battleDamage +
-                calc.battleResult.playerA.effectDamage -
-                calc.battleResult.playerA.redirectedDamage -
-                calc.battleResult.playerA.redirectedEffectDamage +
+                calc.battleResult.playerA.effectDamage +
+                calc.battleResult.playerA.redirectedDamage +
+                calc.battleResult.playerA.redirectedEffectDamage -
                 calc.battleResult.playerA.lifeGained}</td>
           </tr>
           <tr>
@@ -95,9 +95,9 @@
             <td>{calc.battleResult.playerB.lifeGained}</td>
             <td
               >{calc.battleResult.playerB.battleDamage +
-                calc.battleResult.playerB.effectDamage -
-                calc.battleResult.playerB.redirectedDamage -
-                calc.battleResult.playerB.redirectedEffectDamage +
+                calc.battleResult.playerB.effectDamage +
+                calc.battleResult.playerB.redirectedDamage +
+                calc.battleResult.playerB.redirectedEffectDamage -
                 calc.battleResult.playerB.lifeGained}</td>
           </tr>
         </tbody>
@@ -143,15 +143,15 @@
             <td>Net Difference</td>
             <td
               >{calc.battleResult.playerA.battleDamage +
-                calc.battleResult.playerA.effectDamage -
-                calc.battleResult.playerA.redirectedDamage -
-                calc.battleResult.playerA.redirectedEffectDamage +
+                calc.battleResult.playerA.effectDamage +
+                calc.battleResult.playerA.redirectedDamage +
+                calc.battleResult.playerA.redirectedEffectDamage -
                 calc.battleResult.playerA.lifeGained}</td>
             <td
               >{calc.battleResult.playerB.battleDamage +
-                calc.battleResult.playerB.effectDamage -
-                calc.battleResult.playerB.redirectedDamage -
-                calc.battleResult.playerB.redirectedEffectDamage +
+                calc.battleResult.playerB.effectDamage +
+                calc.battleResult.playerB.redirectedDamage +
+                calc.battleResult.playerB.redirectedEffectDamage -
                 calc.battleResult.playerB.lifeGained}</td>
           </tr>
         </tbody>
