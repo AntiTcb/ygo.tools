@@ -67,7 +67,7 @@
         "typescript-eslint": "^8.57.2",
         "unplugin-icons": "^23.0.1",
         "vite": "^8.0.3",
-        "vite-plugin-mkcert": "^1.17.10",
+        "vite-plugin-mkcert": "^2.0.0",
         "vitest": "^4.1.1",
         "wrangler": "^4.77.0",
         "zod": "^4.3.6"
