@@ -24,7 +24,7 @@
     </Sidebar>
   {/if}
 
-  <main class="min-h-[100vh]" class:col-span-2={currentPage === '/'}>
+  <main class="min-h-screen" class:col-span-2={currentPage === '/'}>
     <Header />
     <section class="p-2">
       {@render children()}
@@ -40,16 +40,16 @@
 <Toaster />
 
 {#snippet NavTiles()}
-  <Navigation.Tile href="/damagecalc" id="damagecalc">
+  <Navigation.TriggerAnchor href="/damagecalc" class="">
     <div class="flex flex-col items-center text-center">
-      <CalculatorIcon class="size-[24px] md:size-[32px]" />
-      <span class="text-sm">Damage Calculator</span>
+      <CalculatorIcon class="size-[24px] md:size-7" />
+      <Navigation.TriggerText class="text-sm text-wrap">Damage Calculator</Navigation.TriggerText>
     </div>
-  </Navigation.Tile>
-  <Navigation.Tile href="/database" id="database" classes="h-full">
-    <div class="flex flex-col items-center text-center">
-      <DatabaseIcon class="size-[24px] md:size-[32px]" />
-      <span class="text-sm">Database</span>
+  </Navigation.TriggerAnchor>
+  <Navigation.TriggerAnchor href="/database" class="">
+    <div class="flex flex-col items-center justify-center text-center">
+      <DatabaseIcon class="size-[24px] md:size-7" />
+      <Navigation.TriggerText class="text-sm ">Card Search</Navigation.TriggerText>
     </div>
-  </Navigation.Tile>
+  </Navigation.TriggerAnchor>
 {/snippet}

@@ -1,24 +1,20 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import type { Snippet } from 'svelte';
 
+  import HomeIcon from '~icons/mdi/home';
+
   let { children }: { children: Snippet<[]> } = $props();
-
-  let value = $state('');
-
-  $effect(() => {
-    value = $page.url.pathname.replace('/', '');
-  });
 </script>
 
-<Navigation
-  bind:value
-  classes="sticky bottom-0 lg:hidden block"
-  height="max-h-24"
-  tilesClasses="max-w-24 max-h-28 h-28"
-  background="bg-surface-950"
-  tilesItems="items-stretch"
-  tilesJustify="justify-start">
-  {@render children()}
+<Navigation layout="bar" class="sticky bottom-0 block bg-surface-950 lg:hidden">
+    <Navigation.Menu class="grid grid-cols-3 ">
+        <Navigation.TriggerAnchor href="/">
+          <div class="flex flex-col items-center text-center">
+            <HomeIcon class="size-[24px] md:size-6" />
+            <Navigation.TriggerText class="text-sm">Home</Navigation.TriggerText>
+          </div>
+        </Navigation.TriggerAnchor>
+    {@render children()}
+  </Navigation.Menu>
 </Navigation>
