@@ -1,5 +1,6 @@
 import { env as secretEnv } from '$env/dynamic/private';
 import { env } from '$env/dynamic/public';
+import type { Database } from '$lib/db/database.types';
 import { createServerClient } from '@supabase/ssr';
 import type { Handle } from '@sveltejs/kit';
 
@@ -11,7 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw new Error('Missing PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');
   }
 
-  event.locals.supabase = createServerClient(supabaseUrl, supabaseServiceKey, {
+  event.locals.supabase = createServerClient<Database>(supabaseUrl, supabaseServiceKey, {
     cookies: {
       getAll() {
         return event.cookies.getAll();

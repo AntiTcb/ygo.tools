@@ -34,6 +34,7 @@
         "@iconify-json/mdi": "^1.2.3",
         "@iconify-json/vscode-icons": "^1.2.49",
         "@macfja/svelte-persistent-store": "^2.4.2",
+        "@playwright/test": "^1.60.0",
         "@skeletonlabs/skeleton": "4.15.2",
         "@skeletonlabs/skeleton-svelte": "4.15.2",
         "@supabase/ssr": "^0.10.3",
