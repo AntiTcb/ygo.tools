@@ -56,7 +56,7 @@
         "globals": "^17.4.0",
         "nprogress": "^0.2.0",
         "prettier": "^3.8.1",
-        "prettier-plugin-svelte": "^3.5.1",
+        "prettier-plugin-svelte": "^4.1.1",
         "prettier-plugin-tailwindcss": "^0.7.2",
         "runed": "^0.37.1",
         "sk-seo": "^0.5.4",
