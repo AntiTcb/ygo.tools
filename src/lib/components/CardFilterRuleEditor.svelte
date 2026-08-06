@@ -1,8 +1,8 @@
 <script lang="ts">
   import { ATTRIBUTES, CARD_TYPES, SPELLTRAP_SUBTYPES } from '$lib/db/cardEnums';
   import type { Condition, RuleNode } from '$lib/db/cardFilterRule';
-  import LinkArrowMaskPicker from './LinkArrowMaskPicker.svelte';
   import Self from './CardFilterRuleEditor.svelte';
+  import LinkArrowMaskPicker from './LinkArrowMaskPicker.svelte';
 
   type Lookups = {
     monsterTypes: { id: number; name: string | null }[];
@@ -145,7 +145,7 @@
                 {node.logic === 'and' ? 'and' : 'or'}
               </p>
             {/if}
-            <Self bind:node={node.children[i]} {lookups} depth={depth + 1} onRemove={() => removeChild(i)} />
+            <Self bind:node={node.children[i]!} {lookups} depth={depth + 1} onRemove={() => removeChild(i)} />
           </li>
         {/each}
       </ul>

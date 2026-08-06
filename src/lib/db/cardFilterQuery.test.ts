@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildOrPart, queryNeuronCardIdsByRule } from './cardFilterQuery';
-import { NEURON_ATK_DEF_QUESTION_MARK, type RuleNode } from './cardFilterRule';
+import { NEURON_ATK_DEF_QUESTION_MARK, type Condition, type RuleNode } from './cardFilterRule';
 import type { Database } from './database.types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const condTree = (condition: RuleNode extends { kind: 'cond' } ? RuleNode['condition'] : never): RuleNode => ({
+const condTree = (condition: Condition): RuleNode => ({
   kind: 'group',
   logic: 'and',
   children: [{ kind: 'cond', condition }],

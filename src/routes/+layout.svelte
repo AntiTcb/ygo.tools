@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { page } from '$app/state';
   import Footer from '$components/Footer.svelte';
   import Header from '$components/Header.svelte';
@@ -18,8 +18,8 @@
 
   const artworks = setArtworksState();
 
-  const navClass = (href) => (isNavActive(currentPage, href) ? 'nav-active' : '');
-  const navCurrent = (href) => (isNavActive(currentPage, href) ? 'page' : undefined);
+  const navClass = (href: string) => (isNavActive(currentPage, href) ? 'nav-active' : '');
+  const navCurrent = (href: string) => (isNavActive(currentPage, href) ? 'page' : undefined);
 </script>
 
 <div class="bg-surface-800 grid grid-cols-[1fr] lg:grid-cols-[auto_1fr]">
@@ -47,19 +47,19 @@
 {#snippet NavTiles()}
   <Navigation.TriggerAnchor href="/damagecalc" class={navClass('/damagecalc')} aria-current={navCurrent('/damagecalc')}>
     <div class="flex flex-col items-center text-center">
-      <CalculatorIcon class="size-[24px] md:size-7" />
+      <CalculatorIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Damage Calculator</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
   <Navigation.TriggerAnchor href="/database" class={navClass('/database')} aria-current={navCurrent('/database')}>
     <div class="flex flex-col items-center justify-center text-center">
-      <DatabaseIcon class="size-[24px] md:size-7" />
+      <DatabaseIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Card Search</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
   <Navigation.TriggerAnchor href="/smallworld" class={navClass('/smallworld')} aria-current={navCurrent('/smallworld')}>
     <div class="flex flex-col items-center justify-center text-center">
-      <EarthIcon class="size-[24px] md:size-7" />
+      <EarthIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Small World</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
