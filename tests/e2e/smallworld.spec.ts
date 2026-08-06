@@ -120,8 +120,12 @@ test.describe('/smallworld helper', () => {
     const firstName = (await page.getByTestId('smallworld-card-name').first().textContent())?.trim() ?? '';
     expect(firstName.length).toBeGreaterThan(0);
     const needle = firstName.slice(0, Math.min(6, firstName.length));
+
+    // URL already has `_data=` from reveal/bridge; wait until the debounced
+    // filter write actually changes the compressed payload before sharing.
+    const urlBeforeFilter = page.url();
     await page.getByTestId('smallworld-target-filter').fill(needle);
-    await expect.poll(() => page.url()).toContain('_data=');
+    await expect.poll(() => page.url()).not.toBe(urlBeforeFilter);
 
     const sharedUrl = page.url();
     expect(sharedUrl).toContain('_data=');
@@ -139,9 +143,11 @@ test.describe('/smallworld helper', () => {
 
     // Direct shared-URL loads render cards before the artwork manifest arrives;
     // manifest must be reactive so imgs get src once fetch completes.
+    // YGOResources art URLs are often protocol-relative (`//…`).
+    const artSrc = /^(https?:)?\/\//;
     const targetArt = page.getByTestId('smallworld-card').first().locator('img');
-    await expect(targetArt).toHaveAttribute('src', /^https?:\/\//, { timeout: 20_000 });
+    await expect(targetArt).toHaveAttribute('src', artSrc, { timeout: 20_000 });
     const revealArt = page.getByTestId('smallworld-reveal-selected').locator('img');
-    await expect(revealArt).toHaveAttribute('src', /^https?:\/\//, { timeout: 20_000 });
+    await expect(revealArt).toHaveAttribute('src', artSrc, { timeout: 20_000 });
   });
 });

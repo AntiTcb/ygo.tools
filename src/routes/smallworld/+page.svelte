@@ -65,6 +65,9 @@
   });
 
   const setRevealId = (next: number | null) => {
+    // No-op writes (e.g. bind sync on shared-URL hydrate) must not wipe filter/page.
+    if (next === params.revealId) return;
+
     let nextBridge: number | null = next == null ? null : params.bridgeId;
     if (next != null && nextBridge != null) {
       const reveal = cardById.get(next);
@@ -82,6 +85,8 @@
   };
 
   const setBridgeId = (next: number | null) => {
+    if (next === params.bridgeId) return;
+
     params.update({
       bridgeId: next,
       targetNameFilter: '',
