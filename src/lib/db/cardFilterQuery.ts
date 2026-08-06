@@ -103,7 +103,8 @@ const buildCondString = (c: Condition): string | null => {
   return null;
 };
 
-const buildOrPart = (node: RuleNode): string | null => {
+/** PostgREST `or`/`and` filter fragment for a rule node (exported for unit tests). */
+export const buildOrPart = (node: RuleNode): string | null => {
   if (node.kind === 'cond') return buildCondString(node.condition);
   if (node.kind === 'group' && node.logic === 'and') {
     const ps = node.children.map(buildOrPart).filter((x): x is string => Boolean(x));
@@ -212,8 +213,6 @@ export const queryNeuronCardIdsByRule = async (supabase: Db, root: RuleNode): Pr
   let q: Qb = supabase.from('neuron_cards').select('id').eq('language', 'en').limit(REMOTE_FETCH_LIMIT);
 
   q = applyRuleToQuery(q, root);
-
-  console.log('q', q);
 
   const { data, error } = await q;
 

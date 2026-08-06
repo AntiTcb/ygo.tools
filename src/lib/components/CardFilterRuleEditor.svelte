@@ -2,6 +2,7 @@
   import { ATTRIBUTES, CARD_TYPES, SPELLTRAP_SUBTYPES } from '$lib/db/cardEnums';
   import type { Condition, RuleNode } from '$lib/db/cardFilterRule';
   import LinkArrowMaskPicker from './LinkArrowMaskPicker.svelte';
+  import Self from './CardFilterRuleEditor.svelte';
 
   type Lookups = {
     monsterTypes: { id: number; name: string | null }[];
@@ -45,7 +46,10 @@
 
   const addGroup = () => {
     if (node.kind !== 'group') return;
-    node.children = [...node.children, { kind: 'group', logic: 'and', children: [{ kind: 'cond', condition: defaultCondition() }] }];
+    node.children = [
+      ...node.children,
+      { kind: 'group', logic: 'and', children: [{ kind: 'cond', condition: defaultCondition() }] },
+    ];
   };
 
   const removeChild = (index: number) => {
@@ -66,7 +70,7 @@
       return;
     }
     if (raw === 'bits:link_arrows') {
-      node.condition = { kind: 'bits', field: 'link_arrows', op: 'isNull' };
+      node.condition = { kind: 'bits', field: 'link_arrows', op: 'eq', values: [] };
       return;
     }
     if (raw === 'text:pendulum_text') {
@@ -89,177 +93,195 @@
     else cur.add(id);
     field.values = [...cur].sort((a, b) => a - b);
   };
+
+  const catOptions = $derived.by((): { id: number; name: string }[] => {
+    if (node.kind !== 'cond' || node.condition.kind !== 'cat') return [];
+    const field = node.condition.field;
+    if (field === 'attribute_id') return attributeEntries();
+    if (field === 'species_id') return lookups.monsterTypes.map((o) => ({ id: o.id, name: o.name ?? String(o.id) }));
+    if (field === 'frame_type_id') return lookups.complexFrameTypes.map((o) => ({ id: o.id, name: o.name }));
+    if (field === 'effect_id') return spelltrapEntries();
+    if (field === 'card_type') return cardTypeEntries();
+    if (field === 'frame_subtype') return lookups.cardFrameTypes.map((o) => ({ id: o.id, name: o.name }));
+    return [];
+  });
 </script>
 
 {#if node.kind === 'group'}
-  <div class="border-surface-500/30 space-y-1.5 rounded border p-1.5" class:ml-2={depth > 0}>
-    <div class="flex flex-wrap items-center gap-1.5">
-      <span class="text-sm font-semibold">{depth === 0 ? 'Stat filters' : 'Group'}</span>
-      <select class="select text-sm" bind:value={node.logic}>
-        <option value="and">All (AND)</option>
-        <option value="or">Any (OR)</option>
-      </select>
+  <div class={['space-y-2', depth > 0 && 'border-surface-500/25 border-l-2 pl-2.5 ml-0.5']}>
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="bg-surface-500/10 inline-flex rounded p-0.5 text-xs" role="group" aria-label="Group logic">
+        <button
+          type="button"
+          class="rounded px-2.5 py-1 transition-colors"
+          class:bg-surface-500={node.logic === 'and'}
+          class:text-surface-50={node.logic === 'and'}
+          class:opacity-70={node.logic !== 'and'}
+          onclick={() => (node.logic = 'and')}>
+          Match all
+        </button>
+        <button
+          type="button"
+          class="rounded px-2.5 py-1 transition-colors"
+          class:bg-surface-500={node.logic === 'or'}
+          class:text-surface-50={node.logic === 'or'}
+          class:opacity-70={node.logic !== 'or'}
+          onclick={() => (node.logic = 'or')}>
+          Match any
+        </button>
+      </div>
       {#if depth > 0}
         <button type="button" class="btn btn-sm preset-ghost-surface" onclick={() => onRemove?.()}>Remove group</button>
       {/if}
     </div>
 
-    {#each node.children as _, i (i)}
-      <svelte:self bind:node={node.children[i]} {lookups} depth={depth + 1} onRemove={() => removeChild(i)} />
-    {/each}
+    {#if node.children.length === 0}
+      <div class="border-surface-500/25 rounded border border-dashed px-3 py-4 text-center text-sm opacity-70">
+        No conditions yet. Add a condition to filter by ATK, type, attribute, and more.
+      </div>
+    {:else}
+      <ul class="space-y-2">
+        {#each node.children as child, i (child)}
+          <li>
+            {#if i > 0}
+              <p class="pb-1 text-[0.65rem] font-semibold tracking-wide uppercase opacity-50">
+                {node.logic === 'and' ? 'and' : 'or'}
+              </p>
+            {/if}
+            <Self bind:node={node.children[i]} {lookups} depth={depth + 1} onRemove={() => removeChild(i)} />
+          </li>
+        {/each}
+      </ul>
+    {/if}
 
     <div class="flex flex-wrap gap-1.5">
       <button
         type="button"
         class="btn btn-sm preset-filled-surface-500"
-        data-testid={depth === 0 ? 'filter-add-condition' : undefined}
-        onclick={addCondition}>+ Condition</button>
-      <button type="button" class="btn btn-sm preset-tonal-surface" onclick={addGroup}>+ Group</button>
+        data-testid={depth === 0 ? 'filter-add-condition' : 'filter-add-condition-nested'}
+        onclick={() => addCondition()}>+ Condition</button>
+      <button
+        type="button"
+        class="btn btn-sm preset-tonal-surface"
+        data-testid={depth === 0 ? 'filter-add-group' : 'filter-add-group-nested'}
+        onclick={() => addGroup()}>+ Nested group</button>
     </div>
   </div>
 {:else}
   {@const c = node.condition}
-  <div class="border-surface-500/30 flex flex-col gap-1.5 rounded border p-1.5 md:flex-row md:items-end">
-    <label class="label grow">
-      <span class="label-text">Field</span>
-      <select
-        class="select text-sm"
-        data-testid="filter-condition-field"
-        value={fieldKindValue}
-        onchange={(e) => onFieldKindChange((e.currentTarget as HTMLSelectElement).value)}>
-        <optgroup label="Numeric">
-          <option value="num:atk">ATK</option>
-          <option value="num:def">DEF</option>
-          <option value="num:level">Level / Rank</option>
-          <option value="num:link_rating">Link Rating</option>
-          <option value="num:pend_scale_l">Pendulum Scale L</option>
-          <option value="num:pend_scale_r">Pendulum Scale R</option>
-        </optgroup>
-        <optgroup label="Categories">
-          <option value="cat:attribute_id">Attribute</option>
-          <option value="cat:species_id">Monster Type (species)</option>
-          <option value="cat:frame_type_id">Complex frame type</option>
-          <option value="cat:effect_id">Spell/Trap subtype</option>
-          <option value="cat:card_type">Card type (Monster/Spell/Trap)</option>
-          <option value="cat:frame_subtype">Frame subtype (tuner, fusion, …)</option>
-        </optgroup>
-        <optgroup label="Other">
-          <option value="bits:link_arrows">Link arrows</option>
-          <option value="text:pendulum_text">Pendulum text</option>
-        </optgroup>
-      </select>
-    </label>
+  <div class="border-surface-500/30 bg-surface-500/5 flex flex-col gap-2 rounded-md border p-2">
+    <div class="flex flex-wrap items-end gap-2">
+      <label class="label min-w-40 grow basis-40">
+        <span class="label-text text-xs">Field</span>
+        <select
+          class="select text-sm"
+          data-testid="filter-condition-field"
+          value={fieldKindValue}
+          onchange={(e) => onFieldKindChange((e.currentTarget as HTMLSelectElement).value)}>
+          <optgroup label="Stats">
+            <option value="num:atk">ATK</option>
+            <option value="num:def">DEF</option>
+            <option value="num:level">Level / Rank</option>
+            <option value="num:link_rating">Link Rating</option>
+            <option value="num:pend_scale_l">Pendulum Scale L</option>
+            <option value="num:pend_scale_r">Pendulum Scale R</option>
+          </optgroup>
+          <optgroup label="Identity">
+            <option value="cat:attribute_id">Attribute</option>
+            <option value="cat:species_id">Monster Type</option>
+            <option value="cat:card_type">Card type</option>
+            <option value="cat:frame_subtype">Frame subtype</option>
+            <option value="cat:frame_type_id">Complex frame</option>
+            <option value="cat:effect_id">Spell/Trap subtype</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option value="bits:link_arrows">Link arrows</option>
+            <option value="text:pendulum_text">Pendulum text (contains)</option>
+          </optgroup>
+        </select>
+      </label>
 
-    {#if c.kind === 'num'}
-      <label class="label">
-        <span class="label-text">Op</span>
-        <select class="select text-sm" bind:value={c.op}>
-          <option value="eq">=</option>
-          <option value="neq">≠</option>
-          <option value="gt">&gt;</option>
-          <option value="gte">≥</option>
-          <option value="lt">&lt;</option>
-          <option value="lte">≤</option>
-          <option value="isNull">is null</option>
-          <option value="notNull">not null</option>
-          {#if c.field === 'atk' || c.field === 'def'}
-            <option value="isQuestion">is ? (stored as -1)</option>
-            <option value="notQuestion">has numeric ATK/DEF (not ?)</option>
-          {/if}
-        </select>
-      </label>
-      {#if c.op !== 'isNull' && c.op !== 'notNull' && c.op !== 'isQuestion' && c.op !== 'notQuestion'}
-        <label class="label">
-          <span class="label-text">Value</span>
-          <input class="input text-sm" type="number" bind:value={c.value} />
+      {#if c.kind === 'num'}
+        <label class="label min-w-36 grow basis-36">
+          <span class="label-text text-xs">Comparison</span>
+          <select class="select text-sm" bind:value={c.op}>
+            <option value="eq">equals</option>
+            <option value="neq">not equal</option>
+            <option value="gt">greater than</option>
+            <option value="gte">at least</option>
+            <option value="lt">less than</option>
+            <option value="lte">at most</option>
+            <option value="isNull">is empty</option>
+            <option value="notNull">is set</option>
+            {#if c.field === 'atk' || c.field === 'def'}
+              <option value="isQuestion">is ?</option>
+              <option value="notQuestion">is numeric (not ?)</option>
+            {/if}
+          </select>
         </label>
+        {#if c.op !== 'isNull' && c.op !== 'notNull' && c.op !== 'isQuestion' && c.op !== 'notQuestion'}
+          <label class="label w-28">
+            <span class="label-text text-xs">Value</span>
+            <input class="input text-sm" type="number" bind:value={c.value} />
+          </label>
+        {/if}
+      {:else if c.kind === 'cat'}
+        <label class="label min-w-36 grow basis-36">
+          <span class="label-text text-xs">Match</span>
+          <select class="select text-sm" bind:value={c.op}>
+            <option value="in">is any of…</option>
+            <option value="notIn">is none of…</option>
+            <option value="isNull">is empty</option>
+            <option value="notNull">is set</option>
+          </select>
+        </label>
+      {:else if c.kind === 'text'}
+        <label class="label min-w-36 grow basis-36">
+          <span class="label-text text-xs">Match</span>
+          <select class="select text-sm" bind:value={c.op}>
+            <option value="contains">contains</option>
+            <option value="eq">equals</option>
+            <option value="isNull">is empty</option>
+            <option value="notNull">is set</option>
+          </select>
+        </label>
+        {#if c.op === 'contains' || c.op === 'eq'}
+          <label class="label min-w-40 grow">
+            <span class="label-text text-xs">Text</span>
+            <input class="input text-sm" type="text" bind:value={c.value} />
+          </label>
+        {/if}
       {/if}
-    {:else if c.kind === 'cat'}
-      <label class="label">
-        <span class="label-text">Op</span>
-        <select class="select text-sm" bind:value={c.op}>
-          <option value="in">is any of…</option>
-          <option value="notIn">is none of…</option>
-          <option value="isNull">is null</option>
-          <option value="notNull">not null</option>
-        </select>
-      </label>
-      {#if c.op === 'in' || c.op === 'notIn'}
-        <fieldset class="fieldset max-h-40 grow overflow-y-auto rounded border p-2 text-sm">
-          <legend class="text-xs font-semibold">Values (toggle)</legend>
-          {#if c.field === 'attribute_id'}
-            {#each attributeEntries() as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input
-                  type="checkbox"
-                  data-testid={o.id === 2 ? 'filter-attribute-dark' : undefined}
-                  checked={(c.values ?? []).includes(o.id)}
-                  onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name}</span>
-              </label>
-            {/each}
-          {:else if c.field === 'species_id'}
-            {#each lookups.monsterTypes as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input type="checkbox" checked={(c.values ?? []).includes(o.id)} onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name ?? o.id}</span>
-              </label>
-            {/each}
-          {:else if c.field === 'frame_type_id'}
-            {#each lookups.complexFrameTypes as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input type="checkbox" checked={(c.values ?? []).includes(o.id)} onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name} (#{o.id})</span>
-              </label>
-            {/each}
-          {:else if c.field === 'effect_id'}
-            {#each spelltrapEntries() as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input type="checkbox" checked={(c.values ?? []).includes(o.id)} onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name}</span>
-              </label>
-            {/each}
-          {:else if c.field === 'card_type'}
-            {#each cardTypeEntries() as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input type="checkbox" checked={(c.values ?? []).includes(o.id)} onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name}</span>
-              </label>
-            {/each}
-          {:else if c.field === 'frame_subtype'}
-            {#each lookups.cardFrameTypes as o (o.id)}
-              <label class="flex cursor-pointer items-center gap-2 py-0.5">
-                <input type="checkbox" checked={(c.values ?? []).includes(o.id)} onchange={() => toggleCatValue(c, o.id)} />
-                <span>{o.name}</span>
-              </label>
-            {/each}
-          {/if}
-        </fieldset>
+
+      {#if depth > 0}
+        <button type="button" class="btn btn-sm preset-ghost-error self-end" onclick={() => onRemove?.()}>Remove</button>
+      {/if}
+    </div>
+
+    {#if c.kind === 'cat' && (c.op === 'in' || c.op === 'notIn')}
+      <div class="flex max-h-48 flex-wrap content-start gap-1.5 overflow-y-auto" role="group" aria-label="Values">
+        {#each catOptions as o (o.id)}
+          {@const on = (c.values ?? []).includes(o.id)}
+          <button
+            type="button"
+            class="btn btn-sm"
+            class:preset-filled-primary-500={on}
+            class:preset-tonal-surface={!on}
+            data-testid={c.field === 'attribute_id' && o.id === 2 ? 'filter-attribute-dark' : undefined}
+            aria-pressed={on}
+            onclick={() => toggleCatValue(c, o.id)}>
+            {o.name}
+          </button>
+        {/each}
+      </div>
+      {#if !(c.values?.length)}
+        <p class="text-xs opacity-60">Select one or more values.</p>
       {/if}
     {:else if c.kind === 'bits'}
       <div class="flex flex-col gap-1">
+        <span class="label-text text-xs">Exact arrow set</span>
         <LinkArrowMaskPicker bind:values={c.values} />
       </div>
-    {:else if c.kind === 'text'}
-      <label class="label">
-        <span class="label-text">Op</span>
-        <select class="select text-sm" bind:value={c.op}>
-          <option value="contains">contains</option>
-          <option value="eq">equals</option>
-          <option value="isNull">is null</option>
-          <option value="notNull">not null</option>
-        </select>
-      </label>
-      {#if c.op === 'contains' || c.op === 'eq'}
-        <label class="label grow">
-          <span class="label-text">Text</span>
-          <input class="input text-sm" type="text" bind:value={c.value} />
-        </label>
-      {/if}
-    {/if}
-
-    {#if depth > 0}
-      <button type="button" class="btn btn-sm preset-ghost-error self-end" onclick={() => onRemove?.()}>Remove</button>
     {/if}
   </div>
 {/if}

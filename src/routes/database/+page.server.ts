@@ -23,8 +23,6 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (cardFrameTypesRes.error) console.error('neuron_card_frame_types', cardFrameTypesRes.error);
   if (complexFrameTypesRes.error) console.error('neuron_complex_frame_types', complexFrameTypesRes.error);
 
-  console.log('loaded cards from database', cardsRes.data?.length ?? 0);
-
   return {
     cards: cardsRes.data ?? [],
     lookups: {

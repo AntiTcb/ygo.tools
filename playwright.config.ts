@@ -6,7 +6,7 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Browser tests for /database filtering.
- * Starts `pnpm dev --port 5174` (Vite loads `.env` / `.env.local` from the project root).
+ * Starts `pnpm dev --port 5174` (Vite + mkcert serve HTTPS; loads `.env` / `.env.local`).
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -15,16 +15,20 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
+  timeout: 60_000,
   use: {
-    baseURL: 'http://127.0.0.1:5174',
+    baseURL: 'https://localhost:5174',
+    ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
+    navigationTimeout: 60_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'pnpm dev --port 5174',
     cwd: root,
-    url: 'http://127.0.0.1:5174',
+    url: 'https://localhost:5174',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    ignoreHTTPSErrors: true,
   },
 });

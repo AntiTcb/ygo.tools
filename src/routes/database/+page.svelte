@@ -1,10 +1,13 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import CardFilterBuilder from '$components/CardFilterBuilder.svelte';
+  import RegexSearchField from '$components/RegexSearchField.svelte';
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { evalRuleNode, type CardFilterRow } from '$lib/db/cardFilterEval';
   import { isStatFilterEmpty, resolveVirtualRuleTree, treeNeedsClientEval } from '$lib/db/cardFilterResolve';
   import { validateRuleLimits, type RuleNode } from '$lib/db/cardFilterRule';
+  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
+  import { compileRegex } from '$lib/db/regexSearch';
   import { filterNeuronCardIds } from '$lib/rpc/filterCards.remote';
   import { searchSbCards } from '$lib/rpc/searchSupabaseCards.remote';
   import { useSearchParams } from 'runed/kit';
@@ -17,6 +20,8 @@
   const DEBOUNCE_MS = 500;
   const STAT_DEBOUNCE_MS = 1000;
   const MAX_VISIBLE_RESULTS = 100;
+
+  const siteFavicon = (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 
   /** Plain-data snapshot — avoids structuredClone on Svelte `$state` proxies (DataCloneError on hydrate). */
   const cloneRuleTree = (t: RuleNode): RuleNode => JSON.parse(JSON.stringify(t)) as RuleNode;
@@ -37,13 +42,6 @@
     SearchInput,
     'name' | 'effectText' | 'pendulumText' | 'regexEffectSearch' | 'regexPendulumSearch' | 'regexEffectFlags' | 'regexPendulumFlags'
   >;
-
-  /** Letters allowed in `new RegExp(pattern, flags)` across supported engines. */
-  const normalizeRegexFlags = (raw: string): string =>
-    [...raw.toLowerCase()]
-      .filter((c) => 'dgimsuvy'.includes(c))
-      .filter((c, i, arr) => arr.indexOf(c) === i)
-      .join('');
 
   let { data }: PageProps = $props();
   const { cards } = $derived(data);
@@ -144,22 +142,17 @@
 
   const artworks = getArtworksState();
 
-  /** Delimiter form `/pat/flags` uses only embedded flags; otherwise uses `extraFlags`. */
-  const stringToRegex = (str: string, extraFlags: string): RegExp | null => {
-    const match = str.match(/^([\/~@;%#'])(.*?)\1([a-z]*)$/i);
-
-    try {
-      if (match) {
-        const flags = normalizeRegexFlags(match[3] ?? '');
-        return new RegExp(match[2] ?? '', flags);
-      }
-      return new RegExp(str, normalizeRegexFlags(extraFlags));
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('Invalid regex pattern:', message);
-      return null;
+  const lookupMaps = $derived.by(() => {
+    const speciesById = new Map<number, string>();
+    for (const row of data.lookups.monsterTypes) {
+      if (row.name) speciesById.set(row.id, row.name);
     }
-  };
+    const frameById = new Map<number, string>();
+    for (const row of data.lookups.complexFrameTypes) {
+      frameById.set(row.id, row.name);
+    }
+    return { speciesById, frameById };
+  });
 
   const matchesTextSlice = (haystack: string, needle: string, useRegex: boolean, regex: RegExp | null): boolean => {
     if (!needle) return true;
@@ -191,7 +184,6 @@
     const statActive = !isStatFilterEmpty(search.ruleTree);
 
     if (!nameActive && !effectActive && !pendulumActive && !statActive) {
-      console.debug('no filters');
       return [];
     }
 
@@ -230,9 +222,6 @@
           toast.error(`${r.error} — using offline stat filter on loaded cards.`);
           statIdSet = new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id));
         } else {
-          //   if (r.truncated) {
-          //     toast.warning(`Stat filter hit the ${REMOTE_ID_CAP.toLocaleString()} result cap; refine filters for full accuracy.`);
-          //   }
           statIdSet = new Set(r.ids);
         }
       }
@@ -240,17 +229,10 @@
 
     const cardNameMatches = nameQuery ? await nameQuery : [];
     const cardNameIds = cardNameMatches?.map((x) => x.id) ?? [];
-    const regexEffect = search.regexEffectSearch && effectActive ? stringToRegex(search.effectText, search.regexEffectFlags) : null;
-    const regexPendulum = search.regexPendulumSearch && pendulumActive ? stringToRegex(search.pendulumText, search.regexPendulumFlags) : null;
-
-    console.debug({
-      trimmedName,
-      cardNameMatches,
-      cardNameIds,
-      regexEffect,
-      regexPendulum,
-      statIdSet,
-    });
+    const effectCompiled = search.regexEffectSearch && effectActive ? compileRegex(search.effectText, search.regexEffectFlags) : null;
+    const pendCompiled = search.regexPendulumSearch && pendulumActive ? compileRegex(search.pendulumText, search.regexPendulumFlags) : null;
+    const regexEffect = effectCompiled?.ok ? effectCompiled.regex : null;
+    const regexPendulum = pendCompiled?.ok ? pendCompiled.regex : null;
 
     return cardList
       .filter((card) => {
@@ -300,125 +282,162 @@
   });
 
   const visibleCards = $derived(displayedCards.slice(0, MAX_VISIBLE_RESULTS));
-
-  const regexEffectFlagsPreview = $derived(params.regexEffectSearch ? normalizeRegexFlags(params.regexEffectFlags) || '—' : '');
-
-  const regexPendulumFlagsPreview = $derived(params.regexPendulumSearch ? normalizeRegexFlags(params.regexPendulumFlags) || '—' : '');
+  const showingCapped = $derived(displayedCards.length > MAX_VISIBLE_RESULTS);
 </script>
 
 <div class="card mx-auto my-2 w-full p-3 sm:p-4">
-  <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:grid-rows-[auto_auto_auto] lg:items-start lg:gap-x-4">
-    <div class="flex flex-col gap-1 lg:col-start-1 lg:row-start-1">
-      <span class="label-text text-xs">Card name</span>
-      <input class="input w-full text-sm" type="text" data-testid="database-search-name" bind:value={params.name} />
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start">
+    <div class="flex flex-col gap-4">
+      <label class="label flex flex-col gap-1">
+        <span class="label-text text-xs font-medium">Card name</span>
+        <input class="input w-full text-sm" type="text" data-testid="database-search-name" bind:value={params.name} placeholder="Search by name…" />
+      </label>
+
+      <RegexSearchField
+        label="Effect text"
+        testIdPrefix="database-search-effect"
+        bind:pattern={
+          () => params.effectText,
+          (v) => {
+            params.effectText = v;
+          }
+        }
+        bind:useRegex={
+          () => params.regexEffectSearch,
+          (v) => {
+            params.regexEffectSearch = v;
+          }
+        }
+        bind:flags={
+          () => params.regexEffectFlags,
+          (v) => {
+            params.regexEffectFlags = v;
+          }
+        }
+        placeholder="e.g. destroy.*monster  or  /negate.*activation/i" />
+
+      <RegexSearchField
+        label="Pendulum text"
+        testIdPrefix="database-search-pendulum"
+        bind:pattern={
+          () => params.pendulumText,
+          (v) => {
+            params.pendulumText = v;
+          }
+        }
+        bind:useRegex={
+          () => params.regexPendulumSearch,
+          (v) => {
+            params.regexPendulumSearch = v;
+          }
+        }
+        bind:flags={
+          () => params.regexPendulumFlags,
+          (v) => {
+            params.regexPendulumFlags = v;
+          }
+        }
+        placeholder="Pendulum effect text…" />
     </div>
 
-    <div class="flex flex-col gap-1.5 lg:col-start-1 lg:row-start-2">
-      <span class="label-text text-xs">Effect</span>
-      <input class="input w-full text-sm" type="text" data-testid="database-search-effect" bind:value={params.effectText} />
-      <div class="flex flex-wrap items-end gap-x-3 gap-y-1">
-        <label class="label mb-0 flex cursor-pointer items-center gap-2 p-0">
-          <input class="checkbox" type="checkbox" data-testid="database-regex-effect" bind:checked={params.regexEffectSearch} />
-          <span class="text-sm">Regex</span>
-        </label>
-        <label class="label mb-0 max-w-28 min-w-18 shrink-0 p-0" class:opacity-40={!params.regexEffectSearch}>
-          <span class="label-text text-xs">Flags</span>
-          <input
-            class="input w-full font-mono text-sm"
-            type="text"
-            data-testid="database-regex-effect-flags"
-            bind:value={params.regexEffectFlags}
-            disabled={!params.regexEffectSearch}
-            placeholder="im"
-            maxlength={16}
-            title="Effect RegExp flags: d g i m s u v y. Delimiter patterns (/pat/flags) use embedded flags only." />
-        </label>
-      </div>
-      {#if params.regexEffectSearch}
-        <p class="text-xs opacity-80">
-          Effect active flags:
-          <code class="bg-surface-500/15 rounded px-1">{regexEffectFlagsPreview}</code>
-          <span class="opacity-70"> — delimiter forms ignore this box.</span>
-        </p>
-      {/if}
-    </div>
-
-    <div class="flex flex-col gap-1.5 lg:col-start-1 lg:row-start-3">
-      <span class="label-text text-xs">Pendulum</span>
-      <input
-        class="input w-full text-sm"
-        type="text"
-        data-testid="database-search-pendulum"
-        bind:value={params.pendulumText}
-        placeholder="Pendulum monster text…" />
-      <div class="flex flex-wrap items-end gap-x-3 gap-y-1">
-        <label class="label mb-0 flex cursor-pointer items-center gap-2 p-0">
-          <input class="checkbox" type="checkbox" data-testid="database-regex-pendulum" bind:checked={params.regexPendulumSearch} />
-          <span class="text-sm">Regex</span>
-        </label>
-        <label class="label mb-0 max-w-28 min-w-18 shrink-0 p-0" class:opacity-40={!params.regexPendulumSearch}>
-          <span class="label-text text-xs">Flags</span>
-          <input
-            class="input w-full font-mono text-sm"
-            type="text"
-            data-testid="database-regex-pendulum-flags"
-            bind:value={params.regexPendulumFlags}
-            disabled={!params.regexPendulumSearch}
-            placeholder="im"
-            maxlength={16}
-            title="Pendulum RegExp flags: d g i m s u v y. Delimiter patterns (/pat/flags) use embedded flags only." />
-        </label>
-      </div>
-      {#if params.regexPendulumSearch}
-        <p class="text-xs opacity-80">
-          Pendulum active flags:
-          <code class="bg-surface-500/15 rounded px-1">{regexPendulumFlagsPreview}</code>
-          <span class="opacity-70"> — delimiter forms ignore this box.</span>
-        </p>
-      {/if}
-    </div>
-
-    <aside
-      class="border-surface-500/30 flex max-h-[min(70vh,52rem)] min-h-0 flex-col gap-2 overflow-y-auto rounded border p-2 lg:col-start-2 lg:row-span-3 lg:row-start-1">
-      <div class="shrink-0 text-sm font-semibold">
-        Stat filters
-        <span class="pl-1 text-xs font-normal opacity-70">(apply after {STAT_DEBOUNCE_MS / 1000}s idle)</span>
+    <aside class="border-surface-500/30 flex max-h-[min(70vh,52rem)] min-h-0 flex-col gap-2 overflow-y-auto rounded-md border p-3">
+      <div class="shrink-0">
+        <h2 class="text-sm font-semibold">Stat filters</h2>
+        <p class="text-xs opacity-60">Applies after {STAT_DEBOUNCE_MS / 1000}s idle</p>
       </div>
       <CardFilterBuilder bind:ruleTree lookups={data.lookups} />
     </aside>
   </div>
 </div>
 
-<p class="px-1 text-sm" data-testid="database-results-count">{displayedCards.length} results</p>
-<label class="label inline-flex cursor-pointer items-center gap-2 px-1 text-sm">
-  <input type="checkbox" bind:checked={params.hideEffectText} />
-  Hide effect and pendulum text
-</label>
-<div class="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-1">
+  <p class="text-sm" data-testid="database-results-count">
+    {displayedCards.length} results{#if showingCapped}
+      <span class="opacity-60"> (showing first {MAX_VISIBLE_RESULTS})</span>
+    {/if}
+  </p>
+  <label class="label mb-0 inline-flex cursor-pointer items-center gap-2 p-0 text-sm">
+    <input type="checkbox" class="checkbox" data-testid="database-hide-effect-text" bind:checked={params.hideEffectText} />
+    Hide effect and pendulum text
+  </label>
+</div>
+
+<div class="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5">
   {#each visibleCards as card (card.id)}
-    <div class="card flex grow-0 flex-col items-center">
+    {@const stats = buildCardStatLine(card, lookupMaps)}
+    <div class="card flex grow-0 flex-col items-center gap-2 space-y-0! p-3" data-testid="database-card" data-card-id={card.id}>
       <button type="button" class="cursor-copy" onclick={() => copy(card.name)}>
         <img class="aspect-6/8.5 max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
       </button>
-      <article class="grow">
-        <button type="button" class="cursor-copy text-center font-bold" onclick={() => copy(card.name)}>{card.name}</button>
-        <p class="max-h-72 overflow-y-auto text-sm" class:hidden={params.hideEffectText}>
-          {@html card.effect_text?.replaceAll('\n', '<br />')}
+      <article class="flex w-full grow flex-col gap-1">
+        <button type="button" class="cursor-copy text-center text-sm font-bold" data-testid="database-card-name" onclick={() => copy(card.name)}>{card.name}</button>
+
+        <div class="text-center text-xs leading-snug opacity-85" data-testid="database-card-stats">
+          {#if stats.attribute || stats.typeLine}
+            <p>
+              {#if stats.attribute}<span class="font-medium">{stats.attribute}</span>{/if}
+              {#if stats.attribute && stats.typeLine}<span class="opacity-50"> · </span>{/if}
+              {#if stats.typeLine}{stats.typeLine}{/if}
+            </p>
+          {/if}
+          <p class="font-mono tabular-nums">
+            {#if stats.levelLine}{stats.levelLine}{/if}
+            {#if stats.levelLine && stats.scaleLine}<span class="opacity-50"> · </span>{/if}
+            {#if stats.scaleLine}{stats.scaleLine}{/if}
+            {#if stats.levelLine || stats.scaleLine}<span class="opacity-50"> · </span>{/if}
+            <span title="ATK / DEF">{stats.atkDef}</span>
+          </p>
+        </div>
+
+        {#if card.materials && !params.hideEffectText}
+          <p class="text-center text-[0.7rem] italic opacity-70">{card.materials}</p>
+        {/if}
+        <p class="max-h-72 overflow-y-auto text-xs leading-snug opacity-90" class:hidden={params.hideEffectText} data-testid="database-card-effect">
+          {#each (card.effect_text ?? '').split('\n') as line, lineIdx (lineIdx)}
+            {#if lineIdx > 0}<br />{/if}{line}
+          {/each}
         </p>
         {#if card.pendulum_text}
-          <p class="border-surface-500/20 mt-1 max-h-48 overflow-y-auto border-t pt-1 text-xs opacity-90" class:hidden={params.hideEffectText}>
+          <p
+            class="border-surface-500/20 mt-1 max-h-48 overflow-y-auto border-t pt-1 text-xs leading-snug opacity-90"
+            class:hidden={params.hideEffectText}
+            data-testid="database-card-pendulum">
             <span class="font-semibold">Pendulum: </span>
-            {@html card.pendulum_text.replaceAll('\n', '<br />')}
+            {#each card.pendulum_text.split('\n') as line, lineIdx (lineIdx)}
+              {#if lineIdx > 0}<br />{/if}{line}
+            {/each}
           </p>
         {/if}
       </article>
-      <div class="flex flex-wrap justify-between gap-2 self-stretch text-sm">
-        <a href={`https://yugipedia.com/wiki/${card.name}`} target="_blank">Yugipedia</a>
-        <a href={`https://db.ygoresources.com/card#${card.id}`} target="_blank">YGOResources</a>
+      <nav class="border-surface-500/20 flex w-full items-center justify-center gap-1 border-t pt-2" aria-label="External card links">
         <a
+          class="hover:bg-surface-500/15 inline-flex size-8 items-center justify-center rounded transition-colors"
+          href={`https://yugipedia.com/wiki/${encodeURIComponent(card.name)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Yugipedia"
+          aria-label="Open {card.name} on Yugipedia">
+          <img class="size-5" src={siteFavicon('yugipedia.com')} alt="" width="24" height="24" loading="lazy" />
+        </a>
+        <a
+          class="hover:bg-surface-500/15 inline-flex size-8 items-center justify-center rounded transition-colors"
+          href={`https://db.ygoresources.com/card#${card.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="YGOResources"
+          aria-label="Open {card.name} on YGOResources">
+          <img class="size-5" src={siteFavicon('db.ygoresources.com')} alt="" width="24" height="24" loading="lazy" />
+        </a>
+        <a
+          class="hover:bg-surface-500/15 inline-flex size-8 items-center justify-center rounded transition-colors"
           href={`https://partner.tcgplayer.com/antitcb?subId2=ygotools&u=${encodeURIComponent(`https://shop.tcgplayer.com/yugioh/product/show?newSearch=false&IsProductNameExact=false&ProductName=${card.name}&Type=Cards&orientation=list`)}`}
-          target="_blank">TCGPlayer</a>
-      </div>
+          target="_blank"
+          rel="noopener noreferrer"
+          title="TCGPlayer"
+          aria-label="Search {card.name} on TCGPlayer">
+          <img class="size-5" src={siteFavicon('tcgplayer.com')} alt="" width="24" height="24" loading="lazy" />
+        </a>
+      </nav>
     </div>
   {/each}
 </div>

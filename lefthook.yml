@@ -1,0 +1,9 @@
+pre-commit:
+  jobs:
+    - name: format
+      glob: '*.{js,jsx,ts,tsx,mjs,cjs,svelte,css,json,md,html,yml,yaml}'
+      run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+    - name: lint
+      glob: '*.{js,jsx,ts,tsx,mjs,cjs,svelte}'
+      run: pnpm oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}

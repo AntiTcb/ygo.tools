@@ -129,9 +129,66 @@ describe('linkArrows encoding', () => {
   });
 });
 
+describe('cardFilterEval groups and text', () => {
+  it('AND requires every child; OR requires any child', () => {
+    const andTree: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [
+        { kind: 'cond', condition: { kind: 'num', field: 'atk', op: 'gte', value: 2000 } },
+        { kind: 'cond', condition: { kind: 'cat', field: 'attribute_id', op: 'in', values: [2] } },
+      ],
+    };
+    const orTree: RuleNode = { ...andTree, logic: 'or' };
+    const darkHigh = row({ id: 1, atk: 2500, attribute_id: 2 });
+    const lightHigh = row({ id: 2, atk: 2500, attribute_id: 1 });
+    const darkLow = row({ id: 3, atk: 500, attribute_id: 2 });
+
+    expect(evalRuleNode(darkHigh, andTree)).toBe(true);
+    expect(evalRuleNode(lightHigh, andTree)).toBe(false);
+    expect(evalRuleNode(darkLow, andTree)).toBe(false);
+
+    expect(evalRuleNode(darkHigh, orTree)).toBe(true);
+    expect(evalRuleNode(lightHigh, orTree)).toBe(true);
+    expect(evalRuleNode(darkLow, orTree)).toBe(true);
+    expect(evalRuleNode(row({ id: 4, atk: 100, attribute_id: 1 }), orTree)).toBe(false);
+  });
+
+  it('matches pendulum_text contains / eq', () => {
+    const contains: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [{ kind: 'cond', condition: { kind: 'text', field: 'pendulum_text', op: 'contains', value: 'scale' } }],
+    };
+    const exact: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [{ kind: 'cond', condition: { kind: 'text', field: 'pendulum_text', op: 'eq', value: 'Once per turn' } }],
+    };
+    expect(evalRuleNode(row({ id: 1, pendulum_text: 'You can scale this' }), contains)).toBe(true);
+    expect(evalRuleNode(row({ id: 2, pendulum_text: 'Nothing' }), contains)).toBe(false);
+    expect(evalRuleNode(row({ id: 3, pendulum_text: 'Once per turn' }), exact)).toBe(true);
+    expect(evalRuleNode(row({ id: 4, pendulum_text: 'Once per turn.' }), exact)).toBe(false);
+  });
+
+  it('empty AND group matches all rows', () => {
+    expect(evalRuleNode(row({ id: 1 }), defaultRuleTree())).toBe(true);
+  });
+});
+
 describe('cardFilterResolve', () => {
   it('treats empty rule tree as inactive', () => {
     expect(isStatFilterEmpty(defaultRuleTree())).toBe(true);
+  });
+
+  it('treats trees with conditions as active', () => {
+    expect(
+      isStatFilterEmpty({
+        kind: 'group',
+        logic: 'and',
+        children: [{ kind: 'cond', condition: { kind: 'num', field: 'atk', op: 'eq', value: 0 } }],
+      }),
+    ).toBe(false);
   });
 
   it('resolves card_type spell to frame_type_id 13', () => {
@@ -153,6 +210,48 @@ describe('cardFilterResolve', () => {
         {
           kind: 'cond',
           condition: { kind: 'cat', field: 'frame_type_id', op: 'in', values: [13] },
+        },
+      ],
+    });
+  });
+
+  it('resolves card_type trap to frame_type_id 14', () => {
+    const root: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [{ kind: 'cond', condition: { kind: 'cat', field: 'card_type', op: 'in', values: [3] } }],
+    };
+    const resolved = resolveVirtualRuleTree(root, []);
+    expect(resolved).toEqual({
+      kind: 'group',
+      logic: 'and',
+      children: [
+        {
+          kind: 'cond',
+          condition: { kind: 'cat', field: 'frame_type_id', op: 'in', values: [14] },
+        },
+      ],
+    });
+  });
+
+  it('resolves frame_subtype via complex frame rows', () => {
+    const root: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [{ kind: 'cond', condition: { kind: 'cat', field: 'frame_subtype', op: 'in', values: [5] } }],
+    };
+    const resolved = resolveVirtualRuleTree(root, [
+      { id: 100, subtype_1: 5, subtype_2: null, subtype_3: null },
+      { id: 101, subtype_1: 1, subtype_2: 5, subtype_3: null },
+      { id: 102, subtype_1: 2, subtype_2: null, subtype_3: null },
+    ]);
+    expect(resolved).toEqual({
+      kind: 'group',
+      logic: 'and',
+      children: [
+        {
+          kind: 'cond',
+          condition: { kind: 'cat', field: 'frame_type_id', op: 'in', values: [100, 101] },
         },
       ],
     });
