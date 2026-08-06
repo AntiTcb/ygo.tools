@@ -1,0 +1,56 @@
+---
+description: How AI agents must implement feature requests, including mandatory unit and e2e test coverage
+alwaysApply: true
+---
+
+# Feature Request Workflow
+
+When implementing a feature request, treat tests as part of the deliverable—not optional follow-up.
+
+## Process
+
+1. **Clarify** — Restate the feature, acceptance criteria, and out-of-scope items before coding.
+2. **Plan** — List the files/modules to touch and the unit + e2e cases that will prove the behavior.
+3. **Implement** — Make minimal, focused changes that match existing project patterns.
+4. **Test** — Ship unit and e2e coverage with the feature; do not mark work done until both pass.
+5. **Validate** — Run the relevant suites and fix failures before finishing.
+
+## Required Tests
+
+Every feature must include:
+
+| Layer | Tool | Location | What to cover |
+| --- | --- | --- | --- |
+| Unit | Vitest | Colocated `*.test.ts` next to the module (or under the same feature folder) | Pure logic, parsers, schemas, filters, edge cases |
+| E2E | Playwright | `tests/e2e/*.spec.ts` | User-visible flows through the UI/routes |
+
+- Map each acceptance criterion to at least one failing-then-passing test.
+- Prefer testing behavior users care about over implementation details.
+- Extend existing suites when the feature extends an existing flow; add new files when the surface is new.
+- Bug fixes that change behavior need regression tests at the appropriate layer(s).
+
+## Commands
+
+```powershell
+pnpm test:unit
+pnpm test:e2e
+```
+
+Run only the affected specs when iterating; run the full relevant suites before considering the feature complete.
+
+## Definition of Done
+
+A feature request is complete only when:
+
+- [ ] Implementation matches the agreed acceptance criteria
+- [ ] Unit tests cover the new/changed logic
+- [ ] E2E tests cover the new/changed user flow
+- [ ] `pnpm test:unit` and `pnpm test:e2e` (or the scoped suites for that feature) pass
+- [ ] No unrelated refactors or drive-by cleanups were introduced
+
+## Anti-Patterns
+
+- Shipping UI or API changes without tests
+- Only adding unit tests when the feature has a user-facing flow (or only e2e when logic belongs in unit tests)
+- Claiming done while tests are skipped, failing, or left “for later”
+- Broad rewrites unrelated to the feature in order to “make testing easier”

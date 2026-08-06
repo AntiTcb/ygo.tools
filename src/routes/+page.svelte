@@ -2,6 +2,7 @@
   import Seo from 'sk-seo';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
+  import EarthIcon from '~icons/mdi/earth';
 </script>
 
 <Seo
@@ -14,7 +15,7 @@
   <div class="flex flex-wrap gap-2">
     <a
       href="/damagecalc"
-      class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
       <article class="space-y-2 p-4">
         <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Damage Calculation Calculator
@@ -25,13 +26,24 @@
     </a>
     <a
       href="/database"
-      class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
       <article class="space-y-2 p-4">
         <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Card Database
           <DatabaseIcon class="inline size-[32px] min-w-[28px] hue-rotate-90" />
         </h5>
         <p class="opacity-70">A card database with advanced search capabilities.</p>
+      </article>
+    </a>
+    <a
+      href="/smallworld"
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
+      <article class="space-y-2 p-4">
+        <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
+          Small World Helper
+          <EarthIcon class="inline size-[32px] min-w-[28px] hue-rotate-90" />
+        </h5>
+        <p class="opacity-70">Find exact one-property bridges and add targets for Small World.</p>
       </article>
     </a>
   </div>

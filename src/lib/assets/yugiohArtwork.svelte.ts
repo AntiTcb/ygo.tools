@@ -1,23 +1,28 @@
 import { getContext, setContext } from 'svelte';
 
 export class YugiohArtwork {
-  manifest: Manifest | undefined = undefined;
+  /** Must be `$state` so templates re-render when the remote manifest arrives. */
+  manifest = $state<Manifest | undefined>(undefined);
+
   constructor() {
     $effect(() => {
       fetch('https://artworks.ygoresources.com/manifest.json')
         .then((res) => res.json())
-        .then((d) => (this.manifest = d));
+        .then((d: Manifest) => {
+          this.manifest = d;
+        });
     });
   }
 
   getArtwork(cardId: number) {
-    if (!this.manifest) return null;
-    const cardData = this.manifest.cards[cardId];
+    const manifest = this.manifest;
+    if (!manifest) return null;
+    const cardData = manifest.cards[String(cardId)];
     if (!cardData) return null;
     const artId = Object.keys(cardData)[0];
     if (!artId) return null;
 
-    return cardData[artId];
+    return cardData[artId] ?? null;
   }
 }
 

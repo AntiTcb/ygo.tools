@@ -1,21 +1,96 @@
 <script lang="ts">
-  import { page } from '$app/state';
+  import { browser } from '$app/environment';
   import { createDamageCalculator } from '$lib/damageCalc.svelte';
-  import { watch } from 'runed';
+  import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
+  import { untrack } from 'svelte';
   import { toast } from 'svelte-sonner';
   import ShareIcon from '~icons/mdi/share';
   import SwapIcon from '~icons/mdi/swap-horizontal';
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
+  import {
+    applyModifiers,
+    cloneMonster,
+    damagecalcSearchParamsSchema,
+    snapshotDamagecalcParams,
+  } from './damagecalcSearchParams.schema';
 
-  const calc = createDamageCalculator(page.url.hash ? page.url.hash.slice(1) : null);
+  const params = useSearchParams(damagecalcSearchParamsSchema, {
+    pushHistory: false,
+    debounce: 300,
+    noScroll: true,
+    compress: true,
+  });
+
+  const calc = createDamageCalculator();
+  calc.attackingMonster = cloneMonster(params.attackingMonster);
+  calc.defendingMonster = cloneMonster(params.defendingMonster);
+  applyModifiers(calc.playerAModifiers, params.playerAModifiers);
+  applyModifiers(calc.playerBModifiers, params.playerBModifiers);
 
   let open = $state<boolean>(true);
-  let showExamples = $state<boolean>(false);
+  let showExamples = $state<boolean>(params.showExamples);
+
+  /** Sync incoming URL params onto local calculator state. */
+  $effect(() => {
+    if (!browser) return;
+    const fromUrl = {
+      attackingMonster: params.attackingMonster,
+      defendingMonster: params.defendingMonster,
+      playerAModifiers: params.playerAModifiers,
+      playerBModifiers: params.playerBModifiers,
+      showExamples: params.showExamples,
+    };
+    const urlJson = JSON.stringify(fromUrl);
+    const localJson = JSON.stringify(
+      untrack(() =>
+        snapshotDamagecalcParams({
+          attackingMonster: calc.attackingMonster,
+          defendingMonster: calc.defendingMonster,
+          playerAModifiers: calc.playerAModifiers,
+          playerBModifiers: calc.playerBModifiers,
+          showExamples,
+        }),
+      ),
+    );
+    if (localJson === urlJson) return;
+
+    calc.attackingMonster = cloneMonster(fromUrl.attackingMonster);
+    calc.defendingMonster = cloneMonster(fromUrl.defendingMonster);
+    applyModifiers(calc.playerAModifiers, fromUrl.playerAModifiers);
+    applyModifiers(calc.playerBModifiers, fromUrl.playerBModifiers);
+    showExamples = fromUrl.showExamples;
+  });
+
+  /** Push local calculator mutations into the URL. */
+  $effect(() => {
+    if (!browser) return;
+    JSON.stringify(calc.attackingMonster);
+    JSON.stringify(calc.defendingMonster);
+    JSON.stringify(calc.playerAModifiers.getProps());
+    JSON.stringify(calc.playerBModifiers.getProps());
+    void showExamples;
+
+    const next = snapshotDamagecalcParams({
+      attackingMonster: calc.attackingMonster,
+      defendingMonster: calc.defendingMonster,
+      playerAModifiers: calc.playerAModifiers,
+      playerBModifiers: calc.playerBModifiers,
+      showExamples,
+    });
+    const current = {
+      attackingMonster: params.attackingMonster,
+      defendingMonster: params.defendingMonster,
+      playerAModifiers: params.playerAModifiers,
+      playerBModifiers: params.playerBModifiers,
+      showExamples: params.showExamples,
+    };
+    if (JSON.stringify(current) === JSON.stringify(next)) return;
+    params.update(next);
+  });
 
   const swap = () => {
-    // swap monsters and modifiers
     const tempMonster = calc.attackingMonster;
     calc.attackingMonster = calc.defendingMonster;
     calc.defendingMonster = tempMonster;
@@ -32,20 +107,6 @@
       error: 'Failed to copy',
     });
   };
-
-  watch(
-    () => calc.battleResult,
-    () => {
-      if (!calc.isModified) {
-        history.replaceState({}, '', window.location.pathname);
-        return;
-      }
-      window.location.hash = calc.encodedString;
-    },
-    {
-      lazy: true,
-    },
-  );
 </script>
 
 <Seo
@@ -59,7 +120,7 @@
     <header class="card-header">Battle Result:</header>
     <!-- Desktop Table -->
     <div class="table-wrap hidden lg:table">
-      <table class="table w-auto">
+      <table class="table w-auto" data-testid="damagecalc-result-desktop">
         <thead>
           <tr>
             <th class="min-w-32"></th>
@@ -72,9 +133,9 @@
           </tr>
         </thead>
         <tbody class="[&>tr]:hover:preset-tonal-primary text-right [&>tr>td:first-child]:italic">
-          <tr>
+          <tr data-testid="damagecalc-result-a">
             <td>Player A</td>
-            <td>{calc.battleResult.playerA.battleDamage}</td>
+            <td data-testid="damagecalc-a-battle">{calc.battleResult.playerA.battleDamage}</td>
             <td>{calc.battleResult.playerA.effectDamage}</td>
             <td>{calc.battleResult.playerA.redirectedDamage}</td>
             <td>{calc.battleResult.playerA.redirectedEffectDamage}</td>
@@ -86,9 +147,9 @@
                 calc.battleResult.playerA.redirectedEffectDamage -
                 calc.battleResult.playerA.lifeGained}</td>
           </tr>
-          <tr>
+          <tr data-testid="damagecalc-result-b">
             <td>Player B</td>
-            <td>{calc.battleResult.playerB.battleDamage}</td>
+            <td data-testid="damagecalc-b-battle">{calc.battleResult.playerB.battleDamage}</td>
             <td>{calc.battleResult.playerB.effectDamage}</td>
             <td>{calc.battleResult.playerB.redirectedDamage}</td>
             <td>{calc.battleResult.playerB.redirectedEffectDamage}</td>
@@ -157,19 +218,19 @@
         </tbody>
       </table>
     </div>
-    <button type="button" class="btn btn-sm preset-filled" onclick={() => copy(window.location.href)}>
+    <button type="button" class="btn btn-sm preset-filled" data-testid="damagecalc-share" onclick={() => copy(window.location.href)}>
       <ShareIcon class="size-[24px]" /> Share battle results
     </button>
   </div>
 
   <div class="card col-span-2">
     <label class="flex items-center space-x-2">
-      <input type="checkbox" class="checkbox" bind:checked={showExamples} />
+      <input type="checkbox" class="checkbox" data-testid="damagecalc-show-examples" bind:checked={showExamples} />
       <p class="italic">Show card examples</p>
     </label>
   </div>
 
-  <div id="attacking" class="card">
+  <div id="attacking" class="card" data-testid="damagecalc-attacking">
     <div class="flex justify-between">
       <h4 class="h4">Player A: Attacking Monster</h4>
       <button type="button" class="btn btn-sm preset-filled" onclick={swap}><SwapIcon class="size-[24px]" /> Swap</button>
@@ -181,7 +242,7 @@
       <BattleModifiers bind:modifiers={calc.playerAModifiers} bind:showExamples />
     </details>
   </div>
-  <div id="defending" class="card">
+  <div id="defending" class="card" data-testid="damagecalc-defending">
     <h4 class="h4">Player B: Defending Monster</h4>
     <Monster bind:monster={calc.defendingMonster} defending />
 
