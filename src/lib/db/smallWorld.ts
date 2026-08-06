@@ -61,7 +61,5 @@ export const findExactTargets = <T extends SmallWorldCard>(
 ): SmallWorldTarget<T>[] => {
   const exclude = new Set(options?.excludeIds ?? []);
   exclude.add(bridge.id);
-  return cards
-    .filter((c) => !exclude.has(c.id) && isExactOneBridge(bridge, c))
-    .map((c) => ({ ...c, shared: getSharedProperties(bridge, c) }));
+  return cards.filter((c) => !exclude.has(c.id) && isExactOneBridge(bridge, c)).map((c) => ({ ...c, shared: getSharedProperties(bridge, c) }));
 };

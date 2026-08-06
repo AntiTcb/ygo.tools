@@ -370,7 +370,8 @@
         <img class="aspect-6/8.5 max-h-60" src={artworks.getArtwork(card.id)?.bestArt} alt={card.name} />
       </button>
       <article class="flex w-full grow flex-col gap-1">
-        <button type="button" class="cursor-copy text-center text-sm font-bold" data-testid="database-card-name" onclick={() => copy(card.name)}>{card.name}</button>
+        <button type="button" class="cursor-copy text-center text-sm font-bold" data-testid="database-card-name" onclick={() => copy(card.name)}
+          >{card.name}</button>
 
         <div class="text-center text-xs leading-snug opacity-85" data-testid="database-card-stats">
           {#if stats.attribute || stats.typeLine}

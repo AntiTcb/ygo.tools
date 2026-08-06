@@ -227,10 +227,10 @@
       </p>
       <div class="flex gap-2 py-2 md:py-0">
         <select class="select w-24 text-sm" bind:value={modifiers.damagePreventionComparison}>
-          <option value="<">&lt;</option>
-          <option value="<=">&leq;</option>
-          <option value=">">&gt;</option>
-          <option value=">=">&geq;</option>
+          <option value="<"> &lt;</option>
+          <option value="<="> &lt;=</option>
+          <option value=">"> &gt;</option>
+          <option value=">="> &gt;=</option>
         </select>
         <input class="input w-20! text-sm!" type="number" bind:value={modifiers.damagePreventionValue} />
       </div>

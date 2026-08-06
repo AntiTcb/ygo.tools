@@ -1,11 +1,11 @@
 export type MonsterProps = {
   atk: number;
   def: number;
-  position: 'ATK' | 'DEF';
+  position: "ATK" | "DEF";
   hasPiercing: boolean;
 };
 
-const defaultMonster = { atk: 0, def: 0, position: 'ATK', hasPiercing: false };
+const defaultMonster = { atk: 0, def: 0, position: "ATK", hasPiercing: false };
 
 export class BattleModifiers {
   // 01
@@ -18,44 +18,44 @@ export class BattleModifiers {
   battleDamageIsAlsoInflictedToYourOpponent: boolean = $state(false);
   // 04
   battleDamageIsConvertedToEffectDamage: boolean = $state(false);
-  convertedToEffectDamageInflictType: 'deal' | 'take' | 'deal/take' = $state('deal');
+  convertedToEffectDamageInflictType: "deal" | "take" | "deal/take" = $state("deal");
   // 05
   damageIsConvertedToHealing: boolean = $state(false);
-  healingDamageType: 'battle' | 'effect' | 'any' = $state('battle');
+  healingDamageType: "battle" | "effect" | "any" = $state("battle");
   // 06
   battleDamageBecomesZero: boolean = $state(false);
-  battleDamageBecomesZeroInflictType: 'deal' | 'take' | 'deal/take' = $state('deal');
+  battleDamageBecomesZeroInflictType: "deal" | "take" | "deal/take" = $state("deal");
   // 07
   battleDamageIsHalved: boolean = $state(false);
-  battleDamageIsHalvedInflictType: 'deal' | 'take' | 'deal/take' = $state('deal');
+  battleDamageIsHalvedInflictType: "deal" | "take" | "deal/take" = $state("deal");
   // 08
   battleDamageIsDoubled: boolean = $state(false);
-  battleDamageIsDoubledInflictType: 'deal' | 'take' | 'deal/take' = $state('deal');
+  battleDamageIsDoubledInflictType: "deal" | "take" | "deal/take" = $state("deal");
   // 09
   battleDamageBecomesSpecificValue: boolean = $state(false);
   specificValue: number = $state(0);
-  specificValueInflictType: 'deal' | 'take' | 'deal/take' = $state('deal');
+  specificValueInflictType: "deal" | "take" | "deal/take" = $state("deal");
   // 10
   damageYouTakeIsPreventedIf: boolean = $state(false);
-  damagePreventionComparison: '>' | '>=' | '<' | '<=' = $state('>');
+  damagePreventionComparison: ">" | ">=" | "<" | "<=" = $state(">");
   damagePreventionValue: number = $state(0);
-  preventedDamageType: 'battle' | 'effect' | 'any' = $state('battle');
+  preventedDamageType: "battle" | "effect" | "any" = $state("battle");
 
   isModified: boolean = $derived.by(() => {
-    var thisInstance = JSON.stringify(this.getProps());
-    var defaultInstance = JSON.stringify(this.getDefaultProps());
+    const thisInstance = JSON.stringify(this.getProps());
+    const defaultInstance = JSON.stringify(this.getDefaultProps());
     return thisInstance !== defaultInstance;
   });
 
   preventionCondition(damage: number): boolean {
     switch (this.damagePreventionComparison) {
-      case '>':
+      case ">":
         return damage > this.damagePreventionValue;
-      case '>=':
+      case ">=":
         return damage >= this.damagePreventionValue;
-      case '<':
+      case "<":
         return damage < this.damagePreventionValue;
-      case '<=':
+      case "<=":
         return damage <= this.damagePreventionValue;
       default:
         return false;
@@ -95,22 +95,22 @@ export class BattleModifiers {
       yourOpponentTakesYourBattleDamage: false,
       battleDamageIsAlsoInflictedToYourOpponent: false,
       battleDamageIsConvertedToEffectDamage: false,
-      convertedToEffectDamageInflictType: 'deal',
+      convertedToEffectDamageInflictType: "deal",
       damageIsConvertedToHealing: false,
-      healingDamageType: 'battle',
+      healingDamageType: "battle",
       battleDamageBecomesZero: false,
-      battleDamageBecomesZeroInflictType: 'deal',
+      battleDamageBecomesZeroInflictType: "deal",
       battleDamageIsHalved: false,
-      battleDamageIsHalvedInflictType: 'deal',
+      battleDamageIsHalvedInflictType: "deal",
       battleDamageIsDoubled: false,
-      battleDamageIsDoubledInflictType: 'deal',
+      battleDamageIsDoubledInflictType: "deal",
       battleDamageBecomesSpecificValue: false,
       specificValue: 0,
-      specificValueInflictType: 'deal',
+      specificValueInflictType: "deal",
       damageYouTakeIsPreventedIf: false,
-      damagePreventionComparison: '>',
+      damagePreventionComparison: ">",
       damagePreventionValue: 0,
-      preventedDamageType: 'battle',
+      preventedDamageType: "battle",
     };
   }
 }
@@ -129,8 +129,8 @@ export type BattleResult = {
 };
 
 export class DamageCalculator {
-  attackingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
-  defendingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: 'ATK', hasPiercing: false });
+  attackingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: "ATK", hasPiercing: false });
+  defendingMonster = $state<MonsterProps>({ atk: 0, def: 0, position: "ATK", hasPiercing: false });
   playerAModifiers = $state(new BattleModifiers());
   playerBModifiers = $state(new BattleModifiers());
   battleResult = $derived.by(() => this.calculateBattleDamage());
@@ -145,33 +145,33 @@ export class DamageCalculator {
   // Property name mappings for compact encoding
   private static readonly propertyMappings = {
     // Monster properties
-    atk: 'a',
-    def: 'd',
-    position: 'p',
-    hasPiercing: 'h',
+    atk: "a",
+    def: "d",
+    position: "p",
+    hasPiercing: "h",
 
     // Battle modifier properties
-    inflictsDoubleBattleDamage: 'm1',
-    battleDamageIsTakenByBothPlayers: 'm2',
-    yourOpponentTakesYourBattleDamage: 'm3',
-    battleDamageIsAlsoInflictedToYourOpponent: 'm3_5',
-    battleDamageIsConvertedToEffectDamage: 'm4',
-    convertedToEffectDamageInflictType: 'm4t',
-    damageIsConvertedToHealing: 'm5',
-    healingDamageType: 'm5t',
-    battleDamageBecomesZero: 'm6',
-    battleDamageBecomesZeroInflictType: 'm6t',
-    battleDamageIsHalved: 'm7',
-    battleDamageIsHalvedInflictType: 'm7t',
-    battleDamageIsDoubled: 'm8',
-    battleDamageIsDoubledInflictType: 'm8t',
-    battleDamageBecomesSpecificValue: 'm9',
-    specificValue: 'm9v',
-    specificValueInflictType: 'm9t',
-    damageYouTakeIsPreventedIf: 'm10',
-    damagePreventionComparison: 'm10c',
-    damagePreventionValue: 'm10v',
-    preventedDamageType: 'm10t',
+    inflictsDoubleBattleDamage: "m1",
+    battleDamageIsTakenByBothPlayers: "m2",
+    yourOpponentTakesYourBattleDamage: "m3",
+    battleDamageIsAlsoInflictedToYourOpponent: "m3_5",
+    battleDamageIsConvertedToEffectDamage: "m4",
+    convertedToEffectDamageInflictType: "m4t",
+    damageIsConvertedToHealing: "m5",
+    healingDamageType: "m5t",
+    battleDamageBecomesZero: "m6",
+    battleDamageBecomesZeroInflictType: "m6t",
+    battleDamageIsHalved: "m7",
+    battleDamageIsHalvedInflictType: "m7t",
+    battleDamageIsDoubled: "m8",
+    battleDamageIsDoubledInflictType: "m8t",
+    battleDamageBecomesSpecificValue: "m9",
+    specificValue: "m9v",
+    specificValueInflictType: "m9t",
+    damageYouTakeIsPreventedIf: "m10",
+    damagePreventionComparison: "m10c",
+    damagePreventionValue: "m10v",
+    preventedDamageType: "m10t",
   } as const;
 
   // Reverse mappings for decoding
@@ -198,13 +198,15 @@ export class DamageCalculator {
 
     // Process attacking monster
     const am = this.attackingMonster;
-    const amDefault = { atk: 0, def: 0, position: 'ATK', hasPiercing: false };
+    const amDefault = { atk: 0, def: 0, position: "ATK", hasPiercing: false };
     if (JSON.stringify(am) !== JSON.stringify(amDefault)) {
       compactObj.am = {};
       if (am.atk !== amDefault.atk) compactObj.am[DamageCalculator.propertyMappings.atk] = am.atk;
       if (am.def !== amDefault.def) compactObj.am[DamageCalculator.propertyMappings.def] = am.def;
-      if (am.position !== amDefault.position) compactObj.am[DamageCalculator.propertyMappings.position] = am.position;
-      if (am.hasPiercing !== amDefault.hasPiercing) compactObj.am[DamageCalculator.propertyMappings.hasPiercing] = am.hasPiercing;
+      if (am.position !== amDefault.position)
+        compactObj.am[DamageCalculator.propertyMappings.position] = am.position;
+      if (am.hasPiercing !== amDefault.hasPiercing)
+        compactObj.am[DamageCalculator.propertyMappings.hasPiercing] = am.hasPiercing;
     }
 
     // Process defending monster
@@ -213,8 +215,10 @@ export class DamageCalculator {
       compactObj.dm = {};
       if (dm.atk !== amDefault.atk) compactObj.dm[DamageCalculator.propertyMappings.atk] = dm.atk;
       if (dm.def !== amDefault.def) compactObj.dm[DamageCalculator.propertyMappings.def] = dm.def;
-      if (dm.position !== amDefault.position) compactObj.dm[DamageCalculator.propertyMappings.position] = dm.position;
-      if (dm.hasPiercing !== amDefault.hasPiercing) compactObj.dm[DamageCalculator.propertyMappings.hasPiercing] = dm.hasPiercing;
+      if (dm.position !== amDefault.position)
+        compactObj.dm[DamageCalculator.propertyMappings.position] = dm.position;
+      if (dm.hasPiercing !== amDefault.hasPiercing)
+        compactObj.dm[DamageCalculator.propertyMappings.hasPiercing] = dm.hasPiercing;
     }
 
     // Process player A modifiers
@@ -236,7 +240,7 @@ export class DamageCalculator {
     }
 
     if (Object.keys(compactObj).length === 0) {
-      return '';
+      return "";
     }
 
     return btoa(JSON.stringify(compactObj));
@@ -257,7 +261,7 @@ export class DamageCalculator {
         calc.attackingMonster = {
           atk: am.atk ?? 0,
           def: am.def ?? 0,
-          position: am.position ?? 'ATK',
+          position: am.position ?? "ATK",
           hasPiercing: am.hasPiercing ?? false,
         };
       }
@@ -272,14 +276,17 @@ export class DamageCalculator {
         calc.defendingMonster = {
           atk: dm.atk ?? 0,
           def: dm.def ?? 0,
-          position: dm.position ?? 'ATK',
+          position: dm.position ?? "ATK",
           hasPiercing: dm.hasPiercing ?? false,
         };
       }
 
       // Process player A modifiers
       if (compactObj.pa) {
-        const expandedPa = this.expandObjectKeys(compactObj.pa, DamageCalculator.reversePropertyMappings);
+        const expandedPa = this.expandObjectKeys(
+          compactObj.pa,
+          DamageCalculator.reversePropertyMappings,
+        );
         for (const [key, value] of Object.entries(expandedPa)) {
           (calc.playerAModifiers as any)[key] = value;
         }
@@ -287,7 +294,10 @@ export class DamageCalculator {
 
       // Process player B modifiers
       if (compactObj.pb) {
-        const expandedPb = this.expandObjectKeys(compactObj.pb, DamageCalculator.reversePropertyMappings);
+        const expandedPb = this.expandObjectKeys(
+          compactObj.pb,
+          DamageCalculator.reversePropertyMappings,
+        );
         for (const [key, value] of Object.entries(expandedPb)) {
           (calc.playerBModifiers as any)[key] = value;
         }
@@ -295,12 +305,15 @@ export class DamageCalculator {
 
       return calc;
     } catch (e) {
-      console.error('Error decoding calculator state:', e);
+      console.error("Error decoding calculator state:", e);
       return new DamageCalculator();
     }
   }
 
-  private getDifferences(obj: Record<string, any>, defaultObj: Record<string, any>): Record<string, any> {
+  private getDifferences(
+    obj: Record<string, any>,
+    defaultObj: Record<string, any>,
+  ): Record<string, any> {
     const result: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(obj)) {
@@ -312,7 +325,10 @@ export class DamageCalculator {
     return result;
   }
 
-  private mapObjectKeys(obj: Record<string, any>, mapping: Record<string, string>): Record<string, any> {
+  private mapObjectKeys(
+    obj: Record<string, any>,
+    mapping: Record<string, string>,
+  ): Record<string, any> {
     const result: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(obj)) {
@@ -323,7 +339,10 @@ export class DamageCalculator {
     return result;
   }
 
-  private static expandObjectKeys(obj: Record<string, any>, mapping: Record<string, string>): Record<string, any> {
+  private static expandObjectKeys(
+    obj: Record<string, any>,
+    mapping: Record<string, string>,
+  ): Record<string, any> {
     const result: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(obj)) {
@@ -353,9 +372,16 @@ export class DamageCalculator {
     } satisfies BattleResult;
 
     // determine initial battle damage
-    const attackingBattleValue = this.attackingMonster.position === 'ATK' ? this.attackingMonster.atk : this.attackingMonster.def;
-    const defendingBattleValue = this.defendingMonster.position === 'ATK' ? this.defendingMonster.atk : this.defendingMonster.def;
-    const isPiercingAttack = this.attackingMonster.hasPiercing && this.defendingMonster.position === 'DEF';
+    const attackingBattleValue =
+      this.attackingMonster.position === "ATK"
+        ? this.attackingMonster.atk
+        : this.attackingMonster.def;
+    const defendingBattleValue =
+      this.defendingMonster.position === "ATK"
+        ? this.defendingMonster.atk
+        : this.defendingMonster.def;
+    const isPiercingAttack =
+      this.attackingMonster.hasPiercing && this.defendingMonster.position === "DEF";
     const damageAmount = attackingBattleValue - defendingBattleValue;
 
     let aBattleDamage = 0,
@@ -374,7 +400,7 @@ export class DamageCalculator {
     } else {
       bBattleDamage = isPiercingAttack
         ? damageAmount
-        : this.attackingMonster.position === 'ATK' && this.defendingMonster.position === 'ATK'
+        : this.attackingMonster.position === "ATK" && this.defendingMonster.position === "ATK"
           ? damageAmount
           : 0;
     }
@@ -387,7 +413,10 @@ export class DamageCalculator {
     }
 
     // 02: Battle damage is taken by both players
-    if (this.playerAModifiers.battleDamageIsTakenByBothPlayers || this.playerBModifiers.battleDamageIsTakenByBothPlayers) {
+    if (
+      this.playerAModifiers.battleDamageIsTakenByBothPlayers ||
+      this.playerBModifiers.battleDamageIsTakenByBothPlayers
+    ) {
       if (aBattleDamage > 0) {
         bBattleDamage = aBattleDamage;
       } else if (bBattleDamage > 0) {
@@ -415,13 +444,16 @@ export class DamageCalculator {
     // 04: Battle damage is treated as effect damage.
     if (
       (this.playerAModifiers.battleDamageIsConvertedToEffectDamage &&
-        ['deal', 'deal/take'].includes(this.playerAModifiers.convertedToEffectDamageInflictType)) ||
+        ["deal", "deal/take"].includes(this.playerAModifiers.convertedToEffectDamageInflictType)) ||
       (this.playerBModifiers.battleDamageIsConvertedToEffectDamage &&
-        ['take', 'deal/take'].includes(this.playerBModifiers.convertedToEffectDamageInflictType))
+        ["take", "deal/take"].includes(this.playerBModifiers.convertedToEffectDamageInflictType))
     ) {
       bEffectDamage = bBattleDamage;
       bBattleDamage = 0;
-      if (['take', 'deal/take'].includes(this.playerBModifiers.convertedToEffectDamageInflictType) && bRedirectedDamage > 0) {
+      if (
+        ["take", "deal/take"].includes(this.playerBModifiers.convertedToEffectDamageInflictType) &&
+        bRedirectedDamage > 0
+      ) {
         bRedirectedEffectDamage = bRedirectedDamage;
         bRedirectedDamage = 0;
       }
@@ -429,13 +461,16 @@ export class DamageCalculator {
 
     if (
       (this.playerAModifiers.battleDamageIsConvertedToEffectDamage &&
-        ['take', 'deal/take'].includes(this.playerAModifiers.convertedToEffectDamageInflictType)) ||
+        ["take", "deal/take"].includes(this.playerAModifiers.convertedToEffectDamageInflictType)) ||
       (this.playerBModifiers.battleDamageIsConvertedToEffectDamage &&
-        ['deal', 'deal/take'].includes(this.playerBModifiers.convertedToEffectDamageInflictType))
+        ["deal", "deal/take"].includes(this.playerBModifiers.convertedToEffectDamageInflictType))
     ) {
       aEffectDamage = aBattleDamage;
       aBattleDamage = 0;
-      if (['take', 'deal/take'].includes(this.playerAModifiers.convertedToEffectDamageInflictType) && aRedirectedDamage > 0) {
+      if (
+        ["take", "deal/take"].includes(this.playerAModifiers.convertedToEffectDamageInflictType) &&
+        aRedirectedDamage > 0
+      ) {
         aRedirectedEffectDamage = aRedirectedDamage;
         aRedirectedDamage = 0;
       }
@@ -443,15 +478,15 @@ export class DamageCalculator {
     // 05:A The player gains Life Points instead of taking battle damage.
     if (this.playerAModifiers.damageIsConvertedToHealing) {
       switch (this.playerAModifiers.healingDamageType) {
-        case 'battle':
+        case "battle":
           aLifeGained = aBattleDamage;
           aBattleDamage = 0;
           break;
-        case 'effect':
+        case "effect":
           aLifeGained = aEffectDamage;
           aEffectDamage = 0;
           break;
-        case 'any':
+        case "any":
           aLifeGained = aBattleDamage + aEffectDamage;
           aBattleDamage = 0;
           aEffectDamage = 0;
@@ -462,15 +497,15 @@ export class DamageCalculator {
     // 05:B The player gains Life Points instead of taking battle damage.
     if (this.playerBModifiers.damageIsConvertedToHealing) {
       switch (this.playerBModifiers.healingDamageType) {
-        case 'battle':
+        case "battle":
           bLifeGained = bBattleDamage;
           bBattleDamage = 0;
           break;
-        case 'effect':
+        case "effect":
           bLifeGained = bEffectDamage;
           bEffectDamage = 0;
           break;
-        case 'any':
+        case "any":
           bLifeGained = bBattleDamage + bEffectDamage;
           bBattleDamage = 0;
           bEffectDamage = 0;
@@ -480,50 +515,62 @@ export class DamageCalculator {
 
     // 06.A: Battle damage becomes 0.
     if (
-      (this.playerBModifiers.battleDamageBecomesZero && ['deal', 'deal/take'].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)) ||
-      (this.playerAModifiers.battleDamageBecomesZero && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType))
+      (this.playerBModifiers.battleDamageBecomesZero &&
+        ["deal", "deal/take"].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)) ||
+      (this.playerAModifiers.battleDamageBecomesZero &&
+        ["take", "deal/take"].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType))
     ) {
       aBattleDamage = 0;
       aRedirectedDamage =
-        this.playerAModifiers.battleDamageBecomesZero && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType)
+        this.playerAModifiers.battleDamageBecomesZero &&
+        ["take", "deal/take"].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType)
           ? 0
           : aRedirectedDamage;
     } else if (aBattleDamage > 0 || aRedirectedDamage > 0) {
       // 07.A: Battle damage is halved.
       if (
-        (this.playerBModifiers.battleDamageIsHalved && ['deal', 'deal/take'].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)) ||
-        (this.playerAModifiers.battleDamageIsHalved && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageIsHalvedInflictType))
+        (this.playerBModifiers.battleDamageIsHalved &&
+          ["deal", "deal/take"].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)) ||
+        (this.playerAModifiers.battleDamageIsHalved &&
+          ["take", "deal/take"].includes(this.playerAModifiers.battleDamageIsHalvedInflictType))
       ) {
         aBattleDamage /= 2;
         aRedirectedDamage =
-          this.playerAModifiers.battleDamageIsHalved && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageIsHalvedInflictType)
+          this.playerAModifiers.battleDamageIsHalved &&
+          ["take", "deal/take"].includes(this.playerAModifiers.battleDamageIsHalvedInflictType)
             ? aRedirectedDamage / 2
             : aRedirectedDamage;
       }
       // 08.A: Battle damage is doubled.
       if (
-        (this.playerBModifiers.battleDamageIsDoubled && ['deal', 'deal/take'].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)) ||
-        (this.playerAModifiers.battleDamageIsDoubled && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageIsDoubledInflictType))
+        (this.playerBModifiers.battleDamageIsDoubled &&
+          ["deal", "deal/take"].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)) ||
+        (this.playerAModifiers.battleDamageIsDoubled &&
+          ["take", "deal/take"].includes(this.playerAModifiers.battleDamageIsDoubledInflictType))
       ) {
         aBattleDamage *= 2;
         aRedirectedDamage =
-          this.playerAModifiers.battleDamageIsDoubled && ['take', 'deal/take'].includes(this.playerAModifiers.battleDamageIsDoubledInflictType)
+          this.playerAModifiers.battleDamageIsDoubled &&
+          ["take", "deal/take"].includes(this.playerAModifiers.battleDamageIsDoubledInflictType)
             ? aRedirectedDamage * 2
             : aRedirectedDamage;
       }
       // 09.A: Battle damage becomes X (X being a predetermined value > 0).
       if (
         (this.playerBModifiers.battleDamageBecomesSpecificValue &&
-          this.playerBModifiers.specificValueInflictType === 'deal' &&
+          this.playerBModifiers.specificValueInflictType === "deal" &&
           !this.playerAModifiers.yourOpponentTakesYourBattleDamage) ||
-        (this.playerAModifiers.battleDamageBecomesSpecificValue && this.playerAModifiers.specificValueInflictType === 'take')
+        (this.playerAModifiers.battleDamageBecomesSpecificValue &&
+          this.playerAModifiers.specificValueInflictType === "take")
       ) {
-        const specificValue = this.playerBModifiers.specificValue ? this.playerBModifiers.specificValue : this.playerAModifiers.specificValue;
+        const specificValue = this.playerBModifiers.specificValue
+          ? this.playerBModifiers.specificValue
+          : this.playerAModifiers.specificValue;
         aBattleDamage = aBattleDamage > 0 ? specificValue : aBattleDamage;
         aRedirectedDamage =
           aRedirectedDamage > 0 &&
           this.playerAModifiers.battleDamageBecomesSpecificValue &&
-          ['take', 'deal/take'].includes(this.playerAModifiers.specificValueInflictType)
+          ["take", "deal/take"].includes(this.playerAModifiers.specificValueInflictType)
             ? specificValue
             : aRedirectedDamage;
       }
@@ -533,64 +580,74 @@ export class DamageCalculator {
     if (
       this.playerAModifiers.damageYouTakeIsPreventedIf &&
       this.playerAModifiers.preventionCondition(aBattleDamage) &&
-      ['battle', 'any'].includes(this.playerAModifiers.preventedDamageType)
+      ["battle", "any"].includes(this.playerAModifiers.preventedDamageType)
     ) {
       aBattleDamage = 0;
     }
     if (
       this.playerAModifiers.damageYouTakeIsPreventedIf &&
       this.playerAModifiers.preventionCondition(aRedirectedDamage) &&
-      ['battle', 'any'].includes(this.playerAModifiers.preventedDamageType)
+      ["battle", "any"].includes(this.playerAModifiers.preventedDamageType)
     ) {
       aRedirectedDamage = 0;
     }
     if (
       this.playerAModifiers.damageYouTakeIsPreventedIf &&
       this.playerAModifiers.preventionCondition(aEffectDamage) &&
-      ['effect', 'any'].includes(this.playerAModifiers.preventedDamageType)
+      ["effect", "any"].includes(this.playerAModifiers.preventedDamageType)
     ) {
       aEffectDamage = 0;
     }
 
     // 06.B: Battle damage becomes 0.
     if (
-      (this.playerBModifiers.battleDamageBecomesZero && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)) ||
-      (this.playerAModifiers.battleDamageBecomesZero && ['deal', 'deal/take'].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType))
+      (this.playerBModifiers.battleDamageBecomesZero &&
+        ["take", "deal/take"].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)) ||
+      (this.playerAModifiers.battleDamageBecomesZero &&
+        ["deal", "deal/take"].includes(this.playerAModifiers.battleDamageBecomesZeroInflictType))
     ) {
       bBattleDamage = 0;
       bRedirectedDamage =
-        this.playerBModifiers.battleDamageBecomesZero && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)
+        this.playerBModifiers.battleDamageBecomesZero &&
+        ["take", "deal/take"].includes(this.playerBModifiers.battleDamageBecomesZeroInflictType)
           ? 0
           : bRedirectedDamage;
     } else if (bBattleDamage > 0 || bRedirectedDamage > 0) {
       // 07.B: Battle damage is halved.
       if (
-        (this.playerBModifiers.battleDamageIsHalved && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)) ||
-        (this.playerAModifiers.battleDamageIsHalved && ['deal', 'deal/take'].includes(this.playerAModifiers.battleDamageIsHalvedInflictType))
+        (this.playerBModifiers.battleDamageIsHalved &&
+          ["take", "deal/take"].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)) ||
+        (this.playerAModifiers.battleDamageIsHalved &&
+          ["deal", "deal/take"].includes(this.playerAModifiers.battleDamageIsHalvedInflictType))
       ) {
         bBattleDamage /= 2;
         bRedirectedDamage =
-          this.playerBModifiers.battleDamageIsHalved && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)
+          this.playerBModifiers.battleDamageIsHalved &&
+          ["take", "deal/take"].includes(this.playerBModifiers.battleDamageIsHalvedInflictType)
             ? bRedirectedDamage / 2
             : bRedirectedDamage;
       }
       // 08.B: Battle damage is doubled.
       if (
-        (this.playerBModifiers.battleDamageIsDoubled && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)) ||
-        (this.playerAModifiers.battleDamageIsDoubled && ['deal', 'deal/take'].includes(this.playerAModifiers.battleDamageIsDoubledInflictType))
+        (this.playerBModifiers.battleDamageIsDoubled &&
+          ["take", "deal/take"].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)) ||
+        (this.playerAModifiers.battleDamageIsDoubled &&
+          ["deal", "deal/take"].includes(this.playerAModifiers.battleDamageIsDoubledInflictType))
       ) {
         bBattleDamage *= 2;
         bRedirectedDamage =
-          this.playerBModifiers.battleDamageIsDoubled && ['take', 'deal/take'].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)
+          this.playerBModifiers.battleDamageIsDoubled &&
+          ["take", "deal/take"].includes(this.playerBModifiers.battleDamageIsDoubledInflictType)
             ? bRedirectedDamage * 2
             : bRedirectedDamage;
       }
       // 09.B: Battle damage becomes X (X being a predetermined value).
       if (
         (this.playerAModifiers.battleDamageBecomesSpecificValue &&
-          this.playerAModifiers.specificValueInflictType === 'deal' &&
+          this.playerAModifiers.specificValueInflictType === "deal" &&
           !this.playerBModifiers.yourOpponentTakesYourBattleDamage) ||
-        (this.playerBModifiers.battleDamageBecomesSpecificValue && this.playerBModifiers.specificValueInflictType === 'take')
+        (this.playerBModifiers.battleDamageBecomesSpecificValue &&
+          this.playerBModifiers.specificValueInflictType === "take")
       ) {
         const specificValue = this.playerAModifiers.battleDamageBecomesSpecificValue
           ? this.playerAModifiers.specificValue
@@ -599,7 +656,7 @@ export class DamageCalculator {
         bRedirectedDamage =
           bRedirectedDamage > 0 &&
           this.playerBModifiers.battleDamageBecomesSpecificValue &&
-          ['take', 'deal/take'].includes(this.playerBModifiers.specificValueInflictType)
+          ["take", "deal/take"].includes(this.playerBModifiers.specificValueInflictType)
             ? specificValue
             : bRedirectedDamage;
       }
@@ -609,21 +666,21 @@ export class DamageCalculator {
     if (
       this.playerBModifiers.damageYouTakeIsPreventedIf &&
       this.playerBModifiers.preventionCondition(bBattleDamage) &&
-      ['battle', 'any'].includes(this.playerBModifiers.preventedDamageType)
+      ["battle", "any"].includes(this.playerBModifiers.preventedDamageType)
     ) {
       bBattleDamage = 0;
     }
     if (
       this.playerBModifiers.damageYouTakeIsPreventedIf &&
       this.playerBModifiers.preventionCondition(bRedirectedDamage) &&
-      ['battle', 'any'].includes(this.playerBModifiers.preventedDamageType)
+      ["battle", "any"].includes(this.playerBModifiers.preventedDamageType)
     ) {
       bRedirectedDamage = 0;
     }
     if (
       this.playerBModifiers.damageYouTakeIsPreventedIf &&
       this.playerBModifiers.preventionCondition(bEffectDamage) &&
-      ['effect', 'any'].includes(this.playerBModifiers.preventedDamageType)
+      ["effect", "any"].includes(this.playerBModifiers.preventedDamageType)
     ) {
       bEffectDamage = 0;
     }
@@ -655,7 +712,7 @@ export const createDamageCalculator = (
     | null = null,
 ) => {
   // Handle base64 encoded string
-  if (typeof json === 'string') {
+  if (typeof json === "string") {
     return DamageCalculator.fromEncodedString(json);
   }
 

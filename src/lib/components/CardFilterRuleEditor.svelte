@@ -46,10 +46,7 @@
 
   const addGroup = () => {
     if (node.kind !== 'group') return;
-    node.children = [
-      ...node.children,
-      { kind: 'group', logic: 'and', children: [{ kind: 'cond', condition: defaultCondition() }] },
-    ];
+    node.children = [...node.children, { kind: 'group', logic: 'and', children: [{ kind: 'cond', condition: defaultCondition() }] }];
   };
 
   const removeChild = (index: number) => {
@@ -108,7 +105,7 @@
 </script>
 
 {#if node.kind === 'group'}
-  <div class={['space-y-2', depth > 0 && 'border-surface-500/25 border-l-2 pl-2.5 ml-0.5']}>
+  <div class={['space-y-2', depth > 0 && 'border-surface-500/25 ml-0.5 border-l-2 pl-2.5']}>
     <div class="flex flex-wrap items-center gap-2">
       <div class="bg-surface-500/10 inline-flex rounded p-0.5 text-xs" role="group" aria-label="Group logic">
         <button
@@ -274,7 +271,7 @@
           </button>
         {/each}
       </div>
-      {#if !(c.values?.length)}
+      {#if !c.values?.length}
         <p class="text-xs opacity-60">Select one or more values.</p>
       {/if}
     {:else if c.kind === 'bits'}

@@ -57,7 +57,7 @@
     <div
       class="border-surface-500/40 bg-surface-50-950 focus-within:border-primary-500 flex overflow-hidden rounded border font-mono text-sm"
       class:border-error-500={compiled?.ok === false}>
-      <span class="text-surface-500-400 flex select-none items-start px-2 pt-2 opacity-60" aria-hidden="true">/</span>
+      <span class="text-surface-500-400 flex items-start px-2 pt-2 opacity-60 select-none" aria-hidden="true">/</span>
       <textarea
         class="min-h-18 w-full grow resize-y border-0 bg-transparent py-2 pr-1 font-mono text-sm outline-none"
         data-testid={testIdPrefix}
@@ -67,9 +67,9 @@
         spellcheck="false"
         aria-invalid={compiled?.ok === false}
         aria-describedby="{testIdPrefix}-hint"></textarea>
-      <span class="text-surface-500-400 flex select-none items-start px-1 pt-2 opacity-60" aria-hidden="true">/</span>
+      <span class="text-surface-500-400 flex items-start px-1 pt-2 opacity-60 select-none" aria-hidden="true">/</span>
       <span
-        class="text-primary-600-400 flex min-w-6 select-none items-start px-1.5 pt-2 text-xs"
+        class="text-primary-600-400 flex min-w-6 items-start px-1.5 pt-2 text-xs select-none"
         title={delimiterActive ? 'Flags come from the /pattern/flags form' : 'Active flags'}
         aria-hidden="true">{delimiterActive ? '…' : activeFlags || ''}</span>
     </div>
@@ -109,12 +109,7 @@
       </p>
     {/if}
   {:else}
-    <textarea
-      class="textarea min-h-18 w-full resize-y text-sm"
-      data-testid={testIdPrefix}
-      bind:value={pattern}
-      {placeholder}
-      {rows}></textarea>
+    <textarea class="textarea min-h-18 w-full resize-y text-sm" data-testid={testIdPrefix} bind:value={pattern} {placeholder} {rows}></textarea>
     <p class="text-xs opacity-60">Plain substring match (case-sensitive).</p>
   {/if}
 </div>

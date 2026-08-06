@@ -26,9 +26,7 @@
   const artworks = getArtworksState();
 
   const lookupMaps = $derived.by(() => {
-    const speciesById = new Map(
-      data.lookups.monsterTypes.filter((row) => row.name).map((row) => [row.id, row.name as string] as const),
-    );
+    const speciesById = new Map(data.lookups.monsterTypes.filter((row) => row.name).map((row) => [row.id, row.name as string] as const));
     const frameById = new Map(data.lookups.cardFrameTypes.map((row) => [row.id, row.name] as const));
     return { speciesById, frameById };
   });
@@ -80,9 +78,7 @@
 
   const targets = $derived.by(() => {
     if (!revealCard || !bridgeCard) return [];
-    return findExactTargets(bridgeCard, cards, { excludeIds: [revealCard.id, bridgeCard.id] }).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    return findExactTargets(bridgeCard, cards, { excludeIds: [revealCard.id, bridgeCard.id] }).sort((a, b) => a.name.localeCompare(b.name));
   });
 
   const filteredTargets = $derived.by(() => {
@@ -107,7 +103,8 @@
 <div class="card mx-auto my-2 w-full max-w-3xl p-3 sm:p-4">
   <h1 class="h3 mb-2">Small World Helper</h1>
   <p class="mb-4 text-sm opacity-80">
-    Reveal a monster from hand, then choose a deck monster that shares exactly one property (Type, Attribute, Level/Rank, ATK, or DEF). The tool lists monsters you can add that share exactly one property with that bridge.
+    Reveal a monster from hand, then choose a deck monster that shares exactly one property (Type, Attribute, Level/Rank, ATK, or DEF). The tool lists
+    monsters you can add that share exactly one property with that bridge.
   </p>
 
   <div class="flex flex-col gap-4">
@@ -115,10 +112,7 @@
       label="1. Reveal (hand)"
       testIdPrefix="smallworld-reveal"
       candidates={cards}
-      bind:selectedId={
-        () => revealId,
-        (v) => setRevealId(v)
-      }
+      bind:selectedId={() => revealId, (v) => setRevealId(v)}
       placeholder="Search reveal monster…"
       hint="Monster revealed by Small World from your hand." />
 
@@ -126,15 +120,10 @@
       label="2. Bridge (deck)"
       testIdPrefix="smallworld-bridge"
       candidates={bridgeCandidates}
-      bind:selectedId={
-        () => bridgeId,
-        (v) => setBridgeId(v)
-      }
+      bind:selectedId={() => bridgeId, (v) => setBridgeId(v)}
       disabled={revealCard == null}
       placeholder="Search bridge monster…"
-      hint={revealCard
-        ? `${bridgeCandidates.length} exact one-property bridges for ${revealCard.name}.`
-        : 'Select a reveal monster first.'} />
+      hint={revealCard ? `${bridgeCandidates.length} exact one-property bridges for ${revealCard.name}.` : 'Select a reveal monster first.'} />
 
     {#if revealCard && bridgeCard && revealBridgeProps.length > 0}
       <div class="flex flex-wrap items-center gap-2 text-sm">

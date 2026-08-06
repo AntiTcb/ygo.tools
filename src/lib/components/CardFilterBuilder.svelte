@@ -20,9 +20,7 @@
 
 <div class="flex min-h-0 flex-col gap-2">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
-    <p class="text-xs opacity-70">
-      Combine conditions with Match all / Match any. Nest groups for (A and B) or C style queries.
-    </p>
+    <p class="text-xs opacity-70">Combine conditions with Match all / Match any. Nest groups for (A and B) or C style queries.</p>
     {#if leafCount > 0}
       <span class="text-xs tabular-nums opacity-60">{leafCount} condition{leafCount === 1 ? '' : 's'}</span>
     {/if}

@@ -11,9 +11,5 @@
   "sortPackageJson": false,
   "sortTailwindcss": {},
   "svelte": {},
-  "ignorePatterns": [
-    "package-lock.json",
-    "pnpm-lock.yaml",
-    "yarn.lock"
-  ]
+  "ignorePatterns": ["package-lock.json", "pnpm-lock.yaml", "yarn.lock"]
 }

@@ -10,17 +10,14 @@ const hasVirtualCat = (node: RuleNode): boolean => {
   return node.kind === 'group' && node.children.some(hasVirtualCat);
 };
 
-export const filterNeuronCardIds = query(
-  ruleNodeSchema,
-  async (tree): Promise<{ ids: number[]; truncated: boolean; error?: string }> => {
-    if (hasVirtualCat(tree)) {
-      return { ids: [], truncated: false, error: 'Virtual filter fields must be resolved client-side' };
-    }
-    const lim = validateRuleLimits(tree);
-    if (!lim.ok) {
-      return { ids: [], truncated: false, error: lim.message };
-    }
-    const { locals } = getRequestEvent();
-    return queryNeuronCardIdsByRule(locals.supabase, tree);
-  },
-);
+export const filterNeuronCardIds = query(ruleNodeSchema, async (tree): Promise<{ ids: number[]; truncated: boolean; error?: string }> => {
+  if (hasVirtualCat(tree)) {
+    return { ids: [], truncated: false, error: 'Virtual filter fields must be resolved client-side' };
+  }
+  const lim = validateRuleLimits(tree);
+  if (!lim.ok) {
+    return { ids: [], truncated: false, error: lim.message };
+  }
+  const { locals } = getRequestEvent();
+  return queryNeuronCardIdsByRule(locals.supabase, tree);
+});

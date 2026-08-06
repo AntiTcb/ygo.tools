@@ -12,43 +12,27 @@ const condTree = (condition: RuleNode extends { kind: 'cond' } ? RuleNode['condi
 
 describe('buildOrPart', () => {
   it('builds numeric comparison fragments', () => {
-    expect(
-      buildOrPart(
-        condTree({ kind: 'num', field: 'atk', op: 'gte', value: 2500 }),
-      ),
-    ).toBe('atk.gte.2500');
+    expect(buildOrPart(condTree({ kind: 'num', field: 'atk', op: 'gte', value: 2500 }))).toBe('atk.gte.2500');
   });
 
   it('builds ATK/DEF question-mark fragments', () => {
-    expect(buildOrPart(condTree({ kind: 'num', field: 'atk', op: 'isQuestion' }))).toBe(
-      `atk.eq.${NEURON_ATK_DEF_QUESTION_MARK}`,
-    );
+    expect(buildOrPart(condTree({ kind: 'num', field: 'atk', op: 'isQuestion' }))).toBe(`atk.eq.${NEURON_ATK_DEF_QUESTION_MARK}`);
     expect(buildOrPart(condTree({ kind: 'num', field: 'def', op: 'notQuestion' }))).toBe(
       `and(def.not.is.null,def.neq.${NEURON_ATK_DEF_QUESTION_MARK})`,
     );
   });
 
   it('builds categorical in/notIn fragments', () => {
-    expect(
-      buildOrPart(condTree({ kind: 'cat', field: 'attribute_id', op: 'in', values: [1, 2] })),
-    ).toBe('attribute_id.in.(1,2)');
-    expect(
-      buildOrPart(condTree({ kind: 'cat', field: 'species_id', op: 'notIn', values: [3] })),
-    ).toBe('species_id.not.in.(3)');
+    expect(buildOrPart(condTree({ kind: 'cat', field: 'attribute_id', op: 'in', values: [1, 2] }))).toBe('attribute_id.in.(1,2)');
+    expect(buildOrPart(condTree({ kind: 'cat', field: 'species_id', op: 'notIn', values: [3] }))).toBe('species_id.not.in.(3)');
   });
 
   it('builds link_arrows exact match from direction digits', () => {
-    expect(
-      buildOrPart(condTree({ kind: 'bits', field: 'link_arrows', op: 'eq', values: [2, 8] })),
-    ).toBe('link_arrows.eq.28');
+    expect(buildOrPart(condTree({ kind: 'bits', field: 'link_arrows', op: 'eq', values: [2, 8] }))).toBe('link_arrows.eq.28');
   });
 
   it('builds pendulum text contains with escaped wildcards', () => {
-    expect(
-      buildOrPart(
-        condTree({ kind: 'text', field: 'pendulum_text', op: 'contains', value: 'a*b,c' }),
-      ),
-    ).toBe('pendulum_text.ilike.*a\\*b\\,c*');
+    expect(buildOrPart(condTree({ kind: 'text', field: 'pendulum_text', op: 'contains', value: 'a*b,c' }))).toBe('pendulum_text.ilike.*a\\*b\\,c*');
   });
 
   it('nests AND/OR groups', () => {
@@ -97,10 +81,7 @@ describe('queryNeuronCardIdsByRule', () => {
     limit.mockReturnValue(qb);
 
     const supabase = { from } as unknown as SupabaseClient<Database>;
-    const result = await queryNeuronCardIdsByRule(
-      supabase,
-      condTree({ kind: 'num', field: 'atk', op: 'gte', value: 3000 }),
-    );
+    const result = await queryNeuronCardIdsByRule(supabase, condTree({ kind: 'num', field: 'atk', op: 'gte', value: 3000 }));
 
     expect(from).toHaveBeenCalledWith('neuron_cards');
     expect(select).toHaveBeenCalledWith('id');

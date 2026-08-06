@@ -8,11 +8,7 @@ export const formatAtkDef = (n: number | null | undefined): string => {
 };
 
 /** Prefer Link rating; otherwise Level/Rank from `level` (shared column in Neuron data). */
-export const formatLevelRankLink = (card: {
-  level: number | null;
-  link_rating: number | null;
-  frameName?: string | null;
-}): string | null => {
+export const formatLevelRankLink = (card: { level: number | null; link_rating: number | null; frameName?: string | null }): string | null => {
   if (card.link_rating != null && card.link_rating > 0) return `LINK-${card.link_rating}`;
   if (card.level == null) return null;
   const frame = card.frameName?.toLowerCase() ?? '';

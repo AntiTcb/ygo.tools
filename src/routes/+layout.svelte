@@ -45,40 +45,22 @@
 <Toaster />
 
 {#snippet NavTiles()}
-  <Navigation.TriggerAnchor
-    href="/damagecalc"
-    class={navClass('/damagecalc')}
-    aria-current={navCurrent('/damagecalc')}
-  >
+  <Navigation.TriggerAnchor href="/damagecalc" class={navClass('/damagecalc')} aria-current={navCurrent('/damagecalc')}>
     <div class="flex flex-col items-center text-center">
       <CalculatorIcon class="size-[24px] md:size-7" />
-      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">
-        Damage Calculator
-      </Navigation.TriggerText>
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Damage Calculator</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
-  <Navigation.TriggerAnchor
-    href="/database"
-    class={navClass('/database')}
-    aria-current={navCurrent('/database')}
-  >
+  <Navigation.TriggerAnchor href="/database" class={navClass('/database')} aria-current={navCurrent('/database')}>
     <div class="flex flex-col items-center justify-center text-center">
       <DatabaseIcon class="size-[24px] md:size-7" />
-      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">
-        Card Search
-      </Navigation.TriggerText>
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Card Search</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
-  <Navigation.TriggerAnchor
-    href="/smallworld"
-    class={navClass('/smallworld')}
-    aria-current={navCurrent('/smallworld')}
-  >
+  <Navigation.TriggerAnchor href="/smallworld" class={navClass('/smallworld')} aria-current={navCurrent('/smallworld')}>
     <div class="flex flex-col items-center justify-center text-center">
       <EarthIcon class="size-[24px] md:size-7" />
-      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">
-        Small World
-      </Navigation.TriggerText>
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Small World</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
 {/snippet}

@@ -15,7 +15,7 @@
   <div class="flex flex-wrap gap-2">
     <a
       href="/damagecalc"
-      class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
       <article class="space-y-2 p-4">
         <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Damage Calculation Calculator
@@ -26,7 +26,7 @@
     </a>
     <a
       href="/database"
-      class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
       <article class="space-y-2 p-4">
         <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Card Database
@@ -37,7 +37,7 @@
     </a>
     <a
       href="/smallworld"
-      class="card card-hover block max-w-md divide-y overflow-hidden border border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900">
+      class="card border-surface-200-800 divide-surface-200-800 preset-filled-surface-100-900 block max-w-md divide-y overflow-hidden border">
       <article class="space-y-2 p-4">
         <h5 class="h5 flex shrink-0 flex-nowrap justify-between">
           Small World Helper

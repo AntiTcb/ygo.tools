@@ -30,11 +30,7 @@ export const LINK_ARROW_GRID: (LinkArrowCell | null)[][] = [
     { label: 'N', digit: LINK_ARROW_DIGIT.N },
     { label: 'NE', digit: LINK_ARROW_DIGIT.NE },
   ],
-  [
-    { label: 'W', digit: LINK_ARROW_DIGIT.W },
-    null,
-    { label: 'E', digit: LINK_ARROW_DIGIT.E },
-  ],
+  [{ label: 'W', digit: LINK_ARROW_DIGIT.W }, null, { label: 'E', digit: LINK_ARROW_DIGIT.E }],
   [
     { label: 'SW', digit: LINK_ARROW_DIGIT.SW },
     { label: 'S', digit: LINK_ARROW_DIGIT.S },

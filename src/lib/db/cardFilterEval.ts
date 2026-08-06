@@ -144,5 +144,4 @@ export const evalRuleNode = (row: CardFilterRow, node: RuleNode): boolean => {
   return node.children.some((ch) => evalRuleNode(row, ch));
 };
 
-export const filterRowsByRule = (rows: CardFilterRow[], root: RuleNode): CardFilterRow[] =>
-  rows.filter((row) => evalRuleNode(row, root));
+export const filterRowsByRule = (rows: CardFilterRow[], root: RuleNode): CardFilterRow[] => rows.filter((row) => evalRuleNode(row, root));

@@ -8,10 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     locals.supabase.from('neuron_cards').select(CARD_SELECT).eq('language', 'en'),
     locals.supabase.from('neuron_monster_types').select('id,name').eq('language', 'en'),
     locals.supabase.from('neuron_card_frame_types').select('id,name').eq('language', 'en'),
-    locals.supabase
-      .from('neuron_complex_frame_types')
-      .select('id,name,subtype_1,subtype_2,subtype_3')
-      .eq('language', 'en'),
+    locals.supabase.from('neuron_complex_frame_types').select('id,name,subtype_1,subtype_2,subtype_3').eq('language', 'en'),
   ]);
 
   if (cardsRes.error) {

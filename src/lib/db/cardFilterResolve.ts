@@ -1,9 +1,4 @@
-import {
-  SPELL_FRAME_TYPE_ID,
-  TRAP_FRAME_TYPE_ID,
-  type ComplexFrameTypeRow,
-  type RuleNode,
-} from './cardFilterRule';
+import { SPELL_FRAME_TYPE_ID, TRAP_FRAME_TYPE_ID, type ComplexFrameTypeRow, type RuleNode } from './cardFilterRule';
 
 const impossible: RuleNode = {
   kind: 'group',
@@ -27,9 +22,7 @@ const complexIdsForSubtypes = (subtypeIds: number[], rows: ComplexFrameTypeRow[]
   const want = new Set(subtypeIds);
   const out = new Set<number>();
   for (const row of rows) {
-    const subs = [row.subtype_1, row.subtype_2, row.subtype_3].filter(
-      (x): x is number => x !== null && x !== undefined,
-    );
+    const subs = [row.subtype_1, row.subtype_2, row.subtype_3].filter((x): x is number => x !== null && x !== undefined);
     if (subs.some((s) => want.has(s))) out.add(row.id);
   }
   return [...out];
@@ -204,8 +197,7 @@ const resolveNode = (node: RuleNode, complexRows: ComplexFrameTypeRow[]): RuleNo
   return node;
 };
 
-export const resolveVirtualRuleTree = (root: RuleNode, complexRows: ComplexFrameTypeRow[]): RuleNode =>
-  resolveNode(root, complexRows);
+export const resolveVirtualRuleTree = (root: RuleNode, complexRows: ComplexFrameTypeRow[]): RuleNode => resolveNode(root, complexRows);
 
 export const isStatFilterEmpty = (node: RuleNode): boolean => {
   if (node.kind === 'cond') return false;

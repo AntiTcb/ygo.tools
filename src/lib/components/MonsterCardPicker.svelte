@@ -11,15 +11,7 @@
     hint?: string;
   };
 
-  let {
-    candidates,
-    label,
-    testIdPrefix,
-    selectedId = $bindable(null),
-    disabled = false,
-    placeholder = 'Search by name…',
-    hint,
-  }: Props = $props();
+  let { candidates, label, testIdPrefix, selectedId = $bindable(null), disabled = false, placeholder = 'Search by name…', hint }: Props = $props();
 
   const artworks = getArtworksState();
   const MAX_SUGGESTIONS = 12;
@@ -90,9 +82,9 @@
     <div class="flex flex-wrap items-center gap-2 text-sm" data-testid="{testIdPrefix}-selected">
       <span class="flex items-center gap-2">
         {#if selectedArt}
-          <img class="h-8 aspect-6/8.5 shrink-0 rounded object-cover" src={selectedArt} alt="" />
+          <img class="aspect-6/8.5 h-8 shrink-0 rounded object-cover" src={selectedArt} alt="" />
         {:else}
-          <span class="bg-surface-500/20 h-8 aspect-6/8.5 shrink-0 rounded" aria-hidden="true"></span>
+          <span class="bg-surface-500/20 aspect-6/8.5 h-8 shrink-0 rounded" aria-hidden="true"></span>
         {/if}
         <span class="font-medium">{selectedCard.name}</span>
       </span>
@@ -117,9 +109,9 @@
             data-card-id={card.id}
             onclick={() => selectCard(card.id)}>
             {#if art}
-              <img class="h-8 aspect-6/8.5 shrink-0 rounded object-cover" src={art} alt="" />
+              <img class="aspect-6/8.5 h-8 shrink-0 rounded object-cover" src={art} alt="" />
             {:else}
-              <span class="bg-surface-500/20 h-8 aspect-6/8.5 shrink-0 rounded" aria-hidden="true"></span>
+              <span class="bg-surface-500/20 aspect-6/8.5 h-8 shrink-0 rounded" aria-hidden="true"></span>
             {/if}
             <span>{card.name}</span>
           </button>

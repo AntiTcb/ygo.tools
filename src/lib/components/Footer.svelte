@@ -44,27 +44,15 @@
   };
 </script>
 
-<Navigation
-  layout="bar"
-  class="mobile-nav sticky bottom-0 block bg-surface-950 lg:hidden"
-  data-testid="mobile-nav"
->
+<Navigation layout="bar" class="mobile-nav bg-surface-950 sticky bottom-0 block lg:hidden" data-testid="mobile-nav">
   <div class="mobile-nav-frame relative min-w-0">
     <div
-      class="mobile-nav-scroller min-w-0 w-full max-w-full overflow-x-auto overscroll-x-contain"
+      class="mobile-nav-scroller w-full max-w-full min-w-0 overflow-x-auto overscroll-x-contain"
       data-testid="mobile-nav-scroller"
       {@attach trackOverflow}
-      {@attach dragScroll}
-    >
-      <Navigation.Menu
-        class="flex w-max min-w-full flex-nowrap items-center gap-1.5"
-        data-testid="mobile-nav-menu"
-      >
-        <Navigation.TriggerAnchor
-          href="/"
-          class={homeActive ? 'nav-active' : ''}
-          aria-current={homeActive ? 'page' : undefined}
-        >
+      {@attach dragScroll}>
+      <Navigation.Menu class="flex w-max min-w-full flex-nowrap items-center gap-1.5" data-testid="mobile-nav-menu">
+        <Navigation.TriggerAnchor href="/" class={homeActive ? 'nav-active' : ''} aria-current={homeActive ? 'page' : undefined}>
           <div class="flex flex-col items-center text-center">
             <HomeIcon class="size-[24px] md:size-6" />
             <Navigation.TriggerText class="text-sm">Home</Navigation.TriggerText>
@@ -78,16 +66,16 @@
       <div
         class="mobile-nav-fade mobile-nav-fade-left pointer-events-none absolute inset-y-0 left-0 z-10 w-8"
         data-testid="mobile-nav-more-left"
-        aria-hidden="true"
-      ></div>
+        aria-hidden="true">
+      </div>
     {/if}
 
     {#if canScrollRight}
       <div
         class="mobile-nav-fade mobile-nav-fade-right pointer-events-none absolute inset-y-0 right-0 z-10 w-8"
         data-testid="mobile-nav-more-right"
-        aria-hidden="true"
-      ></div>
+        aria-hidden="true">
+      </div>
     {/if}
   </div>
 </Navigation>
