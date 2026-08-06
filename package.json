@@ -10,7 +10,7 @@
     "preview": "pnpm run types && wrangler dev .svelte-kit/cloudflare/_worker.js",
     "cf:deploy": "pnpm run types && pnpm run build && wrangler deploy --env=production",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo --watch",
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",

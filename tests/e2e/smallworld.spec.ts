@@ -104,4 +104,44 @@ test.describe('/smallworld helper', () => {
     await expect(pagePrev.first()).toBeEnabled();
     await expect(page.getByTestId('smallworld-card').first()).toBeVisible();
   });
+
+  test('serializes picker state into the URL and restores it on load', async ({ page }) => {
+    await gotoSmallWorld(page);
+    await pickFirstSuggestion(page, 'smallworld-reveal', 'Dark Magician');
+    await pickFirstSuggestion(page, 'smallworld-bridge', 'a');
+
+    const revealName = (await page.getByTestId('smallworld-reveal-selected').locator('.font-medium').textContent())?.trim() ?? '';
+    const bridgeName = (await page.getByTestId('smallworld-bridge-selected').locator('.font-medium').textContent())?.trim() ?? '';
+    expect(revealName.length).toBeGreaterThan(0);
+    expect(bridgeName.length).toBeGreaterThan(0);
+
+    await expect.poll(() => page.url()).toContain('_data=');
+
+    const firstName = (await page.getByTestId('smallworld-card-name').first().textContent())?.trim() ?? '';
+    expect(firstName.length).toBeGreaterThan(0);
+    const needle = firstName.slice(0, Math.min(6, firstName.length));
+    await page.getByTestId('smallworld-target-filter').fill(needle);
+    await expect.poll(() => page.url()).toContain('_data=');
+
+    const sharedUrl = page.url();
+    expect(sharedUrl).toContain('_data=');
+
+    await page.goto('/smallworld', { waitUntil: 'networkidle' });
+    await expect(page.getByTestId('smallworld-reveal-selected')).toHaveCount(0);
+    await expect(page.getByTestId('smallworld-results-count')).toHaveCount(0);
+
+    await page.goto(sharedUrl, { waitUntil: 'networkidle' });
+    await expect(page.getByTestId('smallworld-reveal-selected')).toContainText(revealName);
+    await expect(page.getByTestId('smallworld-bridge-selected')).toContainText(bridgeName);
+    await expect(page.getByTestId('smallworld-target-filter')).toHaveValue(needle);
+    await expect(page.getByTestId('smallworld-results-count')).toBeVisible();
+    await expect(page.getByTestId('smallworld-card-name').first()).toContainText(new RegExp(needle, 'i'));
+
+    // Direct shared-URL loads render cards before the artwork manifest arrives;
+    // manifest must be reactive so imgs get src once fetch completes.
+    const targetArt = page.getByTestId('smallworld-card').first().locator('img');
+    await expect(targetArt).toHaveAttribute('src', /^https?:\/\//, { timeout: 20_000 });
+    const revealArt = page.getByTestId('smallworld-reveal-selected').locator('img');
+    await expect(revealArt).toHaveAttribute('src', /^https?:\/\//, { timeout: 20_000 });
+  });
 });

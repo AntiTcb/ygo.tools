@@ -1,27 +1,32 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { buildCardStatLine } from '$lib/db/cardStatDisplay';
   import {
-    findExactBridges,
-    findExactTargets,
-    getSharedProperties,
-    isExactOneBridge,
-    SMALL_WORLD_PROPERTY_LABELS,
-    type SmallWorldProperty,
+      findExactBridges,
+      findExactTargets,
+      getSharedProperties,
+      isExactOneBridge,
+      SMALL_WORLD_PROPERTY_LABELS,
+      type SmallWorldProperty,
   } from '$lib/db/smallWorld';
+  import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
   import type { PageProps } from './$types';
+  import { smallworldSearchParamsSchema } from './smallworldSearchParams.schema';
 
   const PAGE_SIZE = 24;
 
   let { data }: PageProps = $props();
   const { cards } = $derived(data);
 
-  let revealId = $state<number | null>(null);
-  let bridgeId = $state<number | null>(null);
-  let targetNameFilter = $state('');
-  let page = $state(1);
+  const params = useSearchParams(smallworldSearchParamsSchema, {
+    pushHistory: false,
+    debounce: 300,
+    noScroll: true,
+    compress: true
+  });
 
   const artworks = getArtworksState();
 
@@ -32,44 +37,66 @@
   });
 
   const cardById = $derived(new Map(cards.map((c) => [c.id, c] as const)));
-  const revealCard = $derived(revealId != null ? (cardById.get(revealId) ?? null) : null);
+  const revealCard = $derived(params.revealId != null ? (cardById.get(params.revealId) ?? null) : null);
 
   const bridgeCandidates = $derived.by(() => {
     if (!revealCard) return [];
     return findExactBridges(revealCard, cards);
   });
 
-  const clearTargetFilter = () => {
-    targetNameFilter = '';
-    page = 1;
-  };
+  /** Drop stale/invalid ids from shared URLs once card data is available. */
+  $effect(() => {
+    if (!browser || cards.length === 0) return;
+    const revealId = params.revealId;
+    const bridgeId = params.bridgeId;
+    if (revealId == null && bridgeId == null) return;
 
-  const setRevealId = (next: number | null) => {
-    revealId = next;
-    clearTargetFilter();
-    if (next == null) {
-      bridgeId = null;
+    const reveal = revealId != null ? (cardById.get(revealId) ?? null) : null;
+    if (revealId != null && !reveal) {
+      params.update({ revealId: null, bridgeId: null });
       return;
     }
+
     if (bridgeId == null) return;
-    const reveal = cardById.get(next);
-    const bridge = cardById.get(bridgeId);
-    if (!reveal || !bridge || !isExactOneBridge(reveal, bridge)) {
-      bridgeId = null;
+    const bridge = cardById.get(bridgeId) ?? null;
+    if (!bridge || !reveal || !isExactOneBridge(reveal, bridge)) {
+      params.bridgeId = null;
     }
+  });
+
+  const setRevealId = (next: number | null) => {
+    let nextBridge: number | null = next == null ? null : params.bridgeId;
+    if (next != null && nextBridge != null) {
+      const reveal = cardById.get(next);
+      const bridge = cardById.get(nextBridge);
+      if (!reveal || !bridge || !isExactOneBridge(reveal, bridge)) {
+        nextBridge = null;
+      }
+    }
+    params.update({
+      revealId: next,
+      bridgeId: nextBridge,
+      targetNameFilter: '',
+      page: 1,
+    });
   };
 
   const setBridgeId = (next: number | null) => {
-    bridgeId = next;
-    clearTargetFilter();
+    params.update({
+      bridgeId: next,
+      targetNameFilter: '',
+      page: 1,
+    });
   };
 
   const setTargetNameFilter = (next: string) => {
-    targetNameFilter = next;
-    page = 1;
+    params.update({
+      targetNameFilter: next,
+      page: 1,
+    });
   };
 
-  const bridgeCard = $derived(bridgeId != null ? (cardById.get(bridgeId) ?? null) : null);
+  const bridgeCard = $derived(params.bridgeId != null ? (cardById.get(params.bridgeId) ?? null) : null);
 
   const revealBridgeProps = $derived.by((): SmallWorldProperty[] => {
     if (!revealCard || !bridgeCard) return [];
@@ -82,16 +109,21 @@
   });
 
   const filteredTargets = $derived.by(() => {
-    const q = targetNameFilter.trim().toLowerCase();
+    const q = params.targetNameFilter.trim().toLowerCase();
     if (!q) return targets;
     return targets.filter((card) => card.name.toLowerCase().includes(q));
   });
 
   const filteredCount = $derived(filteredTargets.length);
   const totalPages = $derived(Math.max(1, Math.ceil(filteredCount / PAGE_SIZE)));
-  const safePage = $derived(Math.min(page, totalPages));
+  const safePage = $derived(Math.min(params.page, totalPages));
   const visibleTargets = $derived(filteredTargets.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE));
-  const filterActive = $derived(targetNameFilter.trim().length > 0 && filteredCount < targets.length);
+  const filterActive = $derived(params.targetNameFilter.trim().length > 0 && filteredCount < targets.length);
+
+  $effect(() => {
+    if (!browser) return;
+    if (params.page > totalPages) params.page = totalPages;
+  });
 </script>
 
 <Seo
@@ -112,7 +144,7 @@
       label="1. Reveal (hand)"
       testIdPrefix="smallworld-reveal"
       candidates={cards}
-      bind:selectedId={() => revealId, (v) => setRevealId(v)}
+      bind:selectedId={() => params.revealId, (v) => setRevealId(v)}
       placeholder="Search reveal monster…"
       hint="Monster revealed by Small World from your hand." />
 
@@ -120,7 +152,7 @@
       label="2. Bridge (deck)"
       testIdPrefix="smallworld-bridge"
       candidates={bridgeCandidates}
-      bind:selectedId={() => bridgeId, (v) => setBridgeId(v)}
+      bind:selectedId={() => params.bridgeId, (v) => setBridgeId(v)}
       disabled={revealCard == null}
       placeholder="Search bridge monster…"
       hint={revealCard ? `${bridgeCandidates.length} exact one-property bridges for ${revealCard.name}.` : 'Select a reveal monster first.'} />
@@ -148,7 +180,7 @@
         data-testid="smallworld-target-filter"
         placeholder="Search targets…"
         autocomplete="off"
-        value={targetNameFilter}
+        value={params.targetNameFilter}
         oninput={(e) => setTargetNameFilter(e.currentTarget.value)} />
     </label>
 
@@ -209,7 +241,7 @@
       class="btn preset-tonal-surface btn-sm"
       data-testid="smallworld-page-prev"
       disabled={safePage <= 1}
-      onclick={() => (page = Math.max(1, safePage - 1))}>
+      onclick={() => (params.page = Math.max(1, safePage - 1))}>
       Prev
     </button>
     <span class="text-sm tabular-nums" data-testid="smallworld-page-label">Page {safePage} of {totalPages}</span>
@@ -218,7 +250,7 @@
       class="btn preset-tonal-surface btn-sm"
       data-testid="smallworld-page-next"
       disabled={safePage >= totalPages}
-      onclick={() => (page = Math.min(totalPages, safePage + 1))}>
+      onclick={() => (params.page = Math.min(totalPages, safePage + 1))}>
       Next
     </button>
   </div>
