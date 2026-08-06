@@ -31,7 +31,7 @@ runs:
 
     - name: Cache Playwright browsers
       if: inputs.install-playwright == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
