@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import AppUpdateNotifier from '$components/AppUpdateNotifier.svelte';
   import Footer from '$components/Footer.svelte';
   import Header from '$components/Header.svelte';
   import Sidebar from '$components/Sidebar.svelte';
@@ -42,6 +43,7 @@
   </Footer>
 {/if}
 
+<AppUpdateNotifier />
 <Toaster />
 
 {#snippet NavTiles()}

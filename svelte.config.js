@@ -27,6 +27,7 @@ const config = {
     },
     version: {
       name: pkg.version,
+      pollInterval: 60_000,
     },
   },
 };
