@@ -16,6 +16,21 @@ const pickFirstSuggestion = async (page: Page, testIdPrefix: string, query: stri
 };
 
 test.describe('/smallworld helper', () => {
+  test('reveal search excludes Extra Deck Fusion/Synchro/Xyz/Link monsters', async ({ page }) => {
+    await gotoSmallWorld(page);
+    await pickFirstSuggestion(page, 'smallworld-reveal', 'Dark Magician');
+    await page.getByTestId('smallworld-reveal-clear').click();
+
+    const extraDeckNames = ['Accesscode Talker', 'Stardust Dragon', 'Number 39: Utopia', 'Blue-Eyes Ultimate Dragon'];
+    const input = page.getByTestId('smallworld-reveal-input');
+
+    for (const name of extraDeckNames) {
+      await input.fill(name);
+      const exactName = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+      await expect(page.getByTestId('smallworld-reveal-suggestion').filter({ hasText: exactName })).toHaveCount(0);
+    }
+  });
+
   test('bridge picker stays disabled until a reveal monster is selected', async ({ page }) => {
     await gotoSmallWorld(page);
     await expect(page.getByTestId('smallworld-bridge-input')).toBeDisabled();

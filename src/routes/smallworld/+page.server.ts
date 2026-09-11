@@ -1,4 +1,4 @@
-import { SPELL_FRAME_TYPE_ID, TRAP_FRAME_TYPE_ID } from '$lib/db/cardFilterRule';
+import { SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS } from '$lib/db/smallWorld';
 import type { PageServerLoad } from './$types';
 
 const CARD_SELECT = 'id,name,effect_text,frame_type_id,atk,def,level,attribute_id,species_id,link_rating,pend_scale_l,pend_scale_r';
@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .from('neuron_cards')
       .select(CARD_SELECT)
       .eq('language', 'en')
-      .not('frame_type_id', 'in', `(${SPELL_FRAME_TYPE_ID},${TRAP_FRAME_TYPE_ID})`),
+      .not('frame_type_id', 'in', `(${SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS.join(',')})`),
     locals.supabase.from('neuron_monster_types').select('id,name').eq('language', 'en'),
     locals.supabase.from('neuron_card_frame_types').select('id,name').eq('language', 'en'),
   ]);

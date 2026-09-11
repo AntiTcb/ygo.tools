@@ -1,5 +1,20 @@
 import { SPELL_FRAME_TYPE_ID, TRAP_FRAME_TYPE_ID } from './cardFilterRule';
 
+/**
+ * Extra Deck `neuron_cards.frame_type_id` values (Fusion / Synchro / Xyz / Link
+ * and their combo frames). Ritual and main-deck Pendulum frames stay searchable.
+ */
+export const EXTRA_DECK_COMPLEX_FRAME_TYPE_IDS = [2, 3, 17, 18, 19, 22, 23, 34, 35, 39, 41, 42, 43, 47] as const;
+
+/** Frames Small World must never search: spells, traps, and Extra Deck monsters. */
+export const SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS = [
+  SPELL_FRAME_TYPE_ID,
+  TRAP_FRAME_TYPE_ID,
+  ...EXTRA_DECK_COMPLEX_FRAME_TYPE_IDS,
+] as const;
+
+const SMALL_WORLD_EXCLUDED_FRAME_TYPE_ID_SET = new Set<number>(SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS);
+
 /** Properties Small World compares between monsters. */
 export type SmallWorldProperty = 'type' | 'attribute' | 'level' | 'atk' | 'def';
 
@@ -33,6 +48,13 @@ export const isMonsterCard = (card: { frame_type_id?: number | null }): boolean 
   const frame = card.frame_type_id;
   if (frame === SPELL_FRAME_TYPE_ID || frame === TRAP_FRAME_TYPE_ID) return false;
   return true;
+};
+
+/** Main Deck monsters only — Extra Deck Fusion/Synchro/Xyz/Link frames are illegal Small World hits. */
+export const isMainDeckMonster = (card: { frame_type_id?: number | null }): boolean => {
+  const frame = card.frame_type_id;
+  if (frame == null) return isMonsterCard(card);
+  return !SMALL_WORLD_EXCLUDED_FRAME_TYPE_ID_SET.has(frame);
 };
 
 export const getSharedProperties = (a: SmallWorldCard, b: SmallWorldCard): SmallWorldProperty[] => {

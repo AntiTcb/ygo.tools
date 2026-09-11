@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  EXTRA_DECK_COMPLEX_FRAME_TYPE_IDS,
   findExactBridges,
   findExactTargets,
   getSharedProperties,
   isExactOneBridge,
+  isMainDeckMonster,
   isMonsterCard,
   valuesEqualForSmallWorld,
   type SmallWorldCard,
@@ -42,6 +44,23 @@ describe('isMonsterCard', () => {
   it('includes monster frames', () => {
     expect(isMonsterCard({ frame_type_id: 1 })).toBe(true);
     expect(isMonsterCard({ frame_type_id: 5 })).toBe(true);
+  });
+});
+
+describe('isMainDeckMonster', () => {
+  it('excludes spells, traps, and Extra Deck combo frames', () => {
+    expect(isMainDeckMonster({ frame_type_id: 13 })).toBe(false);
+    expect(isMainDeckMonster({ frame_type_id: 14 })).toBe(false);
+    for (const frame of EXTRA_DECK_COMPLEX_FRAME_TYPE_IDS) {
+      expect(isMainDeckMonster({ frame_type_id: frame })).toBe(false);
+    }
+  });
+
+  it('keeps Main Deck monster frames including Ritual and Pendulum', () => {
+    expect(isMainDeckMonster({ frame_type_id: 1 })).toBe(true); // Effect
+    expect(isMainDeckMonster({ frame_type_id: 5 })).toBe(true); // Ritual／Effect
+    expect(isMainDeckMonster({ frame_type_id: 16 })).toBe(true); // Tuner／Effect
+    expect(isMainDeckMonster({ frame_type_id: 26 })).toBe(true); // Pendulum／Effect
   });
 });
 
