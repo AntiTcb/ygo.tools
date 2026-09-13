@@ -1,6 +1,6 @@
 {
   "name": "ygo.tools",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "repository": "https://github.com/AntiTcb/ygo.tools",
   "type": "module",

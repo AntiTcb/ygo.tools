@@ -9,6 +9,8 @@ describe('isNavActive', () => {
 
   it('matches exact tool paths', () => {
     expect(isNavActive('/smallworld', '/smallworld')).toBe(true);
+    expect(isNavActive('/metaltronus', '/metaltronus')).toBe(true);
+    expect(isNavActive('/gizmekuka', '/gizmekuka')).toBe(true);
     expect(isNavActive('/database', '/smallworld')).toBe(false);
   });
 

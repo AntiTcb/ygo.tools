@@ -11,6 +11,8 @@
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
   import EarthIcon from '~icons/mdi/earth';
+  import PawIcon from '~icons/mdi/paw';
+  import RobotIcon from '~icons/mdi/robot';
   import '../app.css';
 
   let { children } = $props();
@@ -63,6 +65,18 @@
     <div class="flex flex-col items-center justify-center text-center">
       <EarthIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Small World</Navigation.TriggerText>
+    </div>
+  </Navigation.TriggerAnchor>
+  <Navigation.TriggerAnchor href="/metaltronus" class={navClass('/metaltronus')} aria-current={navCurrent('/metaltronus')}>
+    <div class="flex flex-col items-center justify-center text-center">
+      <RobotIcon class="size-6 md:size-7" />
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Metaltronus</Navigation.TriggerText>
+    </div>
+  </Navigation.TriggerAnchor>
+  <Navigation.TriggerAnchor href="/gizmekuka" class={navClass('/gizmekuka')} aria-current={navCurrent('/gizmekuka')}>
+    <div class="flex flex-col items-center justify-center text-center">
+      <PawIcon class="size-6 md:size-7" />
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Gizmek Uka</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
 {/snippet}
