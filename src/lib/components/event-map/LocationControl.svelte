@@ -109,7 +109,7 @@
       </Combobox.Control>
       <button
         type="button"
-        class="btn-icon preset-filled-primary-500 rounded-l-none"
+        class="btn-icon preset-filled-primary-500 h-auto! w-[2.125rem]! self-stretch rounded-l-none"
         title="Use my location"
         aria-label="Use my location"
         onclick={locate}

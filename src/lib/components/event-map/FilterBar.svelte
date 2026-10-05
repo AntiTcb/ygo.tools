@@ -94,7 +94,7 @@
       <div class="flex">
         <button
           type="button"
-          class="btn-icon preset-tonal-primary rounded-r-none"
+          class="btn-icon preset-tonal-primary h-auto! w-[2.125rem]! self-stretch rounded-r-none"
           aria-label="Previous weekend"
           disabled={weekendIndex <= 0}
           onclick={() => stepWeekend(-1)}><ChevronLeftIcon class="size-4" /></button>
@@ -111,7 +111,7 @@
         </select>
         <button
           type="button"
-          class="btn-icon preset-tonal-primary rounded-l-none"
+          class="btn-icon preset-tonal-primary h-auto! w-[2.125rem]! self-stretch rounded-l-none"
           aria-label="Next weekend"
           disabled={weekendIndex >= weekends.length - 1}
           onclick={() => stepWeekend(1)}><ChevronRightIcon class="size-4" /></button>
