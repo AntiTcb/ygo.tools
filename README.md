@@ -68,11 +68,10 @@ Load data with `curl -X POST http://localhost:8787/scrape -H "authorization: Bea
 
 ```bash
 pnpm event-map:migrate:remote
-pnpm exec wrangler secret put PUBLIC_MAPBOX_TOKEN --env production
 pnpm exec wrangler secret put MAPBOX_SECRET_TOKEN -c wrangler.event-scraper.jsonc
 pnpm exec wrangler secret put SCRAPE_TOKEN -c wrangler.event-scraper.jsonc
 pnpm cf:deploy                    # site, as usual
 pnpm event-map:scraper:deploy     # cron scraper
 ```
 
-Set `NOMINATIM_CONTACT` (an email or URL) in `wrangler.event-scraper.jsonc` before deploying the scraper, as Nominatim's usage policy asks. `pnpm event-map:seed-venues` copies already-located venues from local D1 to production, so they aren't geocoded (and billed) again.
+`PUBLIC_MAPBOX_TOKEN` is a public `pk.*` token set as a var in `wrangler.jsonc`; keep it URL-restricted to ygo.tools in the Mapbox dashboard. The scraper identifies itself to Nominatim with `NOMINATIM_CONTACT` in `wrangler.event-scraper.jsonc`, as Nominatim's usage policy asks. `pnpm event-map:seed-venues` copies already-located venues from local D1 to production, so they aren't geocoded (and billed) again.

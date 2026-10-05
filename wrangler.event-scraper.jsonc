@@ -17,8 +17,8 @@
     // See src/lib/server/event-map/geocode/pipeline.ts.
     "GEOCODE_NOMINATIM_LIMIT": "25",
     "GEOCODE_MAPBOX_FALLBACK": "true",
-    // Nominatim's usage policy asks for a contact email or URL; set one before deploying.
-    "NOMINATIM_CONTACT": "",
+    // Nominatim's usage policy asks clients to identify themselves with a contact email or URL.
+    "NOMINATIM_CONTACT": "https://ygo.tools",
   },
   "triggers": {
     "crons": ["0 */6 * * *"],
