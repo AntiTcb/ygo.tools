@@ -13,7 +13,7 @@
     "workers_dev": false,
     "preview_urls": true,
     "vars": {
-        "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXFkaGhicWQwcGo1MnNvZ2puam11end2In0.3JvvoJaLlxvNbFMzxTdEdQ",
+        "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
         "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
         "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
         "NOMINATIM_CONTACT": "https://ygo.tools",
@@ -35,7 +35,7 @@
     },
     "previews": {
         "vars": {
-            "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXFkaGhicWQwcGo1MnNvZ2puam11end2In0.3JvvoJaLlxvNbFMzxTdEdQ",
+            "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
             "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
             "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
             "NOMINATIM_CONTACT": "https://ygo.tools",
@@ -46,7 +46,7 @@
             "vars": {
                 "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
                 "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
-                "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXFkaGhicWQwcGo1MnNvZ2puam11end2In0.3JvvoJaLlxvNbFMzxTdEdQ",
+                "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
                 "NOMINATIM_CONTACT": "https://ygo.tools",
             },
             // Bindings aren't inherited by named environments.
