@@ -12,6 +12,9 @@ const useMkcert = process.env.NODE_ENV === 'development';
 export default defineConfig({
   optimizeDeps: {
     entries: ['src/**/*.svelte'],
+    // /event-map loads these with dynamic import(); pre-bundle them so the dev server
+    // doesn't discover them mid-session and force a reload (flaky E2E runs).
+    include: ['mapbox-gl', 'fullcalendar', 'fullcalendar/daygrid', 'fullcalendar/list', 'fullcalendar/themes/classic', 'temporal-polyfill/global'],
   },
   plugins: [
     tailwindcss(),
