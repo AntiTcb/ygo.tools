@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Cron Worker for /event-map: scrapes yugioh-card.com, geocodes venues and writes to
+  // the ygo-event-map D1 database that the site Worker (wrangler.jsonc) reads.
+  "name": "ygotools-event-scraper",
+  "compatibility_date": "2026-04-27",
+  "main": "src/scraper/event-map.ts",
+  "workers_dev": false,
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
+  "vars": {
+    // Geocoding: Census (US) -> Nominatim/OSM -> Mapbox (paid, once per venue).
+    // See src/lib/server/event-map/geocode/pipeline.ts.
+    "GEOCODE_NOMINATIM_LIMIT": "25",
+    "GEOCODE_MAPBOX_FALLBACK": "true",
+    // Nominatim's usage policy asks for a contact email or URL; set one before deploying.
+    "NOMINATIM_CONTACT": "",
+  },
+  "triggers": {
+    "crons": ["0 */6 * * *"],
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ygo-event-map",
+      "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
+      "migrations_dir": "migrations/event-map",
+    },
+  ],
+  // Secrets (wrangler secret put … -c wrangler.event-scraper.jsonc):
+  //   MAPBOX_SECRET_TOKEN  server-side token for the Mapbox geocoding fallback
+  //   SCRAPE_TOKEN         bearer token for the manual POST /scrape trigger
+}

@@ -11,6 +11,7 @@
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
   import EarthIcon from '~icons/mdi/earth';
+  import MapMarkerIcon from '~icons/mdi/map-marker-radius';
   import PawIcon from '~icons/mdi/paw';
   import RobotIcon from '~icons/mdi/robot';
   import '../app.css';
@@ -59,6 +60,12 @@
     <div class="flex flex-col items-center justify-center text-center">
       <DatabaseIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Card Search</Navigation.TriggerText>
+    </div>
+  </Navigation.TriggerAnchor>
+  <Navigation.TriggerAnchor href="/event-map" class={navClass('/event-map')} aria-current={navCurrent('/event-map')}>
+    <div class="flex flex-col items-center justify-center text-center">
+      <MapMarkerIcon class="size-6 md:size-7" />
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Event Map</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
   <Navigation.TriggerAnchor href="/smallworld" class={navClass('/smallworld')} aria-current={navCurrent('/smallworld')}>

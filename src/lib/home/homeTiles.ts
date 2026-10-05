@@ -14,8 +14,7 @@ export type HomeHelperTile = HomeTile & {
   cardName: string;
 };
 
-export const sortTilesByTitle = <T extends { title: string }>(tiles: readonly T[]): T[] =>
-  [...tiles].sort((a, b) => a.title.localeCompare(b.title));
+export const sortTilesByTitle = <T extends { title: string }>(tiles: readonly T[]): T[] => [...tiles].sort((a, b) => a.title.localeCompare(b.title));
 
 export const HOME_TOOL_TILES = sortTilesByTitle([
   {
@@ -27,6 +26,11 @@ export const HOME_TOOL_TILES = sortTilesByTitle([
     href: '/database',
     title: 'Card Database',
     description: 'A card database with advanced search capabilities.',
+  },
+  {
+    href: '/event-map',
+    title: 'Event Map',
+    description: 'Find Regionals, OTS Championships and YCS events weekend by weekend, with driving directions and calendar export.',
   },
 ] as const satisfies readonly HomeTile[]);
 

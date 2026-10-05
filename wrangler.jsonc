@@ -14,6 +14,15 @@
     "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
     "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
   },
+  "d1_databases": [
+    {
+      // /event-map events and geocoded venues (written by the scraper Worker in wrangler.event-scraper.jsonc).
+      "binding": "EVENT_MAP_DB",
+      "database_name": "ygo-event-map",
+      "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
+      "migrations_dir": "migrations/event-map",
+    },
+  ],
   "observability": {
     "logs": {
       "enabled": true,
@@ -26,6 +35,15 @@
         "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
         "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
       },
+      // Bindings aren't inherited by named environments.
+      "d1_databases": [
+        {
+          "binding": "EVENT_MAP_DB",
+          "database_name": "ygo-event-map",
+          "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
+          "migrations_dir": "migrations/event-map",
+        },
+      ],
       "routes": [
         {
           "custom_domain": true,
