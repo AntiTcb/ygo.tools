@@ -4,6 +4,7 @@
   import Seo from 'sk-seo';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
+  import MapMarkerIcon from '~icons/mdi/map-marker-radius';
 
   const artworks = getArtworksState();
   const helperTiles = $derived(
@@ -15,6 +16,7 @@
 
   const toolIcon = (href: string) => {
     if (href === '/damagecalc') return CalculatorIcon;
+    if (href === '/event-map') return MapMarkerIcon;
     return DatabaseIcon;
   };
 </script>
