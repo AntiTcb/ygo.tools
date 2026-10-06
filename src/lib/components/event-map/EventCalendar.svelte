@@ -159,7 +159,8 @@
 
       const options: CalendarOptions = {
         plugins: [dayGrid.default, list.default, classic.default],
-        initialView: 'dayGridMonth',
+        // Month cells are too narrow for event cards on phones (below Tailwind's `md`).
+        initialView: window.matchMedia('(min-width: 48rem)').matches ? 'dayGridMonth' : 'listMonth',
         initialDate: focusDate ?? undefined,
         headerToolbar: {
           start: 'prev,next today',
