@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/wrangler/config-schema.json",
     "name": "ygotools",
-    "compatibility_date": "2026-04-27",
+    "compatibility_date": "2026-10-06",
     "compatibility_flags": [
         "nodejs_compat"
     ],
