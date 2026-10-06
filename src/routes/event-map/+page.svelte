@@ -16,6 +16,8 @@
   import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '$lib/event-map/types';
   import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
   import Seo from 'sk-seo';
+  import { fly } from 'svelte/transition';
+  import ArrowDownIcon from '~icons/lucide/arrow-down';
   import CalendarDaysIcon from '~icons/lucide/calendar-days';
   import CircleAlertIcon from '~icons/lucide/circle-alert';
   import HistoryIcon from '~icons/lucide/clock-arrow-left';
@@ -139,6 +141,24 @@
       selectedIds = [...selectedIds, id];
     }
   };
+
+  // On a single-column (mobile) layout the details sit below the calendar and
+  // map, so a floating button points to them until they scroll into view.
+  let detailsEl = $state<HTMLElement | null>(null);
+  let detailsBelow = $state(false);
+  $effect(() => {
+    if (!detailsEl) {
+      detailsBelow = false;
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      detailsBelow = !!entry && !entry.isIntersecting && entry.boundingClientRect.top > 0;
+    });
+    observer.observe(detailsEl);
+    return () => observer.disconnect();
+  });
+
+  const jumpToDetails = () => detailsEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const clearSelection = () => {
     selectedIds = [];
@@ -320,7 +340,7 @@
       </div>
 
       {#if selectedEvents.length}
-        <div class="card preset-tonal-primary flex flex-wrap items-center gap-2 space-y-0! p-3">
+        <div bind:this={detailsEl} class="card preset-tonal-primary flex scroll-mt-4 flex-wrap items-center gap-2 space-y-0! p-3">
           <span class="text-primary-300 flex items-center gap-1.5 font-semibold">
             <ListChecksIcon class="size-4" />{selectedEvents.length} selected
           </span>
@@ -354,6 +374,19 @@
       {/if}
     </section>
   </div>
+
+  {#if selectedEvents.length && detailsBelow}
+    <button
+      type="button"
+      class="btn preset-filled-primary-500 fixed bottom-16 left-1/2 z-40 -translate-x-1/2 rounded-full shadow-xl lg:hidden"
+      onclick={jumpToDetails}
+      transition:fly={{ y: 24, duration: 150 }}
+      data-testid="event-map-jump-details">
+      <ListChecksIcon class="size-4" />
+      View {selectedEvents.length === 1 ? 'event details' : `${selectedEvents.length} selected events`}
+      <ArrowDownIcon class="size-4" />
+    </button>
+  {/if}
 
   <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pb-2 text-center text-xs opacity-60">
     {#if updated}
