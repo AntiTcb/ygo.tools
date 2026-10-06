@@ -116,8 +116,7 @@
   text-decoration: underline dotted;
   text-underline-offset: 2px;
 }
-.ev-meta,
-.ev-mail {
+.ev-meta {
   display: flex;
   align-items: center;
   gap: 0.25rem;

@@ -8,7 +8,6 @@
   import ChevronLeft from '~icons/lucide/chevron-left?raw';
   import ChevronRight from '~icons/lucide/chevron-right?raw';
   import Globe from '~icons/lucide/globe?raw';
-  import Mail from '~icons/lucide/mail?raw';
   import MapPin from '~icons/lucide/map-pin?raw';
 
   interface Props {
@@ -33,6 +32,8 @@
 
   /** The date range currently displayed, as [start, end) YYYY-MM-DD. */
   let viewRange = $state<{ start: string; end: string } | null>(null);
+  /** View type and dates last passed to onrangechange. */
+  let reportedRange = '';
 
   /**
    * Events run on weekends, so weekday columns are hidden. A weekday is shown
@@ -85,13 +86,15 @@
     return node;
   };
 
+  /** Short chip text, so cards stay narrow on small screens. */
+  const CHIP_LABELS: Record<string, string> = { Advanced: 'Adv', Genesys: 'Gen' };
+
   /**
    * Builds the event card:
    *   10:00 AM Host name
-   *   [Remote] [Advanced] [Genesys]
+   *   [Remote] [Adv] [Gen]
    *   📍 Venue name
-   *      Street address, City, ST ZIP
-   *   ✉ contact@email
+   *      City, ST
    */
   const renderCard = (e: EventItem, selected: boolean): HTMLElement => {
     const card = el_('div', ['ev-card', `ev-${e.type}`, e.isRemote && 'ev-remote', selected && 'ev-selected'].filter(Boolean).join(' '));
@@ -113,7 +116,9 @@
     if (chips.length) {
       const row = el_('div', 'ev-formats');
       for (const label of chips) {
-        row.appendChild(el_('span', `ev-chip ev-chip-${label.toLowerCase()}`, label));
+        const chip = el_('span', `ev-chip ev-chip-${label.toLowerCase()}`, CHIP_LABELS[label] ?? label);
+        chip.title = label;
+        row.appendChild(chip);
       }
       title.appendChild(row);
     }
@@ -129,12 +134,13 @@
       if (e.venue.name && e.venue.name !== e.host) {
         lines.appendChild(el_('div', 'ev-venue', e.venue.name));
       }
-      lines.appendChild(el_('div', 'ev-address', e.venue.address));
+      // City and state keep cards short; the full address is in the details panel.
+      const place = [e.venue.city, e.state].filter(Boolean).join(', ');
+      lines.appendChild(el_('div', 'ev-address', place || e.venue.address));
       where.appendChild(lines);
       card.appendChild(where);
     }
 
-    if (e.email) card.appendChild(iconLine('ev-mail', Mail, e.email));
     return card;
   };
 
@@ -176,15 +182,20 @@
         datesSet: ({ view }) => {
           const start = isoDate(view.currentStart);
           const end = isoDate(view.currentEnd);
-          // Only update on a real change: hiddenDays depends on this range and
-          // re-applying it re-fires datesSet.
-          if (viewRange?.start !== start || viewRange?.end !== end) viewRange = { start, end };
+          const kind = view.type === 'dayGridWeek' ? 'week' : 'month';
+          // Only report a real change: hiddenDays depends on this range, and
+          // re-applying it (Friday appearing or disappearing) re-fires datesSet
+          // with the same dates, which would restart the map's fit animation.
+          const key = `${view.type}|${start}|${end}`;
+          if (key === reportedRange) return;
+          reportedRange = key;
+          viewRange = { start, end };
           onrangechange?.({
-            kind: view.type === 'dayGridWeek' ? 'week' : 'month',
-            start: isoDate(view.currentStart),
-            end: isoDate(view.currentEnd),
+            kind,
+            start,
+            end,
             // FullCalendar titles a week by its month; name the week explicitly instead.
-            title: view.type === 'dayGridWeek' ? `the week of ${formatDate(isoDate(view.currentStart))}` : view.title,
+            title: kind === 'week' ? `the week of ${formatDate(start)}` : view.title,
           });
         },
         eventClick: (info) => {
