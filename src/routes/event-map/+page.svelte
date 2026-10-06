@@ -208,7 +208,7 @@
   keywords="yugioh, ygo, regional, ots championship, ycs, events, tournaments, map, calendar"
   author="AntiTcb" />
 
-<div class="event-map mx-auto flex w-full max-w-[110rem] flex-col gap-3">
+<div class="event-map mx-auto flex w-full flex-col gap-3">
   <div class="card space-y-3! p-3 sm:p-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <h1 class="h3">Event Map</h1>

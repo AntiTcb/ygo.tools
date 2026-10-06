@@ -100,12 +100,12 @@
   keywords="yugioh, ygo, gizmek uka, attribute, atk, def, Yu-Gi-Oh!"
   author="AntiTcb" />
 
-<div class="card mx-auto my-2 w-full max-w-3xl p-3 sm:p-4">
+<div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Gizmek Uka Helper</h1>
   <p class="mb-4 text-sm opacity-80">
     Pick any non-Token monster — the one your opponent controls, or a Main Deck monster whose ATK equals its own DEF that you want to Special Summon.
-    Summons are legal if the selected card is the opponent's monster. Targets appear when the selected card itself can be summoned: same Attribute, from
-    hand or Deck, ATK equal to its own DEF.
+    Summons are legal if the selected card is the opponent's monster. Targets appear when the selected card itself can be summoned: same Attribute,
+    from hand or Deck, ATK equal to its own DEF.
   </p>
 
   <MonsterCardPicker
@@ -136,7 +136,9 @@
     <h2 class="h4 px-1">Summons</h2>
     <p class="mb-2 px-1 text-sm opacity-70">Main Deck monsters whose ATK equals their own DEF and share this Attribute.</p>
     <p class="px-1 text-sm" data-testid="gizmekuka-summons-count">
-      {filteredSummons.length} summons{#if filterActive && filteredSummons.length < summons.length}<span class="opacity-60">{` (of ${summons.length})`}</span>{/if}
+      {filteredSummons.length} summons{#if filterActive && filteredSummons.length < summons.length}<span class="opacity-60"
+          >{` (of ${summons.length})`}</span
+        >{/if}
     </p>
 
     {@render listPaginator('summon', safeSummonPage, summonTotalPages)}
@@ -155,7 +157,9 @@
     {#if selectedCanBeSummon}
       <p class="mb-2 px-1 text-sm opacity-70">Face-up monsters that share this Attribute — legal if the selected card is the summon.</p>
       <p class="px-1 text-sm" data-testid="gizmekuka-targets-count">
-        {filteredTargets.length} targets{#if filterActive && filteredTargets.length < targets.length}<span class="opacity-60">{` (of ${targets.length})`}</span>{/if}
+        {filteredTargets.length} targets{#if filterActive && filteredTargets.length < targets.length}<span class="opacity-60"
+            >{` (of ${targets.length})`}</span
+          >{/if}
       </p>
 
       {@render listPaginator('target', safeTargetPage, targetTotalPages)}

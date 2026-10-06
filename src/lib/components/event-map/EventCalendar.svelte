@@ -87,7 +87,8 @@
 
   /**
    * Builds the event card:
-   *   10:00 AM [Remote] Host name          [Advanced] [Genesys]
+   *   10:00 AM Host name
+   *   [Remote] [Advanced] [Genesys]
    *   📍 Venue name
    *      Street address, City, ST ZIP
    *   ✉ contact@email
@@ -105,16 +106,16 @@
       if (info && !info.same) time.classList.add('ev-time-converts');
       head.appendChild(time);
     }
-    if (e.isRemote) head.appendChild(el_('span', 'ev-chip ev-chip-remote', 'Remote'));
     head.appendChild(el_('span', 'ev-host', e.host));
     title.appendChild(head);
 
-    if (e.formats.length) {
-      const formats = el_('div', 'ev-formats');
-      for (const f of e.formats) {
-        formats.appendChild(el_('span', `ev-chip ev-chip-${f.toLowerCase()}`, f));
+    const chips = [...(e.isRemote ? ['Remote'] : []), ...e.formats];
+    if (chips.length) {
+      const row = el_('div', 'ev-formats');
+      for (const label of chips) {
+        row.appendChild(el_('span', `ev-chip ev-chip-${label.toLowerCase()}`, label));
       }
-      title.appendChild(formats);
+      title.appendChild(row);
     }
     card.appendChild(title);
 

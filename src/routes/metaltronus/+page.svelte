@@ -87,11 +87,11 @@
   keywords="yugioh, ygo, metaltronus, type, attribute, atk, Yu-Gi-Oh!"
   author="AntiTcb" />
 
-<div class="card mx-auto my-2 w-full max-w-3xl p-3 sm:p-4">
+<div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Metaltronus Helper</h1>
   <p class="mb-4 text-sm opacity-80">
-    Pick any non-Token monster — the one your opponent controls, or the one you want to Special Summon. The list shows every monster that shares two or
-    more of Type, Attribute, and/or ATK. Those are legal summons if the selected card is the target, or legal targets if it is the summon.
+    Pick any non-Token monster — the one your opponent controls, or the one you want to Special Summon. The list shows every monster that shares two
+    or more of Type, Attribute, and/or ATK. Those are legal summons if the selected card is the target, or legal targets if it is the summon.
   </p>
 
   <MonsterCardPicker
