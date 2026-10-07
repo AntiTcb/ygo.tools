@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { searchPlaces, type Place } from '$lib/event-map/mapbox';
-  import type { Region } from '$lib/event-map/types';
+  import { searchPlaces, type Place } from '#lib/event-map/mapbox.js';
+  import type { Region } from '#lib/event-map/types.js';
   import { Combobox, Portal, useListCollection, type ComboboxRootProps } from '@skeletonlabs/skeleton-svelte';
   import LoaderIcon from '~icons/lucide/loader-circle';
   import LocateFixedIcon from '~icons/lucide/locate-fixed';

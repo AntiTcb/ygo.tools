@@ -1,5 +1,5 @@
-import { GIZMEK_UKA_EXCLUDED_FRAME_TYPE_IDS, isLegalGizmekUkaMonster } from '$lib/db/gizmekuka';
-import { isTokenFrameName } from '$lib/db/metaltronus';
+import { GIZMEK_UKA_EXCLUDED_FRAME_TYPE_IDS, isLegalGizmekUkaMonster } from '#lib/db/gizmekuka.js';
+import { isTokenFrameName } from '#lib/db/metaltronus.js';
 import type { PageServerLoad } from './$types';
 
 const CARD_SELECT = 'id,name,effect_text,frame_type_id,atk,def,level,attribute_id,species_id,link_rating,pend_scale_l,pend_scale_r';

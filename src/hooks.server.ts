@@ -1,12 +1,12 @@
-import { env as secretEnv } from '$env/dynamic/private';
-import { env } from '$env/dynamic/public';
-import type { Database } from '$lib/db/database.types';
+import type { Handle } from '@sveltejs/kit/hooks';
+import { SUPABASE_SERVICE_KEY } from '$app/env/private';
+import { PUBLIC_SUPABASE_URL } from '$app/env/public';
+import type { Database } from '#lib/db/database.types.js';
 import { createServerClient } from '@supabase/ssr';
-import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const supabaseUrl = env.PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = secretEnv.SUPABASE_SERVICE_KEY;
+  const supabaseUrl = PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = SUPABASE_SERVICE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error('Missing PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');

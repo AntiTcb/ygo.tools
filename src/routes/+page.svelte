@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { HOME_HELPER_TILES, HOME_TOOL_TILES } from '$lib/home/homeTiles';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { HOME_HELPER_TILES, HOME_TOOL_TILES } from '#lib/home/homeTiles.js';
   import Seo from 'sk-seo';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';

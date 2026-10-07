@@ -1,4 +1,4 @@
-import type { EventType, Region } from '$lib/event-map/types';
+import type { EventType, Region } from '#lib/event-map/types.js';
 
 export const REGIONALS_URL = 'https://www.yugioh-card.com/en/events/regional-locations/';
 export const OTS_URL = 'https://www.yugioh-card.com/en/events/otschampionship/otschamp_locations/';

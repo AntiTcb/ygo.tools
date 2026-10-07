@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import { browser } from '$app/env';
   import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { findMetaltronusMatches, METALTRONUS_PROPERTY_LABELS } from '$lib/db/metaltronus';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { findMetaltronusMatches, METALTRONUS_PROPERTY_LABELS } from '#lib/db/metaltronus.js';
   import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
   import type { PageProps } from './$types';
@@ -176,17 +176,15 @@
       class="btn preset-tonal-surface btn-sm"
       data-testid="metaltronus-page-prev"
       disabled={safePage <= 1}
-      onclick={() => (params.page = Math.max(1, safePage - 1))}>
-      Prev
-    </button>
+      onclick={() => (params.page = Math.max(1, safePage - 1))}>Prev</button>
+
     <span class="text-sm tabular-nums" data-testid="metaltronus-page-label">Page {safePage} of {totalPages}</span>
+
     <button
       type="button"
       class="btn preset-tonal-surface btn-sm"
       data-testid="metaltronus-page-next"
       disabled={safePage >= totalPages}
-      onclick={() => (params.page = Math.min(totalPages, safePage + 1))}>
-      Next
-    </button>
+      onclick={() => (params.page = Math.min(totalPages, safePage + 1))}>Next</button>
   </div>
 {/snippet}

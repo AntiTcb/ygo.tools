@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import { browser } from '$app/env';
   import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
   import {
     findExactBridges,
     findExactTargets,
@@ -10,7 +10,7 @@
     isExactOneBridge,
     SMALL_WORLD_PROPERTY_LABELS,
     type SmallWorldProperty,
-  } from '$lib/db/smallWorld';
+  } from '#lib/db/smallWorld.js';
   import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
   import type { PageProps } from './$types';
@@ -246,17 +246,15 @@
       class="btn preset-tonal-surface btn-sm"
       data-testid="smallworld-page-prev"
       disabled={safePage <= 1}
-      onclick={() => (params.page = Math.max(1, safePage - 1))}>
-      Prev
-    </button>
+      onclick={() => (params.page = Math.max(1, safePage - 1))}>Prev</button>
+
     <span class="text-sm tabular-nums" data-testid="smallworld-page-label">Page {safePage} of {totalPages}</span>
+
     <button
       type="button"
       class="btn preset-tonal-surface btn-sm"
       data-testid="smallworld-page-next"
       disabled={safePage >= totalPages}
-      onclick={() => (params.page = Math.min(totalPages, safePage + 1))}>
-      Next
-    </button>
+      onclick={() => (params.page = Math.min(totalPages, safePage + 1))}>Next</button>
   </div>
 {/snippet}

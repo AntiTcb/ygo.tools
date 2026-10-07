@@ -1,9 +1,9 @@
-import { buildIcs } from '$lib/event-map/calendar-links';
-import { addDays, today } from '$lib/event-map/dates';
-import { applyFilters, parseFilters } from '$lib/event-map/filters';
-import { EVENT_TYPE_LABELS, REGIONS, parseRegion } from '$lib/event-map/types';
-import { eventMapDb } from '$lib/server/event-map/db';
-import { listEvents } from '$lib/server/event-map/events';
+import { buildIcs } from '#lib/event-map/calendar-links.js';
+import { addDays, today } from '#lib/event-map/dates.js';
+import { applyFilters, parseFilters } from '#lib/event-map/filters.js';
+import { EVENT_TYPE_LABELS, REGIONS, parseRegion } from '#lib/event-map/types.js';
+import { eventMapDb } from '#lib/server/event-map/db.js';
+import { listEvents } from '#lib/server/event-map/events.js';
 import type { RequestHandler } from './$types';
 
 /**

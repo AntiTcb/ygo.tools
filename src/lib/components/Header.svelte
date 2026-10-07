@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { version } from '$app/environment';
-  import SiteLogo from '$lib/assets/logo.png';
+  import { version } from '$app/env';
+  import SiteLogo from '#lib/assets/logo.png';
   import GitHubIcon from '~icons/mdi/github-box';
 </script>
 
