@@ -49,8 +49,7 @@ export const getMetaltronusSharedProperties = (a: MetaltronusCard, b: Metaltronu
   return shared;
 };
 
-export const isMetaltronusMatch = (a: MetaltronusCard, b: MetaltronusCard): boolean =>
-  getMetaltronusSharedProperties(a, b).length >= 2;
+export const isMetaltronusMatch = (a: MetaltronusCard, b: MetaltronusCard): boolean => getMetaltronusSharedProperties(a, b).length >= 2;
 
 export type MetaltronusMatch<T extends MetaltronusCard = MetaltronusCard> = T & {
   shared: MetaltronusProperty[];

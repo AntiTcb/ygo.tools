@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { COMMON_REGEX_FLAGS, compileRegex, normalizeRegexFlags, toggleRegexFlag } from '$lib/db/regexSearch';
+  import { COMMON_REGEX_FLAGS, compileRegex, normalizeRegexFlags, toggleRegexFlag } from '#lib/db/regexSearch.js';
 
   type Props = {
     label: string;

@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types/index';
-import { eventTimeZone } from '$lib/event-map/event-time';
-import type { EventItem, EventType, Region } from '$lib/event-map/types';
+import { eventTimeZone } from '#lib/event-map/event-time.js';
+import type { EventItem, EventType, Region } from '#lib/event-map/types.js';
 
 interface EventRow {
   id: string;

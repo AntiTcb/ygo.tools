@@ -30,9 +30,7 @@ test.describe('/damagecalc shareable state', () => {
     await page.goto(sharedUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('#attacking #atk')).toHaveValue('3000');
     await expect(page.locator('#defending #atk')).toHaveValue('2000');
-    await expect(
-      page.getByTestId('damagecalc-attacking').getByRole('checkbox', { name: /inflicts double battle damage/i }),
-    ).toBeChecked();
+    await expect(page.getByTestId('damagecalc-attacking').getByRole('checkbox', { name: /inflicts double battle damage/i })).toBeChecked();
     await expect(page.getByTestId('damagecalc-b-battle')).toHaveText('2000');
   });
 });

@@ -8,12 +8,12 @@
   import LocationControl from '$components/event-map/LocationControl.svelte';
   import SubscribeDialog from '$components/event-map/SubscribeDialog.svelte';
   import '$components/event-map/event-map.css';
-  import { buildIcs } from '$lib/event-map/calendar-links';
-  import { overlapsRange, today, weekendOf } from '$lib/event-map/dates';
-  import { applyFilters, filtersToParams, parseFilters, type Filters } from '$lib/event-map/filters';
-  import { areaOf, MAP_AREAS } from '$lib/event-map/map-areas';
-  import { drivingRoute, type Place, type Route } from '$lib/event-map/mapbox';
-  import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '$lib/event-map/types';
+  import { buildIcs } from '#lib/event-map/calendar-links.js';
+  import { overlapsRange, today, weekendOf } from '#lib/event-map/dates.js';
+  import { applyFilters, filtersToParams, parseFilters, type Filters } from '#lib/event-map/filters.js';
+  import { areaOf, MAP_AREAS } from '#lib/event-map/map-areas.js';
+  import { drivingRoute, type Place, type Route } from '#lib/event-map/mapbox.js';
+  import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '#lib/event-map/types.js';
   import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
   import Seo from 'sk-seo';
   import { fly } from 'svelte/transition';

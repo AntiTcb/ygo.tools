@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { Calendar, CalendarOptions, EventInput } from 'fullcalendar';
-  import { addDays, formatDate, formatTime, overlapsRange } from '$lib/event-map/dates';
-  import { describeEventTime, eventTimeHint } from '$lib/event-map/event-time';
-  import type { CalendarRange, EventItem } from '$lib/event-map/types';
+  import { addDays, formatDate, formatTime, overlapsRange } from '#lib/event-map/dates.js';
+  import { describeEventTime, eventTimeHint } from '#lib/event-map/event-time.js';
+  import type { CalendarRange, EventItem } from '#lib/event-map/types.js';
   // Raw SVG strings: the calendar renders its cards as plain DOM nodes.
   import ChevronLeft from '~icons/lucide/chevron-left?raw';
   import ChevronRight from '~icons/lucide/chevron-right?raw';

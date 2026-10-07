@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ATTRIBUTES, CARD_TYPES, SPELLTRAP_SUBTYPES } from '$lib/db/cardEnums';
-  import type { Condition, RuleNode } from '$lib/db/cardFilterRule';
+  import { ATTRIBUTES, CARD_TYPES, SPELLTRAP_SUBTYPES } from '#lib/db/cardEnums.js';
+  import type { Condition, RuleNode } from '#lib/db/cardFilterRule.js';
   import Self from './CardFilterRuleEditor.svelte';
   import LinkArrowMaskPicker from './LinkArrowMaskPicker.svelte';
 

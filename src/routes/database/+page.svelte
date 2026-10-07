@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import { browser } from '$app/env';
   import CardFilterBuilder from '$components/CardFilterBuilder.svelte';
   import RegexSearchField from '$components/RegexSearchField.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { evalRuleNode, type CardFilterRow } from '$lib/db/cardFilterEval';
-  import { isStatFilterEmpty, resolveVirtualRuleTree, treeNeedsClientEval } from '$lib/db/cardFilterResolve';
-  import { validateRuleLimits, type RuleNode } from '$lib/db/cardFilterRule';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { compileRegex } from '$lib/db/regexSearch';
-  import { filterNeuronCardIds } from '$lib/rpc/filterCards.remote';
-  import { searchSbCards } from '$lib/rpc/searchSupabaseCards.remote';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { evalRuleNode, type CardFilterRow } from '#lib/db/cardFilterEval.js';
+  import { isStatFilterEmpty, resolveVirtualRuleTree, treeNeedsClientEval } from '#lib/db/cardFilterResolve.js';
+  import { validateRuleLimits, type RuleNode } from '#lib/db/cardFilterRule.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { compileRegex } from '#lib/db/regexSearch.js';
+  import { filterNeuronCardIds } from '#lib/rpc/filterCards.remote.js';
+  import { searchSbCards } from '#lib/rpc/searchSupabaseCards.remote.js';
   import { useSearchParams } from 'runed/kit';
   import { untrack } from 'svelte';
   import { toast } from 'svelte-sonner';

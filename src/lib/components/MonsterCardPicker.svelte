@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends { id: number; name: string }">
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
 
   type Props = {
     candidates: T[];

@@ -1,5 +1,5 @@
 import { parse, type HTMLElement } from 'node-html-parser';
-import type { EventType, Region } from '$lib/event-map/types';
+import type { EventType, Region } from '#lib/event-map/types.js';
 import type { EventListSource, TablePressSource } from './sources';
 
 export interface ScrapedVenue {

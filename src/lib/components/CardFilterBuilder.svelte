@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { countRuleLeaves, type RuleNode } from '$lib/db/cardFilterRule';
+  import { countRuleLeaves, type RuleNode } from '#lib/db/cardFilterRule.js';
   import CardFilterRuleEditor from './CardFilterRuleEditor.svelte';
 
   type Lookups = {

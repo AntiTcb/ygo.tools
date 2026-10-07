@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  battleModifiersParamsSchema,
-  damagecalcSearchParamsSchema,
-  monsterParamsSchema,
-} from './damagecalcSearchParams.schema';
+import { battleModifiersParamsSchema, damagecalcSearchParamsSchema, monsterParamsSchema } from './damagecalcSearchParams.schema';
 
 describe('damagecalcSearchParamsSchema', () => {
   it('fills defaults for an empty object', () => {

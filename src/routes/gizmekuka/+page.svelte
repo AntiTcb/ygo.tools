@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import { browser } from '$app/env';
   import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { findGizmekUkaSummons, findGizmekUkaTargets, isLegalGizmekUkaSummon } from '$lib/db/gizmekuka';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { findGizmekUkaSummons, findGizmekUkaTargets, isLegalGizmekUkaSummon } from '#lib/db/gizmekuka.js';
   import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
   import type { PageProps } from './$types';
@@ -187,18 +187,16 @@
       class="btn preset-tonal-surface btn-sm"
       data-testid="gizmekuka-{kind}-page-prev"
       disabled={safePage <= 1}
-      onclick={() => (params[pageKey] = Math.max(1, safePage - 1))}>
-      Prev
-    </button>
+      onclick={() => (params[pageKey] = Math.max(1, safePage - 1))}>Prev</button>
+
     <span class="text-sm tabular-nums" data-testid="gizmekuka-{kind}-page-label">Page {safePage} of {totalPages}</span>
+
     <button
       type="button"
       class="btn preset-tonal-surface btn-sm"
       data-testid="gizmekuka-{kind}-page-next"
       disabled={safePage >= totalPages}
-      onclick={() => (params[pageKey] = Math.min(totalPages, safePage + 1))}>
-      Next
-    </button>
+      onclick={() => (params[pageKey] = Math.min(totalPages, safePage + 1))}>Next</button>
   </div>
 {/snippet}
 

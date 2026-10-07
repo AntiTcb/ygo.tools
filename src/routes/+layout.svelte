@@ -4,8 +4,8 @@
   import Footer from '$components/Footer.svelte';
   import Header from '$components/Header.svelte';
   import Sidebar from '$components/Sidebar.svelte';
-  import { setArtworksState } from '$lib/assets/yugiohArtwork.svelte';
-  import { isNavActive } from '$lib/nav/isNavActive';
+  import { setArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { isNavActive } from '#lib/nav/isNavActive.js';
   import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import { Toaster } from 'svelte-sonner';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';

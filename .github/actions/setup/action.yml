@@ -5,7 +5,7 @@ inputs:
   install-playwright:
     description: Install Playwright Chromium browsers
     required: false
-    default: "false"
+    default: 'false'
 
 runs:
   using: composite
