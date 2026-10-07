@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildIcs, eventSpan, googleCalendarUrl, outlookCalendarUrl } from './calendar-links';
 import { formatDateRange, formatTime, formatWeekend, nextWeekend, overlapsRange, weekendOf } from './dates';
-import { applyFilters, filtersToParams, parseFilters } from './filters';
+import { applyFilters, DEFAULT_RADIUS, effectiveRadius, filtersToParams, parseFilters } from './filters';
 import { areaOf } from './map-areas';
 import { describeEventTime, eventTimeZone, zonedTimeToUtc } from './event-time';
 import type { EventItem } from './types';
@@ -93,6 +93,23 @@ describe('filters', () => {
       today: '2026-10-05',
     });
     expect(upcoming.map((e) => e.id)).not.toContain('d');
+  });
+
+  it('defaults to a radius once a starting point is set, unless "any" is chosen', () => {
+    const near = event({ id: 'near' });
+    const far = event({ id: 'far', venue: { ...event().venue!, lat: 47.6, lng: -122.3 } });
+    const ctx = { origin: { lat: 30.8, lng: -84.6 }, unit: 'mi' as const, today: '2026-10-05' };
+
+    const defaults = parseFilters(new URLSearchParams());
+    expect(effectiveRadius(defaults, true, 'mi')).toBe(DEFAULT_RADIUS.mi);
+    expect(effectiveRadius(defaults, false, 'mi')).toBeNull();
+    expect(applyFilters([near, far], defaults, ctx).map((e) => e.id)).toEqual(['near']);
+
+    const any = parseFilters(new URLSearchParams('radius=any'));
+    expect(any.radius).toBe('any');
+    expect(filtersToParams(any).toString()).toBe('radius=any');
+    expect(effectiveRadius(any, true, 'mi')).toBeNull();
+    expect(applyFilters([near, far], any, ctx).map((e) => e.id)).toEqual(['near', 'far']);
   });
 });
 

@@ -14,9 +14,11 @@
     region: Region;
     filters: Filters;
     origin: LngLat | null;
+    /** Distance filter in effect (see effectiveRadius), or null. */
+    radius: number | null;
   }
 
-  let { region, filters, origin }: Props = $props();
+  let { region, filters, origin, radius }: Props = $props();
 
   let copied = $state(false);
 
@@ -24,7 +26,8 @@
     // Weekend/past filters don't make sense for a rolling feed.
     const params = filtersToParams({ ...filters, weekend: null, past: false });
     for (const [key, value] of regionParams(region)) params.set(key, value);
-    if (filters.radius && origin) {
+    if (radius && origin) {
+      params.set('radius', String(radius));
       params.set('lat', origin.lat.toFixed(3));
       params.set('lng', origin.lng.toFixed(3));
     } else {
@@ -62,8 +65,8 @@
           <Dialog.CloseTrigger class="btn-icon hover:preset-tonal" aria-label="Close"><XIcon class="size-4" /></Dialog.CloseTrigger>
         </header>
         <Dialog.Description class="text-sm opacity-80">
-          Add a calendar that stays in sync with the current filters (type, format, state{filters.radius && origin ? ', distance' : ''}). New events
-          show up automatically after each refresh.
+          Add a calendar that stays in sync with the current filters (type, format, state{radius && origin ? ', distance' : ''}). New events show up
+          automatically after each refresh.
         </Dialog.Description>
 
         <div class="flex">
@@ -87,7 +90,7 @@
             ><ExternalLinkIcon class="size-4" />Outlook</a>
           <a class="btn btn-sm preset-outlined-primary-500" href={webcalUrl}><CalendarSyncIcon class="size-4" />Apple Calendar</a>
         </div>
-        {#if filters.radius && origin}
+        {#if radius && origin}
           <p class="text-xs opacity-60">The link includes your approximate starting point (rounded to ~100 m) to apply the distance filter.</p>
         {/if}
       </Dialog.Content>

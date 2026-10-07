@@ -57,14 +57,32 @@
     timer = setTimeout(() => search(text), SEARCH_DEBOUNCE_MS);
   };
 
-  const onValueChange: ComboboxRootProps['onValueChange'] = (e) => {
-    const place = places.find((p) => p.label === e.value[0]);
-    if (!place) return;
+  const choose = (place: Place) => {
+    clearTimeout(timer);
     query = '';
     places = [];
     message = null;
     onchange(place);
   };
+
+  const onValueChange: ComboboxRootProps['onValueChange'] = (e) => {
+    const place = places.find((p) => p.label === e.value[0]);
+    if (place) choose(place);
+  };
+
+  // Typing a city and pressing Enter (or Go on a phone keyboard) without picking
+  // a suggestion would otherwise leave no starting point set.
+  let highlighted = $state<string | null>(null);
+  const onkeydown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter' || highlighted) return;
+    const first = places[0];
+    if (!first) return;
+    e.preventDefault();
+    choose(first);
+  };
+
+  /** Text typed but no place picked yet. */
+  const pending = $derived(query.trim().length >= MIN_QUERY_LENGTH && places.length > 0);
 
   const locate = () => {
     if (!('geolocation' in navigator)) {
@@ -97,6 +115,7 @@
     value={[]}
     {onInputValueChange}
     {onValueChange}
+    onHighlightChange={(e) => (highlighted = e.highlightedValue)}
     placeholder="City, ZIP or address"
     inputBehavior="none"
     selectionBehavior="clear"
@@ -104,7 +123,7 @@
     <Combobox.Label class="text-xs font-medium">Starting point</Combobox.Label>
     <div class="flex">
       <Combobox.Control class="grow">
-        <Combobox.Input class="rounded-r-none text-sm" data-testid="event-map-location-search" />
+        <Combobox.Input class="rounded-r-none text-sm" data-testid="event-map-location-search" {onkeydown} />
         {#if searching}<LoaderIcon class="size-4 shrink-0 animate-spin opacity-60" />{/if}
       </Combobox.Control>
       <button
@@ -143,5 +162,9 @@
         onclick={() => onchange(null)}><XIcon class="size-3.5" /></button>
     </div>
   {/if}
-  {#if message}<p class="text-warning-400 text-xs">{message}</p>{/if}
+  {#if message}
+    <p class="text-warning-400 text-xs">{message}</p>
+  {:else if pending}
+    <p class="text-warning-400 text-xs" data-testid="event-map-location-pending">Pick a place from the list to set your starting point.</p>
+  {/if}
 </div>
