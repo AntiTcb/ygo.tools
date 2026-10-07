@@ -11,7 +11,7 @@ describe('sortTilesByTitle', () => {
 
 describe('HOME_TOOL_TILES / HOME_HELPER_TILES', () => {
   it('keeps tool tiles in alphabetical title order', () => {
-    expect(HOME_TOOL_TILES.map((t) => t.title)).toEqual(['Card Database', 'Damage Calculation Calculator']);
+    expect(HOME_TOOL_TILES.map((t) => t.title)).toEqual(['Card Database', 'Damage Calculation Calculator', 'Event Map']);
   });
 
   it('keeps helper tiles in alphabetical title order with card art ids', () => {

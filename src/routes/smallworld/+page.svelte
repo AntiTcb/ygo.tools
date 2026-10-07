@@ -4,12 +4,12 @@
   import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
   import { buildCardStatLine } from '$lib/db/cardStatDisplay';
   import {
-      findExactBridges,
-      findExactTargets,
-      getSharedProperties,
-      isExactOneBridge,
-      SMALL_WORLD_PROPERTY_LABELS,
-      type SmallWorldProperty,
+    findExactBridges,
+    findExactTargets,
+    getSharedProperties,
+    isExactOneBridge,
+    SMALL_WORLD_PROPERTY_LABELS,
+    type SmallWorldProperty,
   } from '$lib/db/smallWorld';
   import { useSearchParams } from 'runed/kit';
   import Seo from 'sk-seo';
@@ -25,7 +25,7 @@
     pushHistory: false,
     debounce: 300,
     noScroll: true,
-    compress: true
+    compress: true,
   });
 
   const artworks = getArtworksState();
@@ -137,7 +137,7 @@
   keywords="yugioh, ygo, small world, bridge, search, Yu-Gi-Oh!"
   author="AntiTcb" />
 
-<div class="card mx-auto my-2 w-full max-w-3xl p-3 sm:p-4">
+<div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Small World Helper</h1>
   <p class="mb-4 text-sm opacity-80">
     Reveal a monster from hand, then choose a deck monster that shares exactly one property (Type, Attribute, Level/Rank, ATK, or DEF). The tool lists

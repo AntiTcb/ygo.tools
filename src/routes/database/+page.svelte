@@ -285,7 +285,7 @@
   const showingCapped = $derived(displayedCards.length > MAX_VISIBLE_RESULTS);
 </script>
 
-<div class="card mx-auto my-2 w-full p-3 sm:p-4">
+<div class="card mx-auto w-full p-3 sm:p-4">
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start">
     <div class="flex flex-col gap-4">
       <label class="label flex flex-col gap-1">

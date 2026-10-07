@@ -24,7 +24,9 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'pnpm dev --port 5174',
+    // Apply /event-map's D1 migrations to the local database first: a fresh checkout
+    // (e.g. CI) has no tables, and the dev server must see the schema from its first request.
+    command: 'pnpm event-map:migrate:local && pnpm dev --port 5174',
     cwd: root,
     url: 'https://localhost:5174',
     reuseExistingServer: !process.env.CI,

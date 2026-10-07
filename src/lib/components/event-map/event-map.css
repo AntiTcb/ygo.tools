@@ -1,0 +1,200 @@
+/*
+ * Styles for /event-map only (imported by its +page.svelte), so the map and
+ * calendar libraries' CSS never loads on other pages.
+ */
+@import 'mapbox-gl/dist/mapbox-gl.css';
+@import 'fullcalendar/skeleton.css';
+@import 'fullcalendar/themes/classic/theme.css';
+@import 'fullcalendar/themes/classic/palette.css';
+
+.event-map {
+  /* Event colours, shared by the calendar, map pins, chips and legend. */
+  --ev-regional: var(--color-primary-500);
+  --ev-ots: var(--color-warning-500);
+  --ev-ycs: var(--color-tertiary-500);
+  --ev-remote: var(--color-secondary-400);
+  --ev-advanced: var(--color-error-400);
+  --ev-advanced-contrast: var(--color-error-contrast-400);
+  --ev-genesys: var(--color-success-500);
+  --ev-genesys-contrast: var(--color-success-contrast-500);
+  --ev-remote-contrast: var(--color-secondary-contrast-400);
+  --ev-route: var(--color-success-400);
+
+  /* FullCalendar's classic theme, driven by the Skeleton (cerberus) surface palette. */
+  --fc-classic-button: var(--color-surface-800);
+  --fc-classic-button-border: var(--color-surface-700);
+  --fc-classic-button-strong: var(--color-primary-500);
+  --fc-classic-button-strong-border: var(--color-primary-500);
+  --fc-classic-button-foreground: var(--color-surface-50);
+  --fc-classic-primary: var(--color-primary-500);
+  --fc-classic-primary-foreground: var(--color-primary-contrast-500);
+  --fc-classic-background: var(--color-surface-900);
+  --fc-classic-foreground: var(--color-surface-50);
+  --fc-classic-border: color-mix(in oklab, var(--color-surface-50) 12%, transparent);
+  --fc-classic-strong-border: color-mix(in oklab, var(--color-surface-50) 28%, transparent);
+  --fc-classic-faint: color-mix(in oklab, var(--color-surface-50) 4%, transparent);
+  --fc-classic-muted: color-mix(in oklab, var(--color-surface-50) 8%, transparent);
+  --fc-classic-strong: color-mix(in oklab, var(--color-surface-50) 14%, transparent);
+  --fc-classic-today: color-mix(in oklab, var(--color-warning-500) 12%, transparent);
+  --fc-classic-highlight: color-mix(in oklab, var(--color-primary-500) 18%, transparent);
+  --fc-classic-muted-foreground: color-mix(in oklab, var(--color-surface-50) 60%, transparent);
+  --fc-classic-faint-foreground: color-mix(in oklab, var(--color-surface-50) 40%, transparent);
+}
+
+/* FullCalendar's pressed view button (Month/Week/List) uses the primary colour; match its text. */
+.event-map .ygo-calendar [role='tab'][aria-selected='true'] {
+  color: var(--color-primary-contrast-500);
+}
+
+/* Calendar event cards (rendered by EventCalendar.svelte's eventContent). */
+.ev-card {
+  --ev: var(--ev-regional);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.375rem;
+  border-left: 4px solid var(--ev);
+  border-radius: 0.375rem;
+  background: color-mix(in oklab, var(--ev) 18%, var(--color-surface-900));
+  color: var(--color-surface-50);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: normal;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    box-shadow 120ms;
+}
+.ev-card:hover {
+  background: color-mix(in oklab, var(--ev) 28%, var(--color-surface-900));
+}
+.ev-card.ev-ots {
+  --ev: var(--ev-ots);
+}
+.ev-card.ev-ycs {
+  --ev: var(--ev-ycs);
+}
+.ev-card.ev-remote {
+  --ev: var(--ev-remote);
+}
+.ev-card.ev-selected {
+  background: color-mix(in oklab, var(--ev) 36%, var(--color-surface-900));
+  box-shadow:
+    0 0 0 2px var(--color-surface-900),
+    0 0 0 4px var(--ev);
+}
+.ev-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  font-weight: 600;
+}
+.ev-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem 0.375rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ev-formats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+.ev-time {
+  color: color-mix(in oklab, var(--ev) 55%, var(--color-surface-50));
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ev-time-converts {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.ev-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  opacity: 0.85;
+}
+.ev-where {
+  align-items: flex-start;
+}
+.ev-where .ev-icon {
+  margin-top: 0.125rem;
+}
+.ev-where-lines {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ev-venue {
+  font-weight: 500;
+}
+.ev-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ev-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ev);
+}
+.ev-icon svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.ev-chip {
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.ev-chip-advanced {
+  background: var(--ev-advanced);
+  color: var(--ev-advanced-contrast);
+}
+.ev-chip-genesys {
+  background: var(--ev-genesys);
+  color: var(--ev-genesys-contrast);
+}
+.ev-chip-remote {
+  background: var(--ev-remote);
+  color: var(--ev-remote-contrast);
+}
+
+/*
+ * FullCalendar paints its own event background/border (on hashed class names in
+ * v7); `ev-host` is added via eventClass so the card can own both.
+ */
+.ev-host,
+.ev-host > * {
+  border-color: transparent !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Starting-point marker on the map (EventMap.svelte). */
+.origin-marker {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-surface-900);
+  border-radius: 999px;
+  background: var(--color-surface-50);
+  color: var(--color-primary-600);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.45);
+}
+.origin-marker svg {
+  width: 1rem;
+  height: 1rem;
+}
