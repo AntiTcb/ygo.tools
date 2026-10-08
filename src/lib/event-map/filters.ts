@@ -11,13 +11,25 @@ export interface Filters {
   /** Saturday of the selected weekend (YYYY-MM-DD), or null for all dates. */
   weekend: string | null;
   state: string | null;
-  /** Radius in the region's distance unit. Only applied when an origin is known. */
-  radius: number | null;
+  /**
+   * Radius in the region's distance unit, only applied when an origin is known.
+   * `'any'` turns the distance filter off; null means DEFAULT_RADIUS.
+   */
+  radius: number | 'any' | null;
   /** Include events before today. */
   past: boolean;
 }
 
 const EVENT_TYPES: EventType[] = ['regional', 'ots', 'ycs'];
+
+/** Distance applied once a starting point is set, until the viewer picks another. */
+export const DEFAULT_RADIUS: Record<'mi' | 'km', number> = { mi: 100, km: 200 };
+
+/** The radius actually in effect: a number, or null when distance isn't filtered. */
+export const effectiveRadius = (f: Filters, hasOrigin: boolean, unit: 'mi' | 'km'): number | null => {
+  if (!hasOrigin || f.radius === 'any') return null;
+  return f.radius ?? DEFAULT_RADIUS[unit];
+};
 
 const list = (params: Pick<URLSearchParams, 'get'>, key: string): string[] => {
   return (params.get(key) ?? '').split(',').filter(Boolean);
@@ -25,13 +37,14 @@ const list = (params: Pick<URLSearchParams, 'get'>, key: string): string[] => {
 
 export const parseFilters = (params: Pick<URLSearchParams, 'get'>): Filters => {
   const weekend = params.get('weekend');
-  const radius = Number(params.get('radius'));
+  const rawRadius = params.get('radius');
+  const radius = Number(rawRadius);
   return {
     types: list(params, 'type').filter((t): t is EventType => EVENT_TYPES.includes(t as EventType)),
     formats: list(params, 'format'),
     weekend: weekend && /^\d{4}-\d{2}-\d{2}$/.test(weekend) ? weekend : null,
     state: params.get('state') || null,
-    radius: radius > 0 ? radius : null,
+    radius: rawRadius === 'any' ? 'any' : radius > 0 ? radius : null,
     past: params.get('past') === '1',
   };
 };
@@ -56,7 +69,8 @@ export interface FilterContext {
 
 export const applyFilters = (events: EventItem[], f: Filters, ctx: FilterContext): EventItem[] => {
   const cutoff = ctx.today ?? today();
-  const radiusKm = f.radius && ctx.origin ? fromUnit(f.radius, ctx.unit) : null;
+  const radius = effectiveRadius(f, !!ctx.origin, ctx.unit);
+  const radiusKm = radius !== null ? fromUnit(radius, ctx.unit) : null;
 
   return events.filter((e) => {
     if (!f.past && !f.weekend && (e.endDate ?? e.date) < cutoff) return false;

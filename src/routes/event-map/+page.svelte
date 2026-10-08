@@ -10,7 +10,7 @@
   import '$components/event-map/event-map.css';
   import { buildIcs } from '$lib/event-map/calendar-links';
   import { overlapsRange, today, weekendOf } from '$lib/event-map/dates';
-  import { applyFilters, filtersToParams, parseFilters, type Filters } from '$lib/event-map/filters';
+  import { applyFilters, effectiveRadius, filtersToParams, parseFilters, type Filters } from '$lib/event-map/filters';
   import { areaOf, MAP_AREAS } from '$lib/event-map/map-areas';
   import { drivingRoute, type Place, type Route } from '$lib/event-map/mapbox';
   import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '$lib/event-map/types';
@@ -26,6 +26,7 @@
   import ListChecksIcon from '~icons/lucide/list-checks';
   import ListXIcon from '~icons/lucide/list-x';
   import RefreshIcon from '~icons/lucide/refresh-cw';
+  import RulerIcon from '~icons/lucide/ruler';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -56,7 +57,7 @@
     } catch {
       // Storage unavailable; the origin still applies for this visit.
     }
-    if (!place && filters.radius) setFilters({ ...filters, radius: null });
+    if (!place && filters.radius !== null) setFilters({ ...filters, radius: null });
   };
 
   /** Writes filters to the URL, keeping the region param. */
@@ -75,6 +76,7 @@
     goto(qs ? `?${qs}` : page.url.pathname, { noScroll: true });
   };
 
+  const radius = $derived(effectiveRadius(filters, !!origin, unit));
   const ctx = $derived({ origin, unit, today: today() });
   const visible = $derived(applyFilters(data.events, filters, ctx));
 
@@ -131,7 +133,7 @@
   });
   const hasPin = (e: EventItem) => !e.isRemote && e.venue?.lat != null;
   const activeInsets = $derived(areas.insets.filter((a) => byArea[a.id]?.some(hasPin)));
-  const fitToEvents = $derived(!!(filters.weekend || filters.state || (filters.radius && origin) || range?.kind === 'week'));
+  const fitToEvents = $derived(!!(filters.weekend || filters.state || radius || range?.kind === 'week'));
 
   const toggleSelected = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -245,7 +247,7 @@
       </SegmentedControl>
     </div>
 
-    <FilterBar {filters} {types} {formats} {states} {weekends} {unit} hasOrigin={!!origin} onchange={setFilters}>
+    <FilterBar {filters} {types} {formats} {states} {weekends} {unit} hasOrigin={!!origin} {radius} onchange={setFilters}>
       {#snippet location()}
         <LocationControl token={data.mapboxToken} region={data.region} {origin} onchange={setOrigin} />
       {/snippet}
@@ -271,7 +273,7 @@
         {/each}
       </ul>
       <div class="flex-1"></div>
-      <SubscribeDialog region={data.region} {filters} {origin} />
+      <SubscribeDialog region={data.region} {filters} {origin} {radius} />
     </div>
   </div>
 
@@ -283,7 +285,13 @@
   {:else if visible.length === 0}
     <div role="alert" class="card preset-tonal-primary flex flex-wrap items-center gap-2 p-3">
       <InfoIcon class="size-5" />
-      <span>No events match these filters.</span>
+      <span>No events match these filters{radius ? ` within ${radius} ${unit} of ${origin?.label ?? 'your starting point'}` : ''}.</span>
+      {#if radius}
+        <button type="button" class="btn btn-sm preset-filled-primary-500" onclick={() => setFilters({ ...filters, radius: 'any' })}>
+          <RulerIcon class="size-4" />
+          Search any distance
+        </button>
+      {/if}
       {#if !filters.past && !filters.weekend}
         <button type="button" class="btn btn-sm preset-filled-primary-500" onclick={() => setFilters({ ...filters, past: true })}>
           <HistoryIcon class="size-4" />

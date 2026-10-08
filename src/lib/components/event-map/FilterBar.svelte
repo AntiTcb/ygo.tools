@@ -17,14 +17,18 @@
     weekends: { key: string; count: number }[];
     unit: 'mi' | 'km';
     hasOrigin: boolean;
+    /** Distance filter in effect (see effectiveRadius), or null. */
+    radius: number | null;
     /** The starting-point control, rendered in the location panel. */
     location: Snippet;
     onchange: (filters: Filters) => void;
   }
 
-  let { filters, types, formats, states, weekends, unit, hasOrigin, location, onchange }: Props = $props();
+  let { filters, types, formats, states, weekends, unit, hasOrigin, radius, location, onchange }: Props = $props();
 
   const RADII = [25, 50, 100, 200, 500];
+  // Include a radius from a shared link even if it isn't one of the presets.
+  const radiusOptions = $derived(radius && !RADII.includes(radius) ? [...RADII, radius].sort((a, b) => a - b) : RADII);
   /**
    * Toggle colours per event type / format when pressed (`!` beats the toggle
    * group's neutral pressed style). A pressed toggle means "only show these";
@@ -61,13 +65,13 @@
         <span class="label-text text-xs font-medium">Distance</span>
         <select
           class="select text-sm"
-          value={filters.radius ?? ''}
+          value={radius ?? 'any'}
           disabled={!hasOrigin}
           title={hasOrigin ? undefined : 'Set a starting point to filter by distance'}
           data-testid="event-map-radius"
-          onchange={(e) => update({ radius: Number(e.currentTarget.value) || null })}>
-          <option value="">Any distance</option>
-          {#each RADII as r (r)}
+          onchange={(e) => update({ radius: Number(e.currentTarget.value) || 'any' })}>
+          <option value="any">Any distance</option>
+          {#each radiusOptions as r (r)}
             <option value={r}>Within {r} {unit}</option>
           {/each}
         </select>

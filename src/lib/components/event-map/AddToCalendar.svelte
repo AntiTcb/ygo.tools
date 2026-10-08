@@ -35,7 +35,7 @@
     <Menu.Positioner class="z-50">
       <Menu.Content>
         {#each targets as target (target.value)}
-          <Menu.Item value={target.value}>
+          <Menu.Item value={target.value} class="my-0!">
             {#if target.download}<DownloadIcon class="size-4 opacity-60" />{:else}<ExternalLinkIcon class="size-4 opacity-60" />{/if}
             <Menu.ItemText>{target.label}</Menu.ItemText>
           </Menu.Item>
