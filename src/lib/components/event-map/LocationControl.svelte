@@ -140,7 +140,7 @@
       <Combobox.Positioner class="z-50">
         <Combobox.Content>
           {#each places as place (place.label)}
-            <Combobox.Item item={place} class="justify-start gap-2 text-sm">
+            <Combobox.Item item={place} class="my-0! justify-start gap-2 text-sm">
               <MapPinIcon class="text-primary-400 size-4 shrink-0" />
               <Combobox.ItemText class="text-left">{place.label}</Combobox.ItemText>
             </Combobox.Item>
