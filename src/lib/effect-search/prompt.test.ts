@@ -80,7 +80,34 @@ describe('validateTagOutput', () => {
       'effects[0].actions[0]: "summoned" is not an action verb',
       'effects[0].actions[0]: unknown zone "moon"',
       'effects[0].actions[0]: stat and stat_mode must be set together',
-      'effects[1]: duplicate card effect_index 0',
+      'effects[1]: duplicate card effect_index 0 (effects from the Pendulum Effect text need "text_source": "pendulum" and their own numbering from 0)',
     ]);
+  });
+
+  it('allows amounts on LP/damage actions but not on other verbs without a stat', () => {
+    const out = tagOutputSchema.parse({
+      effects: [
+        {
+          effect_index: 0,
+          snippet: 's',
+          effect_type: 'activation',
+          actions: [
+            { verb: 'lose_lp', is_cost: true, stat_amount_note: 'half your LP' },
+            { verb: 'inflict_damage', stat_amount: 800 },
+            { verb: 'draw', stat_amount: 2 },
+          ],
+        },
+      ],
+    });
+    expect(validateTagOutput(out, vocab)).toEqual([
+      'effects[0].actions[2]: stat_amount is only for change_stats (with stat) and inflict_damage/gain_lp/lose_lp',
+    ]);
+  });
+});
+
+describe('buildTagJsonSchema text_source', () => {
+  it('requires text_source on effects so Pendulum effects are labelled explicitly', () => {
+    const schema = buildTagJsonSchema(vocab) as { properties: { effects: { items: { required: string[] } } } };
+    expect(schema.properties.effects.items.required).toContain('text_source');
   });
 });

@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { parseArgs, type ParseArgsConfig } from 'node:util';
 import type { Database } from '../../src/lib/db/database.types';
-import { isModelKey, MODELS, workersAiRestClient, type ModelKey } from '../../src/lib/effect-search/ai';
+import { isModelKey, MODELS, workersAiRestClient, type ModelKey, type ReasoningEffort } from '../../src/lib/effect-search/ai';
 import { cardTextHashInput } from '../../src/lib/effect-search/store';
 import type { Db } from '../../src/lib/effect-search/db';
 import { loadVocab } from '../../src/lib/effect-search/db';
@@ -42,20 +42,27 @@ export const parseModel = (key: string): ModelKey => {
   return key;
 };
 
-export const parseReasoning = (v: string | undefined): 'none' | 'high' | undefined => {
+export const parseReasoning = (v: string | undefined): ReasoningEffort | undefined => {
   if (v === undefined) return undefined;
-  if (v !== 'none' && v !== 'high') {
-    console.error('--reasoning must be none or high');
+  if (v !== 'none' && v !== 'low' && v !== 'high') {
+    console.error('--reasoning must be none, low or high');
     process.exit(1);
   }
   return v;
+};
+
+/** The requested effort if the model accepts it, else the model's cheapest level (undefined for non-reasoning models). */
+export const effortFor = (model: ModelKey, requested: ReasoningEffort | undefined): ReasoningEffort | undefined => {
+  const levels: false | readonly ReasoningEffort[] = MODELS[model].reasoning;
+  if (!levels) return undefined;
+  return requested && levels.includes(requested) ? requested : levels[0];
 };
 
 /** Everything `tagCard` needs, built from the live vocabulary. */
 export const taggerConfig = async (
   db: Db,
   model: ModelKey,
-  reasoning: 'none' | 'high' | undefined,
+  reasoning: ReasoningEffort | undefined,
 ): Promise<Omit<TaggerConfig, 'client'> & { promptVersion: string }> => {
   const { prompt, vocab } = await loadVocab(db);
   const info = MODELS[model];
@@ -64,7 +71,7 @@ export const taggerConfig = async (
     systemPrompt: buildSystemPrompt(prompt),
     jsonSchema: buildTagJsonSchema(vocab),
     vocab,
-    reasoningEffort: info.reasoning ? (reasoning ?? 'none') : undefined,
+    reasoningEffort: effortFor(model, reasoning),
     promptVersion: TAG_PROMPT_VERSION,
   };
 };

@@ -1,4 +1,4 @@
-import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage } from './ai';
+import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage, type ReasoningEffort } from './ai';
 import { buildUserPrompt, type TaggerCard } from './prompt';
 import { normalizeTagOutput, tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
 
@@ -9,7 +9,7 @@ export type TaggerConfig = {
   systemPrompt: string;
   jsonSchema: Record<string, unknown>;
   vocab: Vocab;
-  reasoningEffort?: 'none' | 'high';
+  reasoningEffort?: ReasoningEffort;
   /** Total attempts per card, including corrections after invalid output. */
   maxAttempts?: number;
 };

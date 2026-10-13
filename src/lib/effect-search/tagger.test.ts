@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ChatError, usageCostUsd, MODELS, type ChatClient, type ChatRequest } from './ai';
+import { ChatError, MODELS, parseChatResponse, usageCostUsd, type ChatClient, type ChatRequest } from './ai';
 import { cardTypeLine, type TaggableCardRow } from './cardText';
 import { checkTaggerReply, tagCard, type TaggerConfig } from './tagger';
 import type { Vocab } from './tagSchema';
@@ -93,5 +93,27 @@ describe('cardTypeLine', () => {
     );
     expect(cardTypeLine({ ...base, frame_type_id: 13, effect_id: 5 }, frames)).toBe('Quick-Play Spell');
     expect(cardTypeLine({ ...base, frame_type_id: 14, effect_id: 1 }, frames)).toBe('Counter Trap');
+  });
+});
+
+describe('parseChatResponse', () => {
+  it('assembles streamed deltas and takes usage from the final chunk', () => {
+    const sse = [
+      'data: {"choices":[{"delta":{"role":"assistant"}}]}',
+      'data: {"choices":[{"delta":{"content":"{\\"effects\\""}}]}',
+      'data: {"choices":[{"delta":{"content":":[]}"}}]}',
+      'data: {"choices":[],"usage":{"prompt_tokens":10,"completion_tokens":4,"prompt_tokens_details":{"cached_tokens":8}}}',
+      'data: [DONE]',
+      '',
+    ].join('\n');
+    expect(parseChatResponse(sse)).toEqual({ content: '{"effects":[]}', usage: { promptTokens: 10, cachedPromptTokens: 8, completionTokens: 4 } });
+  });
+
+  it('handles non-streamed completions and empty streams', () => {
+    expect(parseChatResponse('{"choices":[{"message":{"content":"x"}}],"usage":{"prompt_tokens":1,"completion_tokens":2}}')).toEqual({
+      content: 'x',
+      usage: { promptTokens: 1, cachedPromptTokens: 0, completionTokens: 2 },
+    });
+    expect(parseChatResponse('data: {"choices":[{"delta":{}}]}\ndata: [DONE]\n').content).toBeNull();
   });
 });

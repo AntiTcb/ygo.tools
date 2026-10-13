@@ -1,7 +1,7 @@
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type TagOutputInput } from './tagSchema';
 
 /** Bump whenever the prompt or labelling conventions change; stored on each tagged card and run. */
-export const TAG_PROMPT_VERSION = 'v1';
+export const TAG_PROMPT_VERSION = 'v2';
 
 export type VocabTerm = { term: string; description: string; usable_as_action?: boolean; usable_as_event?: boolean };
 
@@ -166,7 +166,8 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
   return `You convert Yu-Gi-Oh! card text into structured effect data for a card search engine. Read the card text the way a judge would, using Problem-Solving Card Text (PSCT) conventions, and output only JSON matching the schema.
 
 ## What counts as an effect
-- Each separately activated or applied effect in the text box is one entry in "effects", numbered from 0 in the order printed ("effect_index"). Pendulum Effect text is numbered separately with text_source "pendulum".
+- Each separately activated or applied effect in the text box is one entry in "effects", numbered from 0 in the order printed ("effect_index"). Effects from the "Pendulum Effect text" section MUST have text_source "pendulum" and are numbered from 0 separately; card-text effects have text_source "card".
+- "Activate 1 of these effects" / "You can activate 1 of these effects" followed by bullet points (●) is ONE effect: put the actions of every bullet in that one effect, in printed order. Bullets that list what an effect responds to (Ash Blossom) are also part of the one effect.
 - NOT effects: Fusion/Synchro/Xyz/Link material lines, bare summoning restrictions ("Cannot be Normal Summoned/Set", "You can only Special Summon "X" once per turn", "You cannot Normal Summon/Set the turn you Special Summon this card"), flavor text of Normal Monsters, once-per-turn clauses (those set "opt"), and restrictions a Spell/Trap places on its own activator ("You cannot Summon other monsters the turn you activate this card").
 - Inherent summoning procedures ARE recorded, with effect_type "procedure": "If only your opponent controls a monster, you can Special Summon this card (from your hand)." -> a special_summon action with is_self true and from_zones ["hand"]. Text that says how the card must be Special Summoned ("Must first be Special Summoned (from your hand) to your opponent's field by Tributing 2 monsters they control", "Must be Special Summoned (from your Extra Deck) by sending the above cards you control to the GY") is also a procedure. Anything you must do as part of the procedure is an is_cost action.
 - Effects that only prevent or protect ("Cannot be used as Synchro Material", "cannot be destroyed by battle", "your opponent's monsters cannot declare an attack") are still effects: record them with the actions that fit (often none), and propose terms in "unmapped" for protections and other things worth searching for.
@@ -202,6 +203,7 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
 - Actions on "that card"/"that monster" (the card a trigger is about, e.g. "negate the activation, and if you do, destroy that card") have target null and are not contextual.
 - Cards on the field: from_zones ["field"] unless the text names a specific zone ("in a Monster Zone" -> ["monster_zone"]); this also applies to non-moving actions (destroy, negate_effect, change_stats, change_position, take_control) on cards on the field.
 - change_stats: set stat ("atk"/"def"/"level"/"rank"), stat_mode ("gain"/"lose"/"set"/"halve"/"double"); stat_amount only for a fixed number, otherwise describe the formula in stat_amount_note.
+- inflict_damage, gain_lp, lose_lp: stat_amount is the fixed amount ("Inflict 800 damage" -> 800; "Pay 1000 LP" -> 1000), otherwise stat_amount_note ("half your LP"). Leave stat and stat_mode null.
 
 ## Vocabulary
 Action verbs:

@@ -68,7 +68,7 @@
           "effect_type": "activation",
           "triggers": [{ "event": "summoned" }, { "event": "activated", "subject": { "card_types": ["spell", "trap"] } }],
           "actions": [
-            { "verb": "lose_lp", "is_cost": true, "to_side": "you" },
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount_note": "half your LP" },
             { "verb": "negate_summon" },
             { "verb": "negate_activation" },
             { "verb": "destroy", "quantity": 1 }
@@ -103,7 +103,7 @@
           "snippet": "Activate this card by paying 800 LP, then target 1 monster in your Graveyard; Special Summon that target in Attack Position and equip it with this card.",
           "effect_type": "activation",
           "actions": [
-            { "verb": "lose_lp", "is_cost": true, "to_side": "you" },
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount": 800 },
             { "verb": "special_summon", "from_zones": ["gy"], "from_side": "you", "quantity": 1 },
             { "verb": "equip", "is_self": true }
           ]
@@ -638,7 +638,7 @@
           "effect_index": 0,
           "snippet": "Increase your Life Points by 1000 points.",
           "effect_type": "activation",
-          "actions": [{ "verb": "gain_lp", "to_side": "you" }]
+          "actions": [{ "verb": "gain_lp", "to_side": "you", "stat_amount": 1000 }]
         }
       ]
     }
@@ -652,7 +652,7 @@
           "effect_index": 0,
           "snippet": "Inflict 800 points of damage to your opponent's Life Points.",
           "effect_type": "activation",
-          "actions": [{ "verb": "inflict_damage", "to_side": "opponent" }]
+          "actions": [{ "verb": "inflict_damage", "to_side": "opponent", "stat_amount": 800 }]
         }
       ]
     }
@@ -738,7 +738,7 @@
           "snippet": "Pay half your LP; Special Summon 1 \"Dark Magician\" from your Deck.",
           "effect_type": "activation",
           "actions": [
-            { "verb": "lose_lp", "is_cost": true, "to_side": "you" },
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount_note": "half your LP" },
             { "verb": "special_summon", "from_zones": ["deck"], "from_side": "you", "quantity": 1, "name_refs": ["Dark Magician"] }
           ]
         }
@@ -769,7 +769,7 @@
           "opt": "soft",
           "phase_restriction": ["standby"],
           "turn_restriction": "opponents",
-          "actions": [{ "verb": "gain_lp", "to_side": "opponent" }]
+          "actions": [{ "verb": "gain_lp", "to_side": "opponent", "stat_amount": 1000 }]
         }
       ]
     }
@@ -810,7 +810,7 @@
           "opt": "soft",
           "phase_restriction": ["standby"],
           "turn_restriction": "yours",
-          "actions": [{ "verb": "inflict_damage", "to_side": "you" }]
+          "actions": [{ "verb": "inflict_damage", "to_side": "you", "stat_amount": 1000 }]
         }
       ]
     }

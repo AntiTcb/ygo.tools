@@ -16,7 +16,7 @@ import { cardPoolTargetComparer, scoreCard, summarize, type CardScore } from '..
 import { makeNameResolver } from '../../src/lib/effect-search/store';
 import { tagCard } from '../../src/lib/effect-search/tagger';
 import { tagOutputSchema, type TagOutput } from '../../src/lib/effect-search/tagSchema';
-import { aiClient, args, mapPool, parseModel, parseReasoning, supabase, taggerConfig, usd, writeReport } from './lib';
+import { aiClient, args, effortFor, mapPool, parseModel, parseReasoning, supabase, taggerConfig, usd, writeReport } from './lib';
 
 const { values } = args({
   models: { type: 'string', default: 'kimi-k2.6' },
@@ -57,7 +57,8 @@ const { count: queueSize } = await db.from('effect_tag_queue').select('card_id',
 const client = aiClient();
 const results = [];
 for (const model of models) {
-  for (const reasoning of MODELS[model].reasoning ? reasonings : [undefined]) {
+  // Effective levels, deduplicated (a model that rejects 'none' runs at its cheapest level instead).
+  for (const reasoning of new Set(reasonings.map((r) => effortFor(model, r)))) {
     const label = `${model}${reasoning ? ` (reasoning ${reasoning})` : ''}`;
     const cfg = { ...(await taggerConfig(db, model, reasoning)), client };
     console.log(`\n${label}: tagging ${gold.length} gold cards...`);

@@ -191,6 +191,9 @@ export type Vocab = {
   zones: readonly string[];
 };
 
+/** Verbs whose actions may carry an amount without a stat (LP and damage). */
+export const AMOUNT_VERBS: ReadonlySet<string> = new Set(['inflict_damage', 'gain_lp', 'lose_lp']);
+
 /** Problems the zod schema can't see: terms outside the vocabulary, inconsistent fields. */
 export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
   const errors: string[] = [];
@@ -204,7 +207,11 @@ export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
   for (const [i, e] of out.effects.entries()) {
     const at = `effects[${i}]`;
     const key = `${e.text_source}:${e.effect_index}`;
-    if (seen.has(key)) errors.push(`${at}: duplicate ${e.text_source} effect_index ${e.effect_index}`);
+    if (seen.has(key)) {
+      errors.push(
+        `${at}: duplicate ${e.text_source} effect_index ${e.effect_index} (effects from the Pendulum Effect text need "text_source": "pendulum" and their own numbering from 0)`,
+      );
+    }
     seen.add(key);
     for (const [j, t] of e.triggers.entries()) {
       if (!events.has(t.event)) errors.push(`${at}.triggers[${j}]: "${t.event}" is not an event verb`);
@@ -216,7 +223,9 @@ export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
       if (!actions.has(a.verb)) errors.push(`${aat}: "${a.verb}" is not an action verb`);
       checkZones(aat, [...a.from_zones, ...a.to_zones]);
       if ((a.stat === null) !== (a.stat_mode === null)) errors.push(`${aat}: stat and stat_mode must be set together`);
-      if (a.stat === null && (a.stat_amount !== null || a.stat_amount_note !== null)) errors.push(`${aat}: stat_amount without stat`);
+      if (a.stat === null && !AMOUNT_VERBS.has(a.verb) && (a.stat_amount !== null || a.stat_amount_note !== null)) {
+        errors.push(`${aat}: stat_amount is only for change_stats (with stat) and ${[...AMOUNT_VERBS].join('/')}`);
+      }
       if (!a.contextual && a.context_note) errors.push(`${aat}: context_note without contextual`);
     }
   }

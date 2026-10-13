@@ -2,7 +2,7 @@ import { evalRuleNode, type CardFilterRow } from '../db/cardFilterEval';
 import type { ComplexFrameTypeRow } from '../db/cardFilterRule';
 import { resolveVirtualRuleTree } from '../db/cardFilterResolve';
 import { targetToRule, type NameResolver } from './targetRule';
-import { normalizeTagOutput, type TagAction, type TagEffect, type TagOutput, type TagTrigger, type Target } from './tagSchema';
+import { AMOUNT_VERBS, normalizeTagOutput, type TagAction, type TagEffect, type TagOutput, type TagTrigger, type Target } from './tagSchema';
 
 /** 0..1 similarity of two targets (null = unrestricted). */
 export type TargetComparer = (a: Target | null, b: Target | null) => number;
@@ -64,7 +64,9 @@ const actionFields = (e: TagAction, p: TagAction, cmp: TargetComparer): Record<s
   contextual: Number(e.contextual === p.contextual),
   ...(e.verb === 'change_stats'
     ? { stat: Number(e.stat === p.stat), stat_mode: Number(e.stat_mode === p.stat_mode), stat_amount: Number(e.stat_amount === p.stat_amount) }
-    : {}),
+    : AMOUNT_VERBS.has(e.verb)
+      ? { stat_amount: Number(e.stat_amount === p.stat_amount) }
+      : {}),
 });
 
 const triggerFields = (e: TagTrigger, p: TagTrigger, cmp: TargetComparer): Record<string, number> => ({
