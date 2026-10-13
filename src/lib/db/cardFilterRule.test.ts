@@ -78,6 +78,11 @@ describe('ruleNodeSchema', () => {
     expect(parsed.kind).toBe('group');
   });
 
+  it('parses archetype conditions and rejects empty names', () => {
+    expect(ruleNodeSchema.parse({ kind: 'cond', condition: { kind: 'archetype', op: 'in', values: ['Frog'] } }).kind).toBe('cond');
+    expect(() => ruleNodeSchema.parse({ kind: 'cond', condition: { kind: 'archetype', op: 'in', values: [''] } })).toThrow();
+  });
+
   it('rejects unknown condition kinds', () => {
     expect(() =>
       ruleNodeSchema.parse({

@@ -17,6 +17,8 @@ export type CardFilterRow = {
   effect_id: number | null;
   link_arrows: number | null;
   pendulum_text: string | null;
+  /** Archetype memberships from `card_archetypes`; only needed for `archetype` conditions (absent = none). */
+  archetypes?: readonly string[];
 };
 
 const colNum = (row: CardFilterRow, field: Condition & { kind: 'num' }): number | null => {
@@ -129,11 +131,25 @@ const evalText = (row: CardFilterRow, c: Extract<Condition, { kind: 'text' }>): 
   }
 };
 
+const evalArchetype = (row: CardFilterRow, c: Extract<Condition, { kind: 'archetype' }>): boolean => {
+  const want = c.values ?? [];
+  const isMember = want.some((a) => row.archetypes?.includes(a) ?? false);
+  switch (c.op) {
+    case 'in':
+      return isMember;
+    case 'notIn':
+      return !isMember;
+    default:
+      return false;
+  }
+};
+
 const evalCond = (row: CardFilterRow, c: Condition): boolean => {
   if (c.kind === 'num') return evalNum(row, c);
   if (c.kind === 'cat') return evalCat(row, c);
   if (c.kind === 'bits') return evalBits(row, c);
   if (c.kind === 'text') return evalText(row, c);
+  if (c.kind === 'archetype') return evalArchetype(row, c);
   return false;
 };
 
