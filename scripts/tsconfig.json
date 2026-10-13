@@ -1,0 +1,6 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "noEmit": true, "types": ["node"] },
+  "include": ["./**/*.ts", "../src/lib/effect-search/**/*.ts", "../src/lib/db/**/*.ts"],
+  "exclude": ["../src/lib/**/*.test.ts"]
+}

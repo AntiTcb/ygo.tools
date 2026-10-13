@@ -6,6 +6,10 @@
 -- stored both as the tagger's readable target (`target`, see src/lib/effect-search/tagSchema.ts) and
 -- compiled to a RuleNode (`target_rule`) for search.
 
+-- Inherent summoning procedures ("you can Special Summon this card (from your hand)") aren't effects
+-- under the rules, but are what people search for ("monsters that can Special Summon themselves").
+alter type public.effect_type add value 'procedure';
+
 alter table public.effect_card_tags
   add column output jsonb,
   -- Who wrote the live tags: the tagger, or a hand correction in /admin.
@@ -36,21 +40,23 @@ comment on column public.effect_triggers.cause_card is 'Tagger target (tagSchema
 --                           cause_side, cause_card, cause_card_rule}]}]
 --   p_mode:   'tagger' — a locked card keeps its live tags and gets the output as a pending draft;
 --             'manual' — hand correction: replaces the tags, locks the card, clears any draft.
+--   p_text_hash: md5 of the text that was tagged (see effect_tag_queue); defaults to the card's current text.
 -- Returns 'stored' or 'drafted'. Unknown verbs/zones raise (nothing is written).
 create function public.effect_store_card_tags (
   p_card_id bigint,
-  p_text_hash text,
   p_output jsonb,
   p_rows jsonb,
   p_model text,
   p_prompt_version text,
-  p_mode text
+  p_mode text,
+  p_text_hash text default null
 ) returns text
 language plpgsql
 set search_path = ''
 as $$
 declare
   is_locked boolean;
+  v_hash text;
   eff jsonb;
   act jsonb;
   trg jsonb;
@@ -62,17 +68,25 @@ begin
     raise exception 'unknown mode %', p_mode;
   end if;
 
+  v_hash := coalesce(p_text_hash, (
+    select md5(coalesce(c.effect_text, '') || E'\x1f' || coalesce(c.pendulum_text, ''))
+    from public.neuron_cards c where c.id = p_card_id and c.language = 'en'
+  ));
+  if v_hash is null then
+    raise exception 'no English card %', p_card_id;
+  end if;
+
   select locked into is_locked from public.effect_card_tags where card_id = p_card_id for update;
 
   if p_mode = 'tagger' and coalesce(is_locked, false) then
     update public.effect_card_tags
-    set pending_draft = p_output, pending_text_hash = p_text_hash, model = p_model, prompt_version = p_prompt_version
+    set pending_draft = p_output, pending_text_hash = v_hash, model = p_model, prompt_version = p_prompt_version
     where card_id = p_card_id;
     return 'drafted';
   end if;
 
   insert into public.effect_card_tags as t (card_id, text_hash, output, source, locked, model, prompt_version, tagged_at)
-  values (p_card_id, p_text_hash, p_output, p_mode, p_mode = 'manual', p_model, p_prompt_version, now())
+  values (p_card_id, v_hash, p_output, p_mode, p_mode = 'manual', p_model, p_prompt_version, now())
   on conflict (card_id) do update
   set text_hash = excluded.text_hash,
     output = excluded.output,
@@ -218,5 +232,5 @@ as $$
     updated_at = now();
 $$;
 
-revoke execute on function public.effect_store_card_tags (bigint, text, jsonb, jsonb, text, text, text) from public, anon, authenticated;
+revoke execute on function public.effect_store_card_tags (bigint, jsonb, jsonb, text, text, text, text) from public, anon, authenticated;
 revoke execute on function public.effect_record_suggestions (bigint, jsonb) from public, anon, authenticated;

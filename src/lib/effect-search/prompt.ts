@@ -100,16 +100,7 @@ export const TAG_EXAMPLES: TagExample[] = [
             "When this card is sent to the Graveyard to activate a WATER monster's effect: Target 1 Set card your opponent controls; destroy that target.",
           effect_type: 'trigger',
           triggers: [{ event: 'send_to_gy', subject_is_self: true, cause: 'cost', cause_card: { card_types: ['monster'], attributes: ['WATER'] } }],
-          actions: [
-            {
-              verb: 'destroy',
-              from_zones: ['field'],
-              from_side: 'opponent',
-              quantity: 1,
-              contextual: true,
-              context_note: 'only Set (face-down) cards',
-            },
-          ],
+          actions: [{ verb: 'destroy', from_zones: ['field'], from_side: 'opponent', quantity: 1 }],
         },
       ],
     },
@@ -176,18 +167,20 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
 
 ## What counts as an effect
 - Each separately activated or applied effect in the text box is one entry in "effects", numbered from 0 in the order printed ("effect_index"). Pendulum Effect text is numbered separately with text_source "pendulum".
-- NOT effects: Fusion/Synchro/Xyz/Link material lines, summoning conditions ("Cannot be Normal Summoned/Set", "Must be Special Summoned by..."), flavor text of Normal Monsters, and once-per-turn clauses (those set "opt").
+- NOT effects: Fusion/Synchro/Xyz/Link material lines, bare summoning restrictions ("Cannot be Normal Summoned/Set", "You can only Special Summon "X" once per turn", "You cannot Normal Summon/Set the turn you Special Summon this card"), flavor text of Normal Monsters, once-per-turn clauses (those set "opt"), and restrictions a Spell/Trap places on its own activator ("You cannot Summon other monsters the turn you activate this card").
+- Inherent summoning procedures ARE recorded, with effect_type "procedure": "If only your opponent controls a monster, you can Special Summon this card (from your hand)." -> a special_summon action with is_self true and from_zones ["hand"]. Text that says how the card must be Special Summoned ("Must first be Special Summoned (from your hand) to your opponent's field by Tributing 2 monsters they control", "Must be Special Summoned (from your Extra Deck) by sending the above cards you control to the GY") is also a procedure. Anything you must do as part of the procedure is an is_cost action.
+- Effects that only prevent or protect ("Cannot be used as Synchro Material", "cannot be destroyed by battle", "your opponent's monsters cannot declare an attack") are still effects: record them with the actions that fit (often none), and propose terms in "unmapped" for protections and other things worth searching for.
 - A Normal Monster or a card with no effects has "effects": [].
 - "snippet": the exact sentence(s) of that effect, copied from the card text.
 
 ## Effect fields
-- effect_type: "activation" for the effect of activating a Spell/Trap Card; "trigger" for effects that activate when something happens ("If/When ...:", FLIP effects, "during the Standby Phase:"); "quick" for Quick Effects (marked "(Quick Effect)", or a Spell Speed 2 monster effect activated in response to something); "ignition" for monster effects you activate in your Main Phase without a trigger; "continuous" for effects that apply without activating (no ":" or ";" activation structure).
+- effect_type: "activation" for the effect of activating a Spell/Trap Card; "trigger" for effects that activate when something happens ("If/When ...:", FLIP effects, "during the Standby Phase:"); "quick" for Quick Effects (marked "(Quick Effect)", or a Spell Speed 2 monster effect activated in response to something); "ignition" for monster effects you activate in your Main Phase without a trigger; "continuous" for effects that apply without activating (no ":" or ";" activation structure); "procedure" for inherent summoning procedures (see above).
 - opt: "soft" = "Once per turn" written on the effect; "hard" = "You can only use this effect of "X" once per turn"; "shared_each_effect" = "You can only use each effect of "X" once per turn"; "per_name_activation" = "You can only activate 1 "X" per turn"; otherwise "none". When several clauses apply, pick the most restrictive.
 - phase_restriction: phases the effect is limited to ("during the Main Phase" -> ["main"]). Empty when unrestricted.
 - turn_restriction: "yours" / "opponents" when limited to one player's turn, else "any".
 
 ## Triggers (what an effect responds to)
-- Only for "trigger" and "quick" effects with a condition. Several triggers on one effect are alternatives ("If this card is Normal or Special Summoned" = two triggers).
+- For any effect whose condition is an event: "trigger" and "quick" effects, Spell/Trap activations with a "When/If ...:" condition (Mirror Force: "When an opponent's monster declares an attack:"), and "continuous" effects that apply when something happens ("When this card leaves the field, destroy that monster"). Several triggers on one effect are alternatives ("If this card is Normal or Special Summoned" = two triggers).
 - event: one of the event verbs. subject_is_self: the event happens to this card. Otherwise "subject" is a target describing the card the event happens to (null = any card).
 - from_zones: where the subject was ("sent from the hand or field to the GY" -> ["hand", "field"]).
 - cause: "cost" (sent/banished/etc. as a cost), "effect" (by a card effect), "battle", "material" (used as material). cause_side / cause_card describe whose card caused it and what kind ("to activate a WATER monster's effect" -> cause "cost", cause_card {card_types: ["monster"], attributes: ["WATER"]}).
@@ -195,9 +188,9 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
 
 ## Actions (what an effect does)
 - One entry per distinct action, in printed order. Everything before ";" is a cost: set is_cost true. Targeting itself is not an action.
-- verb: one of the action verbs. If an action fits no verb, use the closest verb AND add an "unmapped" entry proposing a new term.
+- verb: one of the action verbs. If an action fits no verb ("you win the Duel", "this card's name becomes...", "negate the attack", "excavate"), leave it out of "actions" and add an "unmapped" entry proposing a new term instead; never force it onto a wrong verb. Summoning Tokens is special_summon (with no from_zones) plus an unmapped "special_summon_token" proposal.
 - from_zones: where the affected card comes from. to_zones: only when the destination is not implied by the verb (add_to_hand implies hand, send_to_gy implies GY, banish implies banished, summons imply the field); e.g. return_to_deck to the Extra Deck, place_on_field into a Pendulum Zone, set to the field.
-- from_side: whose zone it comes from ("your GY" -> you, "your opponent's GY" -> opponent, "either GY" -> either). to_side: only when the result is controlled by a specific player that matters ("Set it to your field" -> you; "Special Summon ... to your opponent's field" -> opponent).
+- from_side: whose zone it comes from ("your GY" -> you, "your opponent's GY" -> opponent, "either GY" / "on the field" -> either). to_side: only when the result is controlled by a specific player that matters ("Set it to your field" -> you; "Special Summon ... to your opponent's field" -> opponent). For draw, inflict_damage, gain_lp and lose_lp, to_side is the affected player ("Inflict 800 damage to your opponent" -> opponent; "Take 1000 damage" -> you; "Both players draw" -> either).
 - is_self: the action affects this card itself ("Special Summon this card", "discard this card").
 - quantity: the number printed ("1", "up to 2" -> 2); null for "all"/unspecified.
 - target: restrictions on what the action can affect, beyond what the verb implies (summons imply a monster, so "Special Summon 1 monster" has target null). null = unrestricted. Use the target fields; values within one list are alternatives, different fields must all hold; use "any_of" for "X or Y" across different fields.
@@ -205,7 +198,9 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
   - "level" is for Level; "rank" is for Rank (Xyz); "link_rating" for Link Rating. "Level 4 or lower" -> {"op": "lte", "value": 4}.
   - monster_kinds: card frames/abilities ("Xyz Monster" -> ["xyz"], "Tuner" -> ["tuner"]); "non-Tuner" -> exclude_monster_kinds ["tuner"].
   - Allowed values: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}.
-- contextual: true when what the action can affect also depends on game state that the target can't express ("a monster with the same Level as the destroyed monster", "only Set cards", "monsters that were banished this turn"); put the static part in target and explain the rest in context_note.
+- contextual: true when what the action can affect also depends on game state that the target can't express ("a monster with the same Level as the destroyed monster", "monsters that were banished this turn", "a monster that was used as material"); put the static part in target and explain the rest in context_note. Battle position and face-up/face-down qualifiers ("face-up monster", "Attack Position monsters", "Set card") are ignored: they are not contextual.
+- Actions on "that card"/"that monster" (the card a trigger is about, e.g. "negate the activation, and if you do, destroy that card") have target null and are not contextual.
+- Cards on the field: from_zones ["field"] unless the text names a specific zone ("in a Monster Zone" -> ["monster_zone"]); this also applies to non-moving actions (destroy, negate_effect, change_stats, change_position, take_control) on cards on the field.
 - change_stats: set stat ("atk"/"def"/"level"/"rank"), stat_mode ("gain"/"lose"/"set"/"halve"/"double"); stat_amount only for a fixed number, otherwise describe the formula in stat_amount_note.
 
 ## Vocabulary

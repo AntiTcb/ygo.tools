@@ -156,7 +156,7 @@ export const tagEffectSchema = z.object({
   /** 0-based position of the effect within its text box. */
   effect_index: z.number().int().min(0),
   snippet: z.string().min(1),
-  effect_type: z.enum(['ignition', 'trigger', 'quick', 'continuous', 'activation']),
+  effect_type: z.enum(['ignition', 'trigger', 'quick', 'continuous', 'activation', 'procedure']),
   opt: z.enum(['none', 'soft', 'hard', 'per_name_activation', 'shared_each_effect']).default('none'),
   phase_restriction: z.array(z.enum(['draw', 'standby', 'main', 'battle', 'damage_step', 'end'])).default([]),
   turn_restriction: z.enum(['any', 'yours', 'opponents']).default('any'),

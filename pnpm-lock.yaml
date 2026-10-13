@@ -259,6 +259,9 @@ importers:
       fullcalendar:
         specifier: ^7.1.1
         version: 7.1.1(temporal-polyfill@1.0.5)
+      jose:
+        specifier: ^6.2.12
+        version: 6.2.12
       lefthook:
         specifier: ^2.2.1
         version: 2.2.1
@@ -311,7 +314,7 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       tsx:
-        specifier: 4.20.6
+        specifier: ^4.20.6
         version: 4.20.6
       typescript:
         specifier: ^6.0.3
