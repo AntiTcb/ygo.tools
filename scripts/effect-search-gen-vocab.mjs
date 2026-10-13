@@ -7,8 +7,8 @@
 // Needs PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY (loaded from .env.local by the pnpm script).
 // The tables are the source of truth: approving a term in /admin works without regenerating;
 // regenerate when UI code needs to reference a new term by name.
-import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
+import { formatFiles } from './lib/oxfmt.mjs';
 
 const OUT = 'src/lib/effect-search/vocab.generated.ts';
 
@@ -50,5 +50,5 @@ export type EffectZone = (typeof EFFECT_ZONES)[number];
 `;
 
 writeFileSync(OUT, out);
-execFileSync(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', ['exec', 'oxfmt', OUT], { stdio: 'inherit', shell: process.platform === 'win32' });
+formatFiles(OUT);
 console.log(`Wrote ${OUT}: ${verbs.length} verbs, ${zones.length} zones`);
