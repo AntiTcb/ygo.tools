@@ -40,14 +40,14 @@ Schema: `supabase/migrations/20261012190000_effect_search_schema.sql`. Card refe
 
 One row per numbered effect on a card. Re-tagging a card replaces its effects (actions/triggers cascade).
 
-| Field                                    | Notes                                                                                      |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `card_id`, `text_source`, `effect_index` | `text_source`: `card` \| `pendulum` (Pendulum Effect box)                                  |
-| `effect_type`                            | `ignition` \| `trigger` \| `quick` \| `continuous` \| `activation` (Spell/Trap)            |
-| `opt`                                    | `none` \| `soft` \| `hard` \| `per_name_activation` \| `shared_each_effect`                |
-| `phase_restriction`                      | `effect_phase[]` (`draw`, `standby`, `main`, `battle`, `damage_step`, `end`); empty = none |
-| `turn_restriction`                       | `any` \| `yours` \| `opponents`                                                            |
-| `snippet`                                | Source sentence(s), for "why it matched"                                                   |
+| Field                                    | Notes                                                                                                                                                                                                                 |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `card_id`, `text_source`, `effect_index` | `text_source`: `card` \| `pendulum` (Pendulum Effect box)                                                                                                                                                             |
+| `effect_type`                            | `ignition` \| `trigger` \| `quick` \| `continuous` \| `activation` (Spell/Trap) \| `procedure` (inherent summoning procedures, e.g. Cyber Dragon's or contact fusions: not effects under the rules, but searched for) |
+| `opt`                                    | `none` \| `soft` \| `hard` \| `per_name_activation` \| `shared_each_effect`                                                                                                                                           |
+| `phase_restriction`                      | `effect_phase[]` (`draw`, `standby`, `main`, `battle`, `damage_step`, `end`); empty = none                                                                                                                            |
+| `turn_restriction`                       | `any` \| `yours` \| `opponents`                                                                                                                                                                                       |
+| `snippet`                                | Source sentence(s), for "why it matched"                                                                                                                                                                              |
 
 ### Actions (`effect_actions`)
 
@@ -106,11 +106,24 @@ Initial zones: `deck`, `extra_deck`, `hand`, `field`, `monster_zone`, `spell_tra
 
 ### Bookkeeping
 
-- `effect_card_tags` — per card: `text_hash` (md5 of effect + pendulum text when tagged), `locked` (hand-corrected; automatic re-tagging skips it), `pending_draft` / `pending_text_hash` (errata on a locked card lands here for review; the corrected version stays live until accepted), `model`, `prompt_version`.
+- `effect_card_tags` — per card: `output` (the full tagger output, the editable source of truth; the effect/action/trigger tables are its projection, written atomically by `effect_store_card_tags`), `source` (`tagger` \| `manual`), `text_hash` (md5 of effect + pendulum text when tagged), `locked` (hand-corrected; automatic re-tagging skips it), `pending_draft` / `pending_text_hash` (errata on a locked card lands here for review; the corrected version stays live until accepted), `model`, `prompt_version`.
 - `effect_tag_queue` view — English cards never tagged or whose text hash changed (locked cards included, flagged, unless a draft for that text already exists).
 - `effect_tag_runs` — Workflow runs (`import` \| `vocab` \| `manual` \| `backfill`) with progress; the import cursor is the latest completed `import` run per `db_metadata.source`.
 - `effect_vocab_suggestions` — proposed new terms (`kind: verb|zone`, `as_action`/`as_event`, phrases, occurrences, example card IDs, `cluster_key`, status `pending|approved|rejected|merged`).
-- `effect_gold_cards` — hand-labelled expected tagger output per card, with the `text_hash` it was written against (target 50–75 tricky cards to start).
+- `effect_gold_cards` — hand-labelled expected tagger output per card, with the `text_hash` it was written against. Seeded from `scripts/effect-search/gold.json` (`pnpm effect-search:gold push|pull|status`).
+
+Targets are stored twice: the tagger's readable form (`target`, `subject`, `cause_card`, using printed names like `WATER`, `Aqua`, `xyz`) and compiled RuleNodes (`target_rule`, `subject_rule`, `cause_card_rule`) for search.
+
+### Labelling conventions
+
+The tagger prompt (`src/lib/effect-search/prompt.ts`) and the gold set share these:
+
+- Material lines, bare summoning restrictions and once-per-turn clauses are not effects. Restriction/protection-only effects are recorded with no actions.
+- Text the vocabulary can't express ("you win the Duel", name changes, "negate the attack", protections, Tokens) goes to `unmapped` as a proposed term rather than onto the nearest verb.
+- Everything before `;` is a cost. Battle position and face-up/face-down qualifiers are ignored (not `contextual`).
+- Targets record restrictions beyond what the verb implies ("Special Summon 1 monster" has no target). Level constraints exclude Xyz (Neuron stores Rank in `level`); stat constraints exclude Spells/Traps (stored as level 0, ATK/DEF 0).
+- Actions on "this card" carry no quantity or source side (normalised away).
+- "Link/Synchro/... Summoned" triggers are `special_summon` (no summon-type events yet).
 
 ## Pipeline
 
@@ -122,7 +135,7 @@ Initial zones: `deck`, `extra_deck`, `hand`, `field`, `monster_zone`, `spell_tra
 
 ## Admin (`/admin`)
 
-**Auth:** Cloudflare Access on `ygo.tools/admin/*`, **and** server-side verification of `Cf-Access-Jwt-Assertion`. This matters because `hooks.server.ts` uses the Supabase service-role key (RLS is bypassed) and Access only covers the custom domain — preview URLs must fail closed.
+**Auth (interim):** one shared password, `ADMIN_DASHBOARD_PASS`. `/admin/login` sets an HttpOnly, SameSite=Strict cookie holding an HMAC keyed by the password. `hooks.server.ts` gates every `/admin` request, including form actions (layout loads don't run for actions), and fails closed when the password isn't set: the server uses the Supabase service-role key, so RLS doesn't protect anything. Proper authn/authz is to be revisited.
 
 Features:
 
@@ -163,7 +176,7 @@ Self-summons (`is_self`) are included only for the named card itself, labelled "
 Each phase is its own PR.
 
 1. **Schema & vocab** — Supabase migrations (effects, actions, triggers, vocab, suggestions, archetypes, tag runs, gold set), `archetype` `RuleNode` condition kind, seed vocabulary.
-2. **Tagger & eval** — tagger prompt, eval script, model bake-off, one-off local backfill via Workers AI REST API. Admin: Access gate + JWT verification, tag inspector, tag correction, gold-set button.
+2. **Tagger & eval** — tagger prompt, eval script, model bake-off, one-off local backfill via Workers AI REST API. Admin: password gate, tag inspector, tag correction, gold-set button.
 3. **Workflow** — cron on `db_metadata`, hash-based re-tagging, suggestion pipeline + clustering, AI Gateway. Admin: suggestion review, vocab management, run monitor.
 4. **`/search`** — query parser, rate limiting, name disambiguation, tiered results with "why", editable AST chips, URL schema.
 
