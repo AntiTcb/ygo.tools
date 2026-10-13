@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const goldScore = output && goldOutput ? scoreCard(goldOutput, output, exactTargetComparer) : null;
 
   return {
-    card: { id: card.id, name: card.name, ...toTaggerCard(card, frames.names) },
+    card: { id: card.id, ...toTaggerCard(card, frames.names) },
     tags: tags.data ? { ...tags.data, output, pending_draft: draft } : null,
     /** Card text changed since tagging (or never tagged). */
     stale: queued.data !== null,

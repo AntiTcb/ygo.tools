@@ -1,6 +1,6 @@
 import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage } from './ai';
 import { buildUserPrompt, type TaggerCard } from './prompt';
-import { tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
+import { normalizeTagOutput, tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
 
 export type TaggerConfig = {
   client: ChatClient;
@@ -34,7 +34,7 @@ export const checkTaggerReply = (content: string, vocab: Vocab): { output: TagOu
     return { errors: parsed.error.issues.slice(0, 20).map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`) };
   }
   const problems = validateTagOutput(parsed.data, vocab);
-  return problems.length ? { errors: problems } : { output: parsed.data };
+  return problems.length ? { errors: problems } : { output: normalizeTagOutput(parsed.data) };
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

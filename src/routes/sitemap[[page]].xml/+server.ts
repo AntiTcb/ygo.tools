@@ -5,6 +5,6 @@ export const GET: RequestHandler = async ({ params }) => {
   return await sitemap.response({
     origin: 'https://ygo.tools',
     page: params.page,
-    excludeRoutePatterns: ['^/admin.*'],
+    excludeRoutePatterns: [/^\/admin/],
   });
 };

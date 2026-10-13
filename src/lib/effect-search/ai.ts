@@ -48,15 +48,22 @@ export const workersAiRestClient = (opts: { accountId: string; apiToken: string;
     if (req.temperature !== undefined) body.temperature = req.temperature;
     if (req.maxTokens !== undefined) body.max_tokens = req.maxTokens;
 
-    const res = await doFetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${opts.apiToken}`,
-        'Content-Type': 'application/json',
-        ...(opts.gatewayId ? { 'cf-aig-gateway-id': opts.gatewayId } : {}),
-      },
-      body: JSON.stringify(body),
-    });
+    let res: Response;
+    try {
+      res = await doFetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${opts.apiToken}`,
+          'Content-Type': 'application/json',
+          ...(opts.gatewayId ? { 'cf-aig-gateway-id': opts.gatewayId } : {}),
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(180_000),
+      });
+    } catch (e) {
+      // Network failures and timeouts are transient.
+      throw new ChatError(`Workers AI request failed: ${(e as Error).message}`, null, true);
+    }
     const text = await res.text();
     if (!res.ok) throw new ChatError(`Workers AI ${res.status}: ${text.slice(0, 500)}`, res.status, res.status === 429 || res.status >= 500);
     const json = JSON.parse(text) as OpenAiResponse;

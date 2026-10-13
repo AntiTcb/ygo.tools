@@ -19,8 +19,8 @@ declare global {
     // interface Error {}
     interface Locals {
       supabase: SupabaseClient<Database>;
-      /** Set by hooks.server.ts on /admin requests once Cloudflare Access is verified ('dev' locally). */
-      adminEmail?: string;
+      /** Set by hooks.server.ts on /admin requests: true once the admin session cookie is verified. */
+      isAdmin?: boolean;
     }
     // interface PageData {}
     // interface PageState {}

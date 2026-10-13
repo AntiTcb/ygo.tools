@@ -222,3 +222,15 @@ export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
   }
   return errors;
 };
+
+/**
+ * Drops fields that carry no information so equivalent outputs compare and store identically:
+ * an action on "this card" has no meaningful quantity or source side.
+ */
+export const normalizeTagOutput = (out: TagOutput): TagOutput => ({
+  ...out,
+  effects: out.effects.map((e) => ({
+    ...e,
+    actions: e.actions.map((a) => (a.is_self ? { ...a, quantity: null, from_side: null } : a)),
+  })),
+});

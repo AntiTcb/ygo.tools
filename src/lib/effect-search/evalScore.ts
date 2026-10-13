@@ -2,7 +2,7 @@ import { evalRuleNode, type CardFilterRow } from '../db/cardFilterEval';
 import type { ComplexFrameTypeRow } from '../db/cardFilterRule';
 import { resolveVirtualRuleTree } from '../db/cardFilterResolve';
 import { targetToRule, type NameResolver } from './targetRule';
-import type { TagAction, TagEffect, TagOutput, TagTrigger, Target } from './tagSchema';
+import { normalizeTagOutput, type TagAction, type TagEffect, type TagOutput, type TagTrigger, type Target } from './tagSchema';
 
 /** 0..1 similarity of two targets (null = unrestricted). */
 export type TargetComparer = (a: Target | null, b: Target | null) => number;
@@ -131,7 +131,9 @@ export type CardScore = {
 
 const effectKey = (e: TagEffect) => `${e.text_source}:${e.effect_index}`;
 
-export const scoreCard = (expected: TagOutput, predicted: TagOutput, cmp: TargetComparer): CardScore => {
+export const scoreCard = (rawExpected: TagOutput, rawPredicted: TagOutput, cmp: TargetComparer): CardScore => {
+  const expected = normalizeTagOutput(rawExpected);
+  const predicted = normalizeTagOutput(rawPredicted);
   const notes: string[] = [];
   const fieldErrors: Record<string, number> = {};
   const addErrors = (prefix: string, f: Record<string, number>) => {

@@ -1,6 +1,6 @@
 import type { RuleNode } from '../db/cardFilterRule';
 import { targetToRule, type NameResolver } from './targetRule';
-import type { TagOutput, Target } from './tagSchema';
+import { normalizeTagOutput, type TagOutput, type Target } from './tagSchema';
 
 /** Neuron appends "(Updated from: <old name>)" to renamed cards; card text quotes the current name. */
 export const currentCardName = (name: string): string => name.replace(/\s*\(Updated from: .*\)$/, '');
@@ -79,7 +79,8 @@ export type StoredEffect = {
 };
 
 /** The `p_rows` argument of `effect_store_card_tags`: tagger output with targets compiled and names resolved. */
-export const projectTagOutput = (out: TagOutput, resolve: NameResolver): StoredEffect[] => {
+export const projectTagOutput = (raw: TagOutput, resolve: NameResolver): StoredEffect[] => {
+  const out = normalizeTagOutput(raw);
   const compile = (t: Target | null, unresolved: Set<string>): RuleNode | null => {
     if (!t) return null;
     const { rule, unresolvedNames } = targetToRule(t, resolve);
