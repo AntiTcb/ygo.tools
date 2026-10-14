@@ -27,6 +27,15 @@
             "migrations_dir": "migrations/event-map",
         },
     ],
+    // Effect search tagging runs (/admin "Run now"); the Workflow lives in wrangler.effect-tagger.jsonc.
+    "workflows": [
+        {
+            "binding": "EFFECT_TAG_WORKFLOW",
+            "name": "effect-tag-workflow",
+            "class_name": "EffectTagWorkflow",
+            "script_name": "ygotools-effect-tagger",
+        },
+    ],
     "observability": {
         "logs": {
             "enabled": true,
@@ -56,6 +65,14 @@
                     "database_name": "ygo-event-map",
                     "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
                     "migrations_dir": "migrations/event-map",
+                },
+            ],
+            "workflows": [
+                {
+                    "binding": "EFFECT_TAG_WORKFLOW",
+                    "name": "effect-tag-workflow",
+                    "class_name": "EffectTagWorkflow",
+                    "script_name": "ygotools-effect-tagger",
                 },
             ],
             "routes": [

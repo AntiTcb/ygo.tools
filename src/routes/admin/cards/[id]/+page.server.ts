@@ -2,6 +2,7 @@ import type { Json } from '$lib/db/database.types';
 import { toTaggerCard, TAGGABLE_CARD_COLUMNS } from '$lib/effect-search/cardText';
 import { loadComplexFrames, loadNameIndexFor, loadRelatedIds, loadVocab, storeCardTags, type Db } from '$lib/effect-search/db';
 import { exactTargetComparer, scoreCard } from '$lib/effect-search/evalScore';
+import { requestRetag } from '$lib/effect-search/runner';
 import { tagOutputSchema, validateTagOutput, type TagOutput } from '$lib/effect-search/tagSchema';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -40,7 +41,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const [card, frames, tags, gold, queued, archetypes, unresolved] = await Promise.all([
     loadCard(db, id),
     loadComplexFrames(db),
-    db.from('effect_card_tags').select('output,locked,source,pending_draft,model,prompt_version,tagged_at').eq('card_id', id).maybeSingle(),
+    db
+      .from('effect_card_tags')
+      .select('output,locked,source,pending_draft,model,prompt_version,tagged_at,retag_reason')
+      .eq('card_id', id)
+      .maybeSingle(),
     db.from('effect_gold_cards').select('expected,notes,updated_at').eq('card_id', id).maybeSingle(),
     db.from('effect_tag_queue').select('card_id').eq('card_id', id).maybeSingle(),
     db.from('card_archetypes').select('archetype,source').eq('card_id', id).order('archetype'),
@@ -84,6 +89,13 @@ export const actions: Actions = {
       mode: 'manual',
     });
     return { saved: true };
+  },
+
+  /** Queues this card for the next tagging run (a locked card gets a draft to review). */
+  retag: async ({ locals, params }) => {
+    const n = await requestRetag(locals.supabase, [cardId(params.id)], 'requested from /admin');
+    if (!n) return fail(400, { errors: ['Only tagged cards can be re-tagged; untagged cards are already queued'] });
+    return { retagRequested: true };
   },
 
   /** Lets automatic re-tagging replace this card's tags again. */

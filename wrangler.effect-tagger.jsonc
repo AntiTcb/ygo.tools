@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Effect search tagging: an hourly cron checks for work (new Neuron imports, re-tag requests from
+  // vocabulary changes, leftovers) and starts EffectTagWorkflow, which tags cards with Workers AI and
+  // writes them to Supabase. The site Worker (wrangler.jsonc) starts runs too, from /admin.
+  // See docs/design/effect-search.md.
+  "name": "ygotools-effect-tagger",
+  "compatibility_date": "2026-10-06",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/workers/effect-tagger.ts",
+  "workers_dev": false,
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
+  "vars": {
+    "SUPABASE_URL": "https://sbygo.alexgravely.dev",
+    "TAG_MODEL": "kimi-k2.6",
+    "CLUSTER_MODEL": "kimi-k2.6",
+    // Logs, costs and analytics for every model call. "default" is created automatically on first use.
+    "AI_GATEWAY_ID": "default",
+    "BATCH_SIZE": "20",
+    "MAX_CARDS_PER_RUN": "5000",
+  },
+  "triggers": {
+    "crons": ["17 * * * *"],
+  },
+  "ai": {
+    "binding": "AI",
+  },
+  "workflows": [
+    {
+      "name": "effect-tag-workflow",
+      "binding": "EFFECT_TAG_WORKFLOW",
+      "class_name": "EffectTagWorkflow",
+    },
+  ],
+  // ~4 subrequests per card (model call, store, names, suggestions); a full re-tag is ~60k.
+  "limits": {
+    "subrequests": 200000,
+  },
+  // Secrets (wrangler secret put … -c wrangler.effect-tagger.jsonc):
+  //   SUPABASE_SERVICE_KEY  service-role key for the effect search tables
+}

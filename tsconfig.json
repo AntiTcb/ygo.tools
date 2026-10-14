@@ -13,5 +13,6 @@
     "moduleResolution": "bundler",
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*", "src/routes/sitemap[[page]].xml/+server.ts", ".svelte-kit/ambient.d.ts"]
+  "include": ["src/**/*", "src/routes/sitemap[[page]].xml/+server.ts", ".svelte-kit/ambient.d.ts"],
+  "exclude": ["src/workers/**"]
 }
