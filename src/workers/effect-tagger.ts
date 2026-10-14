@@ -56,14 +56,23 @@ export class EffectTagWorkflow extends WorkflowEntrypoint<TaggerEnv, TagWorkflow
     const { plan } = event.payload;
     const tagModel = model(this.env.TAG_MODEL);
 
-    const runId = await step.do('start', STEP, async () => {
-      const db = supabase(this.env);
-      const id = await startRun(db, plan, tagModel.id, event.instanceId);
-      if (plan.kind === 'import') await refreshDerivedData(db);
-      return id;
-    });
+    // Only the insert in this step, so a retry can't create a second run row.
+    const runId = await step.do('start', STEP, async () => startRun(supabase(this.env), plan, tagModel.id, event.instanceId));
 
     try {
+      if (plan.kind === 'import') {
+        // Upkeep only: a failure here is logged and doesn't stop the run from tagging.
+        await step.do('refresh archetypes and orphans', STEP, async () => {
+          try {
+            return { ok: true, ...(await refreshDerivedData(supabase(this.env))) };
+          } catch (e) {
+            // oxlint-disable-next-line no-console -- Workflow logs are how runs are observed.
+            console.error('refresh failed', (e as Error).message);
+            return { ok: false, error: (e as Error).message };
+          }
+        });
+      }
+
       const queue = await step.do('load queue', STEP, async () => {
         const items = await loadQueue(supabase(this.env));
         return items.slice(0, Number(this.env.MAX_CARDS_PER_RUN ?? 5000));
