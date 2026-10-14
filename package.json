@@ -25,7 +25,9 @@
     "event-map:migrate:remote": "wrangler d1 migrations apply ygo-event-map --remote",
     "event-map:scraper": "wrangler dev -c wrangler.event-scraper.jsonc --test-scheduled",
     "event-map:scraper:deploy": "wrangler deploy -c wrangler.event-scraper.jsonc",
-    "event-map:seed-venues": "node scripts/event-map-seed-venues.mjs"
+    "event-map:seed-venues": "node scripts/event-map-seed-venues.mjs",
+    "db:types": "dotenv -e .env.local -- node scripts/gen-db-types.mjs",
+    "effect-search:gen-vocab": "dotenv -e .env.local -- node scripts/effect-search-gen-vocab.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261009.1",

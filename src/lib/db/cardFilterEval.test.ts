@@ -51,6 +51,35 @@ describe('cardFilterEval', () => {
     expect(evalRuleNode(row({ id: 2, attribute_id: 1 }), tree)).toBe(false);
   });
 
+  it('matches archetype in / notIn', () => {
+    const inFrog: RuleNode = { kind: 'cond', condition: { kind: 'archetype', op: 'in', values: ['Frog'] } };
+    const notFrog: RuleNode = { kind: 'cond', condition: { kind: 'archetype', op: 'notIn', values: ['Frog'] } };
+    const frog = row({ id: 1, archetypes: ['Frog'] });
+    const other = row({ id: 2, archetypes: ['Archfiend'] });
+    const unknown = row({ id: 3 });
+    expect(evalRuleNode(frog, inFrog)).toBe(true);
+    expect(evalRuleNode(other, inFrog)).toBe(false);
+    expect(evalRuleNode(unknown, inFrog)).toBe(false);
+    expect(evalRuleNode(frog, notFrog)).toBe(false);
+    expect(evalRuleNode(other, notFrog)).toBe(true);
+    expect(evalRuleNode(unknown, notFrog)).toBe(true);
+  });
+
+  it('matches a "Rank 2 or lower WATER Xyz Frog" target against Toadally Awesome', () => {
+    const target: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [
+        { kind: 'cond', condition: { kind: 'num', field: 'level', op: 'lte', value: 2 } },
+        { kind: 'cond', condition: { kind: 'cat', field: 'attribute_id', op: 'in', values: [3] } },
+        { kind: 'cond', condition: { kind: 'archetype', op: 'in', values: ['Frog'] } },
+      ],
+    };
+    const toadally = row({ id: 12642, level: 2, atk: 2200, def: 0, attribute_id: 3, species_id: 14, frame_type_id: 23 });
+    expect(evalRuleNode(toadally, target)).toBe(false);
+    expect(evalRuleNode({ ...toadally, archetypes: ['Frog'] }, target)).toBe(true);
+  });
+
   it('ATK is ? matches -1', () => {
     const tree: RuleNode = {
       kind: 'group',

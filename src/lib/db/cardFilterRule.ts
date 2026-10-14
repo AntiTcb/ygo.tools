@@ -26,6 +26,8 @@ const bitsOpSchema = z.enum(['eq', 'isNull']);
 
 const textOpSchema = z.enum(['contains', 'eq', 'isNull', 'notNull']);
 
+const archetypeOpSchema = z.enum(['in', 'notIn']);
+
 export const conditionSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('num'),
@@ -51,6 +53,12 @@ export const conditionSchema = z.discriminatedUnion('kind', [
     field: z.literal('pendulum_text'),
     op: textOpSchema,
     value: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal('archetype'),
+    op: archetypeOpSchema,
+    /** Archetype names as printed in quotes, e.g. `Frog`; membership comes from `card_archetypes`. */
+    values: z.array(z.string().min(1)).optional(),
   }),
 ]);
 
