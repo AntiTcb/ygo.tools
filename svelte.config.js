@@ -16,7 +16,9 @@ const config = {
     },
   },
   kit: {
-    adapter: adapter(),
+    // No remote bindings in local dev/CI (Workers AI would need Cloudflare credentials): /search falls
+    // back to the REST API with a token from .env.local.
+    adapter: adapter({ platformProxy: { remoteBindings: false } }),
     alias: {
       $components: './src/lib/components',
       $runes: './src/lib/runes',

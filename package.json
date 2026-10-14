@@ -35,7 +35,9 @@
     "check:scripts": "tsc -p scripts/tsconfig.json",
     "effect-search:sample": "dotenv -e .env.local -- tsx scripts/effect-search/sample.ts",
     "check:workers": "tsc -p src/workers/tsconfig.json",
-    "effect-tagger:deploy": "wrangler deploy -c wrangler.effect-tagger.jsonc"
+    "effect-tagger:deploy": "wrangler deploy -c wrangler.effect-tagger.jsonc",
+    "effect-search:parser-eval": "dotenv -e .env.local -- tsx scripts/effect-search/parser-eval.ts",
+    "effect-search:search": "dotenv -e .env.local -- tsx scripts/effect-search/search.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261009.1",

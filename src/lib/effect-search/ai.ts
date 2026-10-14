@@ -85,9 +85,11 @@ export type AiBinding = {
 
 /**
  * Workers AI through the `AI` binding (inside a Worker: no API token needed). Streams like the REST
- * client, and routes through AI Gateway when `gatewayId` is set.
+ * client, and routes through AI Gateway when `gateway` is set.
  */
-export const workersAiBindingClient = (ai: AiBinding, gatewayId?: string): ChatClient => {
+export const workersAiBindingClient = (ai: AiBinding, gateway?: string | { id: string; cacheTtl?: number }): ChatClient => {
+  // cacheTtl lets AI Gateway answer identical requests (e.g. the same /search query) from its cache.
+  const gatewayOptions = typeof gateway === 'string' ? { id: gateway } : gateway;
   return async (req) => {
     const input: Record<string, unknown> = { messages: req.messages, stream: true, stream_options: { include_usage: true } };
     if (req.jsonSchema) input.response_format = { type: 'json_schema', json_schema: { name: req.jsonSchema.name, schema: req.jsonSchema.schema } };
@@ -97,7 +99,7 @@ export const workersAiBindingClient = (ai: AiBinding, gatewayId?: string): ChatC
 
     let text: string;
     try {
-      const out = await ai.run(req.model, input, gatewayId ? { gateway: { id: gatewayId } } : undefined);
+      const out = await ai.run(req.model, input, gatewayOptions ? { gateway: gatewayOptions } : undefined);
       if (out instanceof ReadableStream) text = await new Response(out).text();
       // Non-streamed binding results may use the native `{ response }` shape instead of OpenAI's.
       else if (out && typeof out === 'object' && typeof (out as { response?: unknown }).response === 'string') {
@@ -179,6 +181,10 @@ export const MODELS = {
     reasoning: ['none', 'low', 'high'],
   },
   'gpt-oss-120b': { id: '@cf/openai/gpt-oss-120b', input: 0.35, cachedInput: null, output: 0.75, reasoning: ['low', 'high'] },
+  // Smaller/faster models, candidates for /search query parsing (latency matters more than depth).
+  'gpt-oss-20b': { id: '@cf/openai/gpt-oss-20b', input: 0.2, cachedInput: null, output: 0.3, reasoning: ['low', 'high'] },
+  'gemma-4-26b': { id: '@cf/google/gemma-4-26b-a4b-it', input: 0.1, cachedInput: null, output: 0.3, reasoning: false },
+  'llama-3.3-70b-fast': { id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', input: 0.293, cachedInput: null, output: 2.253, reasoning: false },
 } as const satisfies Record<string, ModelInfo>;
 
 export type ModelKey = keyof typeof MODELS;
