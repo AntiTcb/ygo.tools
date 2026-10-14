@@ -58,6 +58,7 @@ export const EFFECT_EVENT_VERBS = [
   'attack_declared',
   'battle_damage',
   'activated',
+  'battles',
 ] as const;
 
 export const EFFECT_ZONES = [

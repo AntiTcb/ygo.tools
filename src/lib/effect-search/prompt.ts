@@ -1,7 +1,7 @@
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type TagOutputInput } from './tagSchema';
 
 /** Bump whenever the prompt or labelling conventions change; stored on each tagged card and run. */
-export const TAG_PROMPT_VERSION = 'v3';
+export const TAG_PROMPT_VERSION = 'v4';
 
 export type VocabTerm = { term: string; description: string; usable_as_action?: boolean; usable_as_event?: boolean };
 
