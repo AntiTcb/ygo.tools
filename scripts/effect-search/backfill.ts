@@ -60,7 +60,7 @@ console.log(
 if (values['dry-run'] || !queue.length) process.exit(0);
 
 const pool = await loadCardPool(db);
-const cfg = { ...(await taggerConfig(db, model, parseReasoning(values.reasoning))), client: aiClient() };
+const cfg = { ...(await taggerConfig(db, model, parseReasoning(values.reasoning))), client: aiClient(), maxAttempts: 3 };
 
 const { data: run, error: runError } = await db
   .from('effect_tag_runs')

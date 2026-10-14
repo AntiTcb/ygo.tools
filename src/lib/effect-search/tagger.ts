@@ -1,6 +1,6 @@
 import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage, type ReasoningEffort } from './ai';
 import { buildUserPrompt, type TaggerCard } from './prompt';
-import { normalizeTagOutput, tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
+import { normalizeTagOutput, repairTagOutput, tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
 
 export type TaggerConfig = {
   client: ChatClient;
@@ -12,6 +12,8 @@ export type TaggerConfig = {
   reasoningEffort?: ReasoningEffort;
   /** Total attempts per card, including corrections after invalid output. */
   maxAttempts?: number;
+  /** Output cap per request, so a looping generation fails fast instead of streaming until the timeout. */
+  maxTokens?: number;
 };
 
 export type TagResult =
@@ -33,8 +35,9 @@ export const checkTaggerReply = (content: string, vocab: Vocab): { output: TagOu
   if (!parsed.success) {
     return { errors: parsed.error.issues.slice(0, 20).map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`) };
   }
-  const problems = validateTagOutput(parsed.data, vocab);
-  return problems.length ? { errors: problems } : { output: normalizeTagOutput(parsed.data) };
+  const repaired = repairTagOutput(parsed.data);
+  const problems = validateTagOutput(repaired, vocab);
+  return problems.length ? { errors: problems } : { output: normalizeTagOutput(repaired) };
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -62,7 +65,9 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
           messages,
           jsonSchema: { name: 'card_effects', schema: cfg.jsonSchema },
           reasoningEffort: cfg.reasoningEffort,
-          temperature: 0,
+          // A retry at temperature 0 repeats the same degenerate output (e.g. endless whitespace); vary it.
+          temperature: attempt === 1 ? 0 : 0.4,
+          maxTokens: cfg.maxTokens ?? 6000,
         });
         usage = addUsage(usage, res.usage);
         content = res.content;
@@ -79,6 +84,9 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
     const checked = checkTaggerReply(content, cfg.vocab);
     if ('output' in checked) return { ok: true, output: checked.output, attempts: attempt, usage };
     lastError = checked.errors.join('; ');
+    // Broken JSON is usually a degenerate generation (e.g. thousands of blank lines): retry fresh at a
+    // higher temperature rather than feeding it back. Valid-but-wrong output gets a correction turn.
+    if (checked.errors[0]?.startsWith('Output is not valid JSON')) continue;
     messages.push(
       { role: 'assistant', content },
       {

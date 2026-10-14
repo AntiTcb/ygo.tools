@@ -243,3 +243,22 @@ export const normalizeTagOutput = (out: TagOutput): TagOutput => ({
     actions: e.actions.map((a) => (a.is_self ? { ...a, quantity: null, from_side: null } : a)),
   })),
 });
+
+/**
+ * Repairs slips that don't change the meaning, before validation: a "this card" trigger that also
+ * names a subject, and stat fields filled in on actions that can't carry them.
+ */
+export const repairTagOutput = (out: TagOutput): TagOutput => ({
+  ...out,
+  effects: out.effects.map((e) => ({
+    ...e,
+    triggers: e.triggers.map((t) => (t.subject_is_self && t.subject ? { ...t, subject: null } : t)),
+    actions: e.actions.map((a) => {
+      if (a.verb === 'change_stats') return a;
+      if (AMOUNT_VERBS.has(a.verb)) return a.stat || a.stat_mode ? { ...a, stat: null, stat_mode: null } : a;
+      return a.stat || a.stat_mode || a.stat_amount !== null || a.stat_amount_note
+        ? { ...a, stat: null, stat_mode: null, stat_amount: null, stat_amount_note: null }
+        : a;
+    }),
+  })),
+});

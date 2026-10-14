@@ -117,3 +117,39 @@ describe('parseChatResponse', () => {
     expect(parseChatResponse('data: {"choices":[{"delta":{}}]}\ndata: [DONE]\n').content).toBeNull();
   });
 });
+
+describe('tagCard retries', () => {
+  it('retries broken JSON fresh at a higher temperature, without feeding the broken reply back', async () => {
+    const { client, calls } = scripted(['{"effects": [\n\n\n\n', good]);
+    const res = await tagCard(card, cfg(client));
+    expect(res).toMatchObject({ ok: true, attempts: 2 });
+    expect(calls[0]!.temperature).toBe(0);
+    expect(calls[1]!.temperature).toBe(0.4);
+    expect(calls[1]!.messages).toHaveLength(2);
+  });
+
+  it('repairs meaning-preserving slips instead of failing', () => {
+    const slip = JSON.stringify({
+      effects: [
+        {
+          effect_index: 0,
+          snippet: 's',
+          effect_type: 'trigger',
+          triggers: [{ event: 'send_to_gy', subject_is_self: true, subject: { card_types: ['monster'] } }],
+          actions: [
+            { verb: 'draw', quantity: 1, stat_mode: 'gain' },
+            { verb: 'inflict_damage', stat_mode: 'lose', stat_amount: 500 },
+          ],
+        },
+      ],
+    });
+    const checked = checkTaggerReply(slip, vocab);
+    expect('output' in checked).toBe(true);
+    if ('output' in checked) {
+      const [e] = checked.output.effects;
+      expect(e!.triggers[0]!.subject).toBeNull();
+      expect(e!.actions[0]).toMatchObject({ stat_mode: null });
+      expect(e!.actions[1]).toMatchObject({ stat_mode: null, stat_amount: 500 });
+    }
+  });
+});
