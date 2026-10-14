@@ -5,6 +5,7 @@
 //   pnpm effect-search:backfill --dry-run                 # queue size and cost estimate only
 //   pnpm effect-search:backfill --limit 200               # try a slice first
 //   pnpm effect-search:backfill --max-cost 40 --concurrency 6
+//   pnpm effect-search:backfill --retag-old-prompt         # also re-tag cards tagged by an older prompt
 //
 // Progress is recorded in effect_tag_runs (kind 'backfill'). Locked (hand-corrected) cards get a
 // pending draft instead of being overwritten. Safe to re-run: stored cards leave the queue.
@@ -12,6 +13,7 @@ import { MODELS, usageCostUsd } from '../../src/lib/effect-search/ai';
 import { toTaggerCard } from '../../src/lib/effect-search/cardText';
 import { fetchAll, loadCardPool, loadRelatedIds, storeCardTags } from '../../src/lib/effect-search/db';
 import { tagCard } from '../../src/lib/effect-search/tagger';
+import { TAG_PROMPT_VERSION } from '../../src/lib/effect-search/prompt';
 import { aiClient, args, mapPool, parseModel, parseReasoning, supabase, taggerConfig, usd, writeReport } from './lib';
 
 const { values } = args({
@@ -23,6 +25,8 @@ const { values } = args({
   /** Expected USD per card, for --dry-run and the --max-cost guard before real numbers come in. */
   'est-per-card': { type: 'string', default: '0.0025' },
   'dry-run': { type: 'boolean', default: false },
+  /** Also re-tag unlocked cards tagged by an older prompt version. */
+  'retag-old-prompt': { type: 'boolean', default: false },
 });
 
 const db = supabase();
@@ -30,9 +34,24 @@ const model = parseModel(values.model);
 const maxCost = values['max-cost'] ? Number(values['max-cost']) : Infinity;
 
 // View columns come back nullable in the generated types; the view never yields null ids.
-let queue = (await fetchAll((from, to) => db.from('effect_tag_queue').select('card_id,text_hash,locked').order('card_id').range(from, to))).filter(
-  (q): q is typeof q & { card_id: number } => q.card_id !== null,
-);
+let queue: { card_id: number; text_hash: string | null; locked: boolean | null }[] = (
+  await fetchAll((from, to) => db.from('effect_tag_queue').select('card_id,text_hash,locked').order('card_id').range(from, to))
+).filter((q): q is typeof q & { card_id: number } => q.card_id !== null);
+
+if (values['retag-old-prompt']) {
+  // Unlocked cards whose text is unchanged but were tagged by an older prompt (hand-corrected cards stay as they are).
+  const old = await fetchAll((from, to) =>
+    db
+      .from('effect_card_tags')
+      .select('card_id,text_hash')
+      .eq('locked', false)
+      .neq('prompt_version', TAG_PROMPT_VERSION)
+      .order('card_id')
+      .range(from, to),
+  );
+  const queued = new Set(queue.map((q) => q.card_id));
+  queue = [...queue, ...old.filter((o) => !queued.has(o.card_id)).map((o) => ({ ...o, locked: false }))].sort((a, b) => a.card_id - b.card_id);
+}
 if (values.limit) queue = queue.slice(0, Number(values.limit));
 const estimate = queue.length * Number(values['est-per-card']);
 console.log(

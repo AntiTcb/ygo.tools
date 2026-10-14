@@ -1,7 +1,7 @@
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type TagOutputInput } from './tagSchema';
 
 /** Bump whenever the prompt or labelling conventions change; stored on each tagged card and run. */
-export const TAG_PROMPT_VERSION = 'v2';
+export const TAG_PROMPT_VERSION = 'v3';
 
 export type VocabTerm = { term: string; description: string; usable_as_action?: boolean; usable_as_event?: boolean };
 
@@ -147,6 +147,55 @@ export const TAG_EXAMPLES: TagExample[] = [
       ],
     },
   },
+  {
+    card: {
+      name: 'Swamp Battleguard',
+      typeLine: 'Effect Monster · Level 5 · EARTH · Warrior · ATK 1800 / DEF 1500',
+      effectText: 'Gains 500 ATK for each "Lava Battleguard" you control.',
+      pendulumText: null,
+    },
+    output: {
+      effects: [
+        {
+          effect_index: 0,
+          snippet: 'Gains 500 ATK for each "Lava Battleguard" you control.',
+          effect_type: 'continuous',
+          actions: [
+            { verb: 'change_stats', is_self: true, stat: 'atk', stat_mode: 'gain', stat_amount_note: '500 for each "Lava Battleguard" you control' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    card: {
+      name: 'Beastking of the Swamps',
+      typeLine: 'Effect Monster · Level 4 · WATER · Aqua · ATK 1000 / DEF 1100',
+      effectText:
+        'You can substitute this card for any 1 Fusion Material Monster. When you do this, the other Fusion Material Monster(s) must be the correct one(s).',
+      pendulumText: null,
+    },
+    output: {
+      effects: [
+        {
+          effect_index: 0,
+          snippet:
+            'You can substitute this card for any 1 Fusion Material Monster. When you do this, the other Fusion Material Monster(s) must be the correct one(s).',
+          effect_type: 'continuous',
+          actions: [],
+        },
+      ],
+      unmapped: [
+        {
+          kind: 'verb',
+          as_action: true,
+          proposed_term: 'fusion_substitute',
+          description: 'This card can be used as a substitute for a named Fusion Material',
+          phrase: 'substitute this card for any 1 Fusion Material Monster',
+        },
+      ],
+    },
+  },
 ];
 
 const termList = (terms: VocabTerm[]) => terms.map((t) => `- ${t.term}: ${t.description}`).join('\n');
@@ -192,7 +241,7 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
 - verb: one of the action verbs. If an action fits no verb ("you win the Duel", "this card's name becomes...", "negate the attack", "excavate"), leave it out of "actions" and add an "unmapped" entry proposing a new term instead; never force it onto a wrong verb. Summoning Tokens is special_summon (with no from_zones) plus an unmapped "special_summon_token" proposal.
 - from_zones: where the affected card comes from. to_zones: only when the destination is not implied by the verb (add_to_hand implies hand, send_to_gy implies GY, banish implies banished, summons imply the field); e.g. return_to_deck to the Extra Deck, place_on_field into a Pendulum Zone, set to the field.
 - from_side: whose zone it comes from ("your GY" -> you, "your opponent's GY" -> opponent, "either GY" / "on the field" -> either). to_side: only when the result is controlled by a specific player that matters ("Set it to your field" -> you; "Special Summon ... to your opponent's field" -> opponent). For draw, inflict_damage, gain_lp and lose_lp, to_side is the affected player ("Inflict 800 damage to your opponent" -> opponent; "Take 1000 damage" -> you; "Both players draw" -> either).
-- is_self: the action affects this card itself ("Special Summon this card", "discard this card").
+- is_self: the action affects this card itself ("Special Summon this card", "discard this card"). Monster text with no stated subject is about this card: "Gains 500 ATK for each..." / "Cannot be destroyed by battle" / "Return this face-up card to the hand" -> is_self true.
 - quantity: the number printed ("1", "up to 2" -> 2); null for "all"/unspecified.
 - target: restrictions on what the action can affect, beyond what the verb implies (summons imply a monster, so "Special Summon 1 monster" has target null). null = unrestricted. Use the target fields; values within one list are alternatives, different fields must all hold; use "any_of" for "X or Y" across different fields.
   - Quoted names followed by "card(s)", "monster(s)", "Spell", "Trap" are archetypes ("archetypes": ["Frog"]); a quoted name standing alone is a specific card: put it in the action's "name_refs" ("Special Summon 1 "Toadally Awesome"" -> name_refs ["Toadally Awesome"]). "except "X"" -> exclude_names.

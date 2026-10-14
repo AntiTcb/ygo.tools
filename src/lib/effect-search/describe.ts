@@ -1,6 +1,8 @@
 import { describeTarget } from './targetRule';
 import type { TagAction, TagTrigger } from './tagSchema';
 
+const PLAYER_VERBS: ReadonlySet<string> = new Set(['draw', 'inflict_damage', 'gain_lp', 'lose_lp']);
+
 const sideWord = { you: 'your', opponent: "opponent's", either: 'either player’s' } as const;
 
 const zones = (zs: string[], side: TagAction['from_side']) => (zs.length ? `${side ? `${sideWord[side]} ` : ''}${zs.join('/')}` : '');
@@ -10,6 +12,14 @@ export const describeAction = (a: TagAction): string => {
   const parts: string[] = [];
   if (a.is_cost) parts.push('COST:');
   parts.push(a.verb);
+  // These affect a player, not a card: "inflict_damage 800 → opponent", "draw 2 → you".
+  if (PLAYER_VERBS.has(a.verb)) {
+    const amount = a.stat_amount ?? a.quantity;
+    if (amount !== null) parts.push(String(amount));
+    if (a.stat_amount_note) parts.push(`(${a.stat_amount_note})`);
+    if (a.to_side) parts.push(`→ ${a.to_side === 'either' ? 'both players' : a.to_side}`);
+    return parts.join(' ');
+  }
   if (a.is_self) parts.push('this card');
   else {
     if (a.quantity) parts.push(`${a.quantity} ×`);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSystemPrompt, buildUserPrompt, type PromptVocab } from './prompt';
+import { buildSystemPrompt, buildUserPrompt, TAG_EXAMPLES, type PromptVocab } from './prompt';
 import { buildTagJsonSchema } from './tagJsonSchema';
 import { tagOutputSchema, validateTagOutput, type Vocab } from './tagSchema';
 import { EFFECT_ACTION_VERBS, EFFECT_EVENT_VERBS, EFFECT_ZONES } from './vocab.generated';
@@ -36,7 +36,7 @@ describe('tagger prompt', () => {
 
   it('has worked examples that are valid tagger output for the seeded vocabulary', () => {
     const outputs = exampleOutputs(prompt);
-    expect(outputs.length).toBe(4);
+    expect(outputs.length).toBe(TAG_EXAMPLES.length);
     for (const raw of outputs) {
       const parsed = tagOutputSchema.parse(raw);
       expect(validateTagOutput(parsed, vocab)).toEqual([]);

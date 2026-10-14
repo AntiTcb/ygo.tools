@@ -41,3 +41,15 @@ describe('describeTrigger', () => {
     ).toBe("attack_declared: monster (opponent's)");
   });
 });
+
+describe('describeAction for player-affecting verbs', () => {
+  it('shows amounts and the affected player instead of a card target', () => {
+    expect(describeAction(tagActionSchema.parse({ verb: 'inflict_damage', to_side: 'opponent', stat_amount: 800 }))).toBe(
+      'inflict_damage 800 → opponent',
+    );
+    expect(describeAction(tagActionSchema.parse({ verb: 'lose_lp', is_cost: true, to_side: 'you', stat_amount_note: 'half your LP' }))).toBe(
+      'COST: lose_lp (half your LP) → you',
+    );
+    expect(describeAction(tagActionSchema.parse({ verb: 'draw', quantity: 2, to_side: 'either' }))).toBe('draw 2 → both players');
+  });
+});
