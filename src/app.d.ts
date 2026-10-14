@@ -19,6 +19,8 @@ declare global {
     // interface Error {}
     interface Locals {
       supabase: SupabaseClient<Database>;
+      /** Set by hooks.server.ts on /admin requests: true once the admin session cookie is verified. */
+      isAdmin?: boolean;
     }
     // interface PageData {}
     // interface PageState {}

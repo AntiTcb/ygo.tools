@@ -23,3 +23,6 @@ vite.config.ts.timestamp-*
 
 # Cloudflare Types
 /worker-configuration.d.ts
+
+# effect-search script reports
+.effect-search

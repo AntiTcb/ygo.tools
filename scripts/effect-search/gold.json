@@ -1,0 +1,1446 @@
+[
+  {
+    "card_id": 4844,
+    "name": "Pot of Greed",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Draw 2 cards.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "draw", "quantity": 2, "to_side": "you" }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4343,
+    "name": "Raigeki",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Destroy all monsters your opponent controls.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "target": { "card_types": ["monster"] } }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4342,
+    "name": "Dark Hole",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Destroy all monsters on the field.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["monster"] } }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4887,
+    "name": "Mirror Force",
+    "notes": "Attack Position qualifier is ignored by convention.",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When an opponent's monster declares an attack: Destroy all your opponent's Attack Position monsters.",
+          "effect_type": "activation",
+          "triggers": [{ "event": "attack_declared", "subject": { "card_types": ["monster"] }, "subject_side": "opponent" }],
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "target": { "card_types": ["monster"] } }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4861,
+    "name": "Solemn Judgment",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When a monster(s) would be Summoned, OR a Spell/Trap Card is activated: Pay half your LP; negate the Summon or activation, and if you do, destroy that card.",
+          "effect_type": "activation",
+          "triggers": [{ "event": "summoned" }, { "event": "activated", "subject": { "card_types": ["spell", "trap"] } }],
+          "actions": [
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount_note": "half your LP" },
+            { "verb": "negate_summon" },
+            { "verb": "negate_activation" },
+            { "verb": "destroy", "quantity": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4909,
+    "name": "Mystical Space Typhoon",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 Spell/Trap on the field; destroy that target.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "destroy", "from_zones": ["field"], "from_side": "either", "quantity": 1, "target": { "card_types": ["spell", "trap"] } }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4966,
+    "name": "Premature Burial",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Activate this card by paying 800 LP, then target 1 monster in your Graveyard; Special Summon that target in Attack Position and equip it with this card.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount": 800 },
+            { "verb": "special_summon", "from_zones": ["gy"], "from_side": "you", "quantity": 1 },
+            { "verb": "equip", "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When this card is destroyed, destroy the equipped monster.",
+          "effect_type": "continuous",
+          "triggers": [{ "event": "destroy", "subject_is_self": true }],
+          "actions": [{ "verb": "destroy", "quantity": 1 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4989,
+    "name": "Call of the Haunted",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Activate this card by targeting 1 monster in your GY; Special Summon that target in Attack Position.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "special_summon", "from_zones": ["gy"], "from_side": "you", "quantity": 1 }]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When this card leaves the field, destroy that monster.",
+          "effect_type": "continuous",
+          "triggers": [{ "event": "leaves_field", "subject_is_self": true }],
+          "actions": [{ "verb": "destroy", "quantity": 1 }]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "When that monster is destroyed, destroy this card.",
+          "effect_type": "continuous",
+          "triggers": [{ "event": "destroy" }],
+          "actions": [{ "verb": "destroy", "is_self": true }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5212,
+    "name": "United We Stand",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "The equipped monster gains 800 ATK/DEF for each face-up monster you control.",
+          "effect_type": "continuous",
+          "actions": [
+            { "verb": "change_stats", "stat": "atk", "stat_mode": "gain", "stat_amount_note": "800 for each face-up monster you control" },
+            { "verb": "change_stats", "stat": "def", "stat_mode": "gain", "stat_amount_note": "800 for each face-up monster you control" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4340,
+    "name": "Umi",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "All Fish, Sea Serpent, Thunder, and Aqua monsters on the field gain 200 ATK/DEF, also all Machine and Pyro monsters on the field lose 200 ATK/DEF.",
+          "effect_type": "continuous",
+          "actions": [
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "either",
+              "target": { "races": ["Fish", "Sea Serpent", "Thunder", "Aqua"] },
+              "stat": "atk",
+              "stat_mode": "gain",
+              "stat_amount": 200
+            },
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "either",
+              "target": { "races": ["Fish", "Sea Serpent", "Thunder", "Aqua"] },
+              "stat": "def",
+              "stat_mode": "gain",
+              "stat_amount": 200
+            },
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "either",
+              "target": { "races": ["Machine", "Pyro"] },
+              "stat": "atk",
+              "stat_mode": "lose",
+              "stat_amount": 200
+            },
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "either",
+              "target": { "races": ["Machine", "Pyro"] },
+              "stat": "def",
+              "stat_mode": "lose",
+              "stat_amount": 200
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5236,
+    "name": "Foolish Burial",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Send 1 monster from your Deck to the GY.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "send_to_gy", "from_zones": ["deck"], "from_side": "you", "quantity": 1, "target": { "card_types": ["monster"] } }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5328,
+    "name": "Reinforcement of the Army",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Add 1 Level 4 or lower Warrior monster from your Deck to your hand.",
+          "effect_type": "activation",
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "level": { "op": "lte", "value": 4 }, "races": ["Warrior"] }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5432,
+    "name": "Book of Moon",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 face-up monster on the field; change that target to face-down Defense Position.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "change_position", "from_zones": ["field"], "from_side": "either", "quantity": 1 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 6603,
+    "name": "Treeborn Frog",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Once per turn, during your Standby Phase, if this card is in your Graveyard and you do not control \"Treeborn Frog\": You can Special Summon this card. You must control no Spell/Trap Cards to activate and to resolve this effect.",
+          "effect_type": "trigger",
+          "opt": "soft",
+          "phase_restriction": ["standby"],
+          "turn_restriction": "yours",
+          "actions": [{ "verb": "special_summon", "from_zones": ["gy"], "from_side": "you", "is_self": true }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 6784,
+    "name": "Elemental HERO Stratos",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When this card is Normal or Special Summoned: You can activate 1 of these effects;\n●Destroy Spells/Traps on the field, up to the number of \"HERO\" monsters you control, except this card.\n●Add 1 \"HERO\" monster from your Deck to your hand.",
+          "effect_type": "trigger",
+          "triggers": [
+            { "event": "normal_summon", "subject_is_self": true },
+            { "event": "special_summon", "subject_is_self": true }
+          ],
+          "actions": [
+            { "verb": "destroy", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["spell", "trap"] } },
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "archetypes": ["HERO"] }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 8469,
+    "name": "Swap Frog",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "You can Special Summon this card (from your hand) by discarding 1 other WATER monster.",
+          "effect_type": "procedure",
+          "actions": [
+            {
+              "verb": "discard",
+              "from_zones": ["hand"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "attributes": ["WATER"] }
+            },
+            { "verb": "special_summon", "from_zones": ["hand"], "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When this card is Summoned: You can send 1 Level 2 or lower WATER Aqua monster from your Deck or face-up field to the GY.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "summoned", "subject_is_self": true }],
+          "actions": [
+            {
+              "verb": "send_to_gy",
+              "from_zones": ["deck", "field"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "level": { "op": "lte", "value": 2 }, "attributes": ["WATER"], "races": ["Aqua"] }
+            }
+          ]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "Once per turn: You can return 1 monster you control to the hand; you can Normal Summon 1 \"Frog\" monster during your Main Phase this turn, except \"Swap Frog\", in addition to your Normal Summon/Set. (You can only gain this effect once per turn.)",
+          "effect_type": "ignition",
+          "opt": "soft",
+          "actions": [
+            {
+              "verb": "return_to_hand",
+              "from_zones": ["field"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "card_types": ["monster"] }
+            },
+            { "verb": "normal_summon", "from_zones": ["hand"], "quantity": 1, "target": { "archetypes": ["Frog"], "exclude_names": ["Swap Frog"] } }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 8809,
+    "name": "Ronintoadin",
+    "expected": {
+      "effects": [
+        { "effect_index": 0, "snippet": "Cannot be used as Synchro Material.", "effect_type": "continuous" },
+        { "effect_index": 1, "snippet": "This card's name becomes \"Des Frog\" while on the field.", "effect_type": "continuous" },
+        {
+          "effect_index": 2,
+          "snippet": "If this card is in your GY: You can banish 1 \"Frog\" monster from your GY; Special Summon this card.",
+          "effect_type": "ignition",
+          "actions": [
+            {
+              "verb": "banish",
+              "from_zones": ["gy"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "archetypes": ["Frog"] }
+            },
+            { "verb": "special_summon", "from_zones": ["gy"], "is_self": true }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "change_name",
+          "description": "A card's name becomes or is treated as another name",
+          "phrase": "This card's name becomes \"Des Frog\" while on the field"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 8933,
+    "name": "Effect Veiler",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "During your opponent's Main Phase (Quick Effect): You can send this card from your hand to the GY, then target 1 Effect Monster your opponent controls; negate the effects of that face-up monster your opponent controls, until the end of this turn.",
+          "effect_type": "quick",
+          "phase_restriction": ["main"],
+          "turn_restriction": "opponents",
+          "actions": [
+            { "verb": "send_to_gy", "from_zones": ["hand"], "is_cost": true, "is_self": true },
+            { "verb": "negate_effect", "from_zones": ["field"], "from_side": "opponent", "quantity": 1, "target": { "monster_kinds": ["effect"] } }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 9455,
+    "name": "Maxx \"C\"",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "During either player's turn: You can send this card from your hand to the Graveyard; this turn, each time your opponent Special Summons a monster(s), immediately draw 1 card.",
+          "effect_type": "quick",
+          "opt": "per_name_activation",
+          "actions": [
+            { "verb": "send_to_gy", "from_zones": ["hand"], "is_cost": true, "is_self": true },
+            { "verb": "draw", "quantity": 1, "to_side": "you" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 9950,
+    "name": "Xyz Reborn",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 Xyz Monster in your GY; Special Summon it, and if you do, attach this card to it as material.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "special_summon", "from_zones": ["gy"], "from_side": "you", "quantity": 1, "target": { "monster_kinds": ["xyz"] } },
+            { "verb": "attach_material", "is_self": true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 13600,
+    "name": "Knightmare Phoenix",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "If this card is Link Summoned: You can discard 1 card, then target 1 Spell/Trap your opponent controls; destroy it, then, if this card was co-linked when this effect was activated, you can draw 1 card. You can only use this effect of \"Knightmare Phoenix\" once per turn.",
+          "effect_type": "trigger",
+          "opt": "hard",
+          "triggers": [{ "event": "special_summon", "subject_is_self": true }],
+          "actions": [
+            { "verb": "discard", "from_zones": ["hand"], "from_side": "you", "is_cost": true, "quantity": 1 },
+            { "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "quantity": 1, "target": { "card_types": ["spell", "trap"] } },
+            { "verb": "draw", "quantity": 1, "to_side": "you" }
+          ]
+        },
+        { "effect_index": 1, "snippet": "Co-linked monsters you control cannot be destroyed by battle.", "effect_type": "continuous" }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "protect_from_destruction",
+          "description": "Cards cannot be destroyed (by battle and/or card effects)",
+          "phrase": "cannot be destroyed by battle"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 13346,
+    "name": "Linkuriboh",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When an opponent's monster declares an attack: You can Tribute this card; change that opponent's monster's ATK to 0, until the end of this turn.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "attack_declared", "subject": { "card_types": ["monster"] }, "subject_side": "opponent" }],
+          "actions": [
+            { "verb": "tribute", "from_zones": ["field"], "is_cost": true, "is_self": true },
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "opponent",
+              "quantity": 1,
+              "stat": "atk",
+              "stat_mode": "set",
+              "stat_amount": 0
+            }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "If this card is in your GY (Quick Effect): You can Tribute 1 Level 1 monster; Special Summon this card. You can only use this effect of \"Linkuriboh\" once per turn.",
+          "effect_type": "quick",
+          "opt": "hard",
+          "actions": [
+            {
+              "verb": "tribute",
+              "from_zones": ["field"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "level": { "op": "eq", "value": 1 } }
+            },
+            { "verb": "special_summon", "from_zones": ["gy"], "is_self": true }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 13619,
+    "name": "Called by the Grave",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 monster in your opponent's GY; banish it, and if you do, until the end of the next turn, its effects are negated, as well as the activated effects and effects on the field of monsters with the same original name.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "banish", "from_zones": ["gy"], "from_side": "opponent", "quantity": 1, "target": { "card_types": ["monster"] } },
+            {
+              "verb": "negate_effect",
+              "contextual": true,
+              "context_note": "the banished monster and monsters with the same original name, until the end of the next turn"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 15756,
+    "name": "Pot of Prosperity",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Banish 3 or 6 cards of your choice from your Extra Deck, face-down; for the rest of this turn after this card resolves, any damage your opponent takes is halved, also excavate cards from the top of your Deck equal to the number of cards banished, add 1 excavated card to your hand, place the rest on the bottom of your Deck in any order.",
+          "effect_type": "activation",
+          "opt": "per_name_activation",
+          "actions": [
+            { "verb": "banish", "from_zones": ["extra_deck"], "from_side": "you", "is_cost": true },
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "contextual": true,
+              "context_note": "one of the excavated cards"
+            },
+            { "verb": "return_to_deck", "from_side": "you" }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "excavate",
+          "description": "Reveal cards from the top of the Deck",
+          "phrase": "excavate cards from the top of your Deck"
+        },
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "halve_damage",
+          "description": "Damage a player takes is halved",
+          "phrase": "any damage your opponent takes is halved"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 13631,
+    "name": "Infinite Impermanence",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 face-up monster your opponent controls; negate its effects (until the end of this turn), then if this card was Set before activation and is on the field at resolution, for the rest of this turn all other Spell/Trap effects in this column are negated.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "negate_effect", "from_zones": ["field"], "from_side": "opponent", "quantity": 1, "target": { "card_types": ["monster"] } },
+            {
+              "verb": "negate_effect",
+              "from_zones": ["field"],
+              "from_side": "either",
+              "target": { "card_types": ["spell", "trap"] },
+              "contextual": true,
+              "context_note": "only Spell/Trap effects in this card's column, if it was Set before activation"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4027,
+    "name": "Exodia the Forbidden One",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "If you have \"Right Leg of the Forbidden One\", \"Left Leg of the Forbidden One\", \"Right Arm of the Forbidden One\" and \"Left Arm of the Forbidden One\" in addition to this card in your hand, you win the Duel.",
+          "effect_type": "continuous"
+        }
+      ],
+      "unmapped": [
+        { "kind": "verb", "as_action": true, "proposed_term": "win_duel", "description": "A player wins the Duel", "phrase": "you win the Duel" }
+      ]
+    }
+  },
+  {
+    "card_id": 4348,
+    "name": "Dian Keto the Cure Master",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Increase your Life Points by 1000 points.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "gain_lp", "to_side": "you", "stat_amount": 1000 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4352,
+    "name": "Ookazi",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Inflict 800 points of damage to your opponent's Life Points.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "inflict_damage", "to_side": "opponent", "stat_amount": 800 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4812,
+    "name": "Graceful Charity",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Draw 3 cards, then discard 2 cards.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "draw", "quantity": 3, "to_side": "you" },
+            { "verb": "discard", "from_zones": ["hand"], "from_side": "you", "quantity": 2 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4817,
+    "name": "Mind Control",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Target 1 monster your opponent controls; until the End Phase, take control of that target, but it cannot declare an attack or be Tributed.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "take_control", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4818,
+    "name": "Scapegoat",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Special Summon 4 \"Sheep Tokens\" (Beast/EARTH/Level 1/ATK 0/DEF 0) in Defense Position. They cannot be Tributed for a Tribute Summon.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "special_summon", "quantity": 4 }]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "special_summon_token",
+          "description": "Special Summon Token monsters",
+          "phrase": "Special Summon 4 \"Sheep Tokens\""
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4821,
+    "name": "Card Destruction",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Both players discard as many cards as possible from their hands, then each player draws the same number of cards they discarded.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "discard", "from_zones": ["hand"], "from_side": "either" },
+            { "verb": "draw", "to_side": "either" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4830,
+    "name": "Dark Magic Curtain",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Pay half your LP; Special Summon 1 \"Dark Magician\" from your Deck.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "lose_lp", "is_cost": true, "to_side": "you", "stat_amount_note": "half your LP" },
+            { "verb": "special_summon", "from_zones": ["deck"], "from_side": "you", "quantity": 1, "name_refs": ["Dark Magician"] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4898,
+    "name": "Snatch Steal",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Equip only to a monster your opponent controls.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "equip", "is_self": true }]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "Take control of the equipped monster.",
+          "effect_type": "continuous",
+          "actions": [{ "verb": "take_control", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "Once per turn, during your opponent's Standby Phase: They gain 1000 LP.",
+          "effect_type": "trigger",
+          "opt": "soft",
+          "phase_restriction": ["standby"],
+          "turn_restriction": "opponents",
+          "actions": [{ "verb": "gain_lp", "to_side": "opponent", "stat_amount": 1000 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5166,
+    "name": "Thousand Knives",
+    "notes": "\"Dark Magician\" is a condition, not a target, so it is not a name_ref.",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "If you control \"Dark Magician\": Target 1 monster your opponent controls; destroy that target.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "quantity": 1, "target": { "card_types": ["monster"] } }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5496,
+    "name": "Lava Golem",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Must first be Special Summoned (from your hand) to your opponent's field by Tributing 2 monsters they control.",
+          "effect_type": "procedure",
+          "actions": [
+            { "verb": "tribute", "from_zones": ["field"], "from_side": "opponent", "is_cost": true, "quantity": 2 },
+            { "verb": "special_summon", "from_zones": ["hand"], "to_side": "opponent", "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "Once per turn, during your Standby Phase: Take 1000 damage.",
+          "effect_type": "trigger",
+          "opt": "soft",
+          "phase_restriction": ["standby"],
+          "turn_restriction": "yours",
+          "actions": [{ "verb": "inflict_damage", "to_side": "you", "stat_amount": 1000 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5505,
+    "name": "Enemy Controller",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Activate 1 of these effects;\n●Target 1 face-up monster your opponent controls; change that target's battle position.\n●Tribute 1 monster, then target 1 face-up monster your opponent controls; take control of that target until the End Phase.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "change_position", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 },
+            { "verb": "tribute", "from_zones": ["field"], "from_side": "you", "is_cost": true, "quantity": 1 },
+            { "verb": "take_control", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5738,
+    "name": "Ojama Trio",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Special Summon 3 \"Ojama Tokens\" (Beast-Type/LIGHT/Level 2/ATK 0/DEF 1000) to your opponent's field in Defense Position. They cannot be Tributed for a Tribute Summon, and each time 1 is destroyed, its controller takes 300 damage.",
+          "effect_type": "activation",
+          "actions": [{ "verb": "special_summon", "to_side": "opponent", "quantity": 3 }]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "special_summon_token",
+          "description": "Special Summon Token monsters",
+          "phrase": "Special Summon 3 \"Ojama Tokens\""
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 5927,
+    "name": "Abyss Soldier",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Once per turn: You can discard 1 WATER monster to the Graveyard to target 1 card on the field; return it to the hand.",
+          "effect_type": "ignition",
+          "opt": "soft",
+          "actions": [
+            {
+              "verb": "discard",
+              "from_zones": ["hand"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "attributes": ["WATER"] }
+            },
+            { "verb": "return_to_hand", "from_zones": ["field"], "from_side": "either", "quantity": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 6161,
+    "name": "Gold Sarcophagus",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Banish 1 card from your Deck, face-up. During your 2nd Standby Phase after this card's activation, add that card to the hand.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "banish", "from_zones": ["deck"], "from_side": "you", "quantity": 1 },
+            { "verb": "add_to_hand", "from_zones": ["banished"], "from_side": "you", "quantity": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 6390,
+    "name": "Cyber Dragon",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "If only your opponent controls a monster, you can Special Summon this card (from your hand).",
+          "effect_type": "procedure",
+          "actions": [{ "verb": "special_summon", "from_zones": ["hand"], "is_self": true }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 7788,
+    "name": "Dupe Frog",
+    "expected": {
+      "effects": [
+        { "effect_index": 0, "snippet": "This card's name becomes \"Des Frog\" while on the field.", "effect_type": "continuous" },
+        {
+          "effect_index": 1,
+          "snippet": "Monsters your opponent controls cannot target monsters for attacks, except this one.",
+          "effect_type": "continuous"
+        },
+        {
+          "effect_index": 2,
+          "snippet": "When this card is sent from the field to the GY: You can add 1 \"Frog\" monster from your Deck or GY to your hand, except \"Dupe Frog\".",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "send_to_gy", "subject_is_self": true, "from_zones": ["field"] }],
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck", "gy"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "archetypes": ["Frog"], "exclude_names": ["Dupe Frog"] }
+            }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "change_name",
+          "description": "A card's name becomes or is treated as another name",
+          "phrase": "This card's name becomes \"Des Frog\" while on the field"
+        },
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "redirect_attacks",
+          "description": "Opponent's monsters can only attack this card",
+          "phrase": "cannot target monsters for attacks, except this one"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 9575,
+    "name": "Number 39: Utopia",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When a monster declares an attack: You can detach 1 material from this card; negate the attack.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "attack_declared", "subject": { "card_types": ["monster"] } }],
+          "actions": [{ "verb": "detach_material", "from_zones": ["xyz_material"], "is_cost": true, "quantity": 1 }]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "If this card is targeted for an attack, while it has no material: Destroy this card.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "targeted", "subject_is_self": true }],
+          "actions": [{ "verb": "destroy", "is_self": true }]
+        }
+      ],
+      "unmapped": [
+        { "kind": "verb", "as_action": true, "proposed_term": "negate_attack", "description": "Negate an attack", "phrase": "negate the attack" }
+      ]
+    }
+  },
+  {
+    "card_id": 10242,
+    "name": "Mermail Abyssmegalo",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "You can discard 2 other WATER monsters to the GY; Special Summon this card from your hand.",
+          "effect_type": "ignition",
+          "actions": [
+            {
+              "verb": "discard",
+              "from_zones": ["hand"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 2,
+              "target": { "card_types": ["monster"], "attributes": ["WATER"] }
+            },
+            { "verb": "special_summon", "from_zones": ["hand"], "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When Summoned this way: You can add 1 \"Abyss-\" Spell/Trap from your Deck to your hand.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "special_summon", "subject_is_self": true }],
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "card_types": ["spell", "trap"], "archetypes": ["Abyss-"] }
+            }
+          ]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "You can Tribute 1 other Attack Position WATER monster; this card can make a second attack during each Battle Phase this turn.",
+          "effect_type": "ignition",
+          "actions": [
+            {
+              "verb": "tribute",
+              "from_zones": ["field"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "attributes": ["WATER"] }
+            }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "extra_attack",
+          "description": "A monster can make additional attacks",
+          "phrase": "can make a second attack during each Battle Phase"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 11708,
+    "name": "Ghost Ogre & Snow Rabbit",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When a monster on the field activates its effect, or when a Spell/Trap that is already face-up on the field activates its effect (Quick Effect): You can send this card from your hand or field to the GY; destroy that card on the field. You can only use this effect of \"Ghost Ogre & Snow Rabbit\" once per turn.",
+          "effect_type": "quick",
+          "opt": "hard",
+          "triggers": [
+            { "event": "activated", "subject": { "card_types": ["monster"] }, "from_zones": ["field"] },
+            { "event": "activated", "subject": { "card_types": ["spell", "trap"] }, "from_zones": ["field"] }
+          ],
+          "actions": [
+            { "verb": "send_to_gy", "from_zones": ["hand", "field"], "is_cost": true, "is_self": true },
+            { "verb": "destroy", "from_zones": ["field"], "quantity": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 11878,
+    "name": "Elder Entity N'tss",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Must be Special Summoned (from your Extra Deck) by sending the above cards you control to the GY.",
+          "effect_type": "procedure",
+          "actions": [
+            {
+              "verb": "send_to_gy",
+              "from_zones": ["field"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 2,
+              "target": { "monster_kinds": ["synchro", "xyz"] }
+            },
+            { "verb": "special_summon", "from_zones": ["extra_deck"], "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "Once per turn: You can Special Summon 1 Level 4 monster from your hand.",
+          "effect_type": "ignition",
+          "opt": "soft",
+          "actions": [
+            { "verb": "special_summon", "from_zones": ["hand"], "from_side": "you", "quantity": 1, "target": { "level": { "op": "eq", "value": 4 } } }
+          ]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "If this card is sent to the GY: You can target 1 card on the field; destroy it.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "send_to_gy", "subject_is_self": true }],
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "either", "quantity": 1 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 13587,
+    "name": "Ghost Belle & Haunted Mansion",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When a card or effect is activated that includes any of these effects (Quick Effect): You can discard this card; negate that activation.\n●Add a card(s) from the GY to the hand, Deck, and/or Extra Deck.\n●Special Summon a Monster Card(s) from the GY.\n●Banish a card(s) from the GY.",
+          "effect_type": "quick",
+          "opt": "hard",
+          "triggers": [{ "event": "activated", "subject_side": "either" }],
+          "actions": [
+            { "verb": "discard", "from_zones": ["hand"], "is_cost": true, "is_self": true, "quantity": 1 },
+            {
+              "verb": "negate_activation",
+              "contextual": true,
+              "context_note": "only activations that add from the GY, Special Summon from the GY, or banish from the GY"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 15032,
+    "name": "Accesscode Talker",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Your opponent cannot activate cards or effects in response to this card's effect activations.",
+          "effect_type": "continuous"
+        },
+        {
+          "effect_index": 1,
+          "snippet": "If this card is Link Summoned: You can target 1 Link Monster that was used as its Link Material; this card gains ATK equal to that monster's Link Rating x 1000.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "special_summon", "subject_is_self": true }],
+          "actions": [
+            {
+              "verb": "change_stats",
+              "is_self": true,
+              "stat": "atk",
+              "stat_mode": "gain",
+              "stat_amount_note": "Link Rating of a Link Monster used as its material x 1000"
+            }
+          ]
+        },
+        {
+          "effect_index": 2,
+          "snippet": "You can banish 1 Link Monster from your field or GY; destroy 1 card your opponent controls, also for the rest of this turn, you cannot banish monsters with that same Attribute to activate this effect of \"Accesscode Talker\".",
+          "effect_type": "ignition",
+          "actions": [
+            {
+              "verb": "banish",
+              "from_zones": ["field", "gy"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 1,
+              "target": { "monster_kinds": ["link"] }
+            },
+            { "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "prevent_responses",
+          "description": "The opponent cannot chain to this card's effects",
+          "phrase": "Your opponent cannot activate cards or effects in response to this card's effect activations"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 17994,
+    "name": "Rescue-ACE Hydrant",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "While you control a \"Rescue-ACE\" monster other than \"Rescue-ACE Hydrant\", your opponent's monsters cannot target this card for attacks, also your opponent cannot target this card with card effects.",
+          "effect_type": "continuous"
+        },
+        {
+          "effect_index": 1,
+          "snippet": "You can activate a Quick-Play Spell, or Trap Card, that was Set by the effect of your \"Rescue-ACE\" card, the turn it was Set.",
+          "effect_type": "continuous",
+          "opt": "shared_each_effect"
+        },
+        {
+          "effect_index": 2,
+          "snippet": "During your Main Phase: You can add 1 \"Rescue-ACE\" monster from your Deck to your hand, except \"Rescue-ACE Hydrant\".",
+          "effect_type": "ignition",
+          "opt": "shared_each_effect",
+          "phase_restriction": ["main"],
+          "turn_restriction": "yours",
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "card_types": ["monster"], "archetypes": ["Rescue-ACE"], "exclude_names": ["Rescue-ACE Hydrant"] }
+            }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "protect_from_targeting",
+          "description": "Cards cannot be targeted by attacks and/or card effects",
+          "phrase": "your opponent cannot target this card with card effects"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 14741,
+    "name": "Nibiru, the Primal Being",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "During the Main Phase, if your opponent Normal or Special Summoned 5 or more monsters this turn (Quick Effect): You can Tribute as many face-up monsters on the field as possible, and if you do, Special Summon this card from your hand, then Special Summon 1 \"Primal Being Token\" (Rock/LIGHT/Level 11/ATK ?/DEF ?) to your opponent's field (this Token's ATK/DEF become the combined original ATK/DEF of the Tributed monsters). You can only use this effect of \"Nibiru, the Primal Being\" once per turn.",
+          "effect_type": "quick",
+          "opt": "hard",
+          "phase_restriction": ["main"],
+          "actions": [
+            { "verb": "tribute", "from_zones": ["field"], "from_side": "either" },
+            { "verb": "special_summon", "from_zones": ["hand"], "is_self": true },
+            { "verb": "special_summon", "to_side": "opponent", "quantity": 1 }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "special_summon_token",
+          "description": "Special Summon Token monsters",
+          "phrase": "Special Summon 1 \"Primal Being Token\""
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 10219,
+    "name": "Atlantean Dragoons",
+    "expected": {
+      "effects": [
+        { "effect_index": 0, "snippet": "All your Level 3 or lower Sea Serpent monsters can attack directly.", "effect_type": "continuous" },
+        {
+          "effect_index": 1,
+          "snippet": "If this card is sent to the GY to activate a WATER monster's effect: Add 1 Sea Serpent monster from your Deck to your hand, except \"Atlantean Dragoons\".",
+          "effect_type": "trigger",
+          "triggers": [
+            { "event": "send_to_gy", "subject_is_self": true, "cause": "cost", "cause_card": { "card_types": ["monster"], "attributes": ["WATER"] } }
+          ],
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": { "races": ["Sea Serpent"], "exclude_names": ["Atlantean Dragoons"] }
+            }
+          ]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "direct_attack",
+          "description": "Monsters can attack directly",
+          "phrase": "can attack directly"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 10221,
+    "name": "Atlantean Heavy Infantry",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "During your Main Phase, you can Normal Summon 1 Level 4 or lower Sea Serpent-Type monster in addition to your Normal Summon/Set. (You can only gain this effect once per turn.)",
+          "effect_type": "continuous",
+          "phase_restriction": ["main"],
+          "turn_restriction": "yours",
+          "actions": [
+            {
+              "verb": "normal_summon",
+              "from_zones": ["hand"],
+              "quantity": 1,
+              "target": { "level": { "op": "lte", "value": 4 }, "races": ["Sea Serpent"] }
+            }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When this card is sent to the Graveyard to activate a WATER monster's effect: Target 1 face-up card your opponent controls; destroy that target.",
+          "effect_type": "trigger",
+          "triggers": [
+            { "event": "send_to_gy", "subject_is_self": true, "cause": "cost", "cause_card": { "card_types": ["monster"], "attributes": ["WATER"] } }
+          ],
+          "actions": [{ "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 10218,
+    "name": "Poseidra, the Atlantean Dragon",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "You can Tribute 3 Level 3 or lower WATER monsters; Special Summon this card from your hand or Graveyard.",
+          "effect_type": "ignition",
+          "actions": [
+            {
+              "verb": "tribute",
+              "from_zones": ["field"],
+              "from_side": "you",
+              "is_cost": true,
+              "quantity": 3,
+              "target": { "level": { "op": "lte", "value": 3 }, "attributes": ["WATER"] }
+            },
+            { "verb": "special_summon", "from_zones": ["hand", "gy"], "is_self": true }
+          ]
+        },
+        {
+          "effect_index": 1,
+          "snippet": "When you do: Return all Spell and Trap Cards on the field to the hand, and if you do, if 3 or more cards are returned to the hand by this effect, all monsters your opponent currently controls lose 300 ATK for each.",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "special_summon", "subject_is_self": true }],
+          "actions": [
+            { "verb": "return_to_hand", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["spell", "trap"] } },
+            {
+              "verb": "change_stats",
+              "from_zones": ["field"],
+              "from_side": "opponent",
+              "target": { "card_types": ["monster"] },
+              "stat": "atk",
+              "stat_mode": "lose",
+              "stat_amount_note": "300 for each card returned, if 3 or more were returned"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 11938,
+    "name": "Performapal Skullcrobat Joker",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "When this card is Normal Summoned: You can add 1 \"Performapal\" monster, \"Magician\" Pendulum Monster, or \"Odd-Eyes\" monster from your Deck to your hand, except \"Performapal Skullcrobat Joker\".",
+          "effect_type": "trigger",
+          "triggers": [{ "event": "normal_summon", "subject_is_self": true }],
+          "actions": [
+            {
+              "verb": "add_to_hand",
+              "from_zones": ["deck"],
+              "from_side": "you",
+              "quantity": 1,
+              "target": {
+                "card_types": ["monster"],
+                "exclude_names": ["Performapal Skullcrobat Joker"],
+                "any_of": [
+                  { "archetypes": ["Performapal"] },
+                  { "archetypes": ["Magician"], "monster_kinds": ["pendulum"] },
+                  { "archetypes": ["Odd-Eyes"] }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "text_source": "pendulum",
+          "effect_index": 0,
+          "snippet": "You cannot Pendulum Summon monsters, except \"Performapal\" monsters, \"Magician\" Pendulum Monsters, and \"Odd-Eyes\" monsters. This effect cannot be negated.",
+          "effect_type": "continuous"
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4676,
+    "name": "Black Luster Ritual",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "This card is used to Ritual Summon \"Black Luster Soldier\". You must also Tribute monsters from your hand or field whose total Levels equal 8 or more.",
+          "effect_type": "activation",
+          "actions": [
+            { "verb": "tribute", "from_zones": ["hand", "field"], "from_side": "you", "is_cost": true },
+            { "verb": "special_summon", "from_zones": ["hand"], "from_side": "you", "quantity": 1, "name_refs": ["Black Luster Soldier"] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "card_id": 4758,
+    "name": "Jinzo",
+    "expected": {
+      "effects": [
+        {
+          "effect_index": 0,
+          "snippet": "Trap Cards, and their effects on the field, cannot be activated. Negate all Trap effects on the field.",
+          "effect_type": "continuous",
+          "actions": [{ "verb": "negate_effect", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["trap"] } }]
+        }
+      ],
+      "unmapped": [
+        {
+          "kind": "verb",
+          "as_action": true,
+          "proposed_term": "prevent_activation",
+          "description": "Cards or effects cannot be activated",
+          "phrase": "Trap Cards, and their effects on the field, cannot be activated"
+        }
+      ]
+    }
+  }
+]

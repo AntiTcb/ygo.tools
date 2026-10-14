@@ -1,8 +1,9 @@
 import { env as secretEnv } from '$env/dynamic/private';
 import { env } from '$env/dynamic/public';
 import type { Database } from '$lib/db/database.types';
+import { ADMIN_COOKIE, ADMIN_LOGIN_PATH, isAdminPath, isAdminSession } from '$lib/server/adminAuth';
 import { createServerClient } from '@supabase/ssr';
-import type { Handle } from '@sveltejs/kit';
+import { error, redirect, type Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const supabaseUrl = env.PUBLIC_SUPABASE_URL;
@@ -31,6 +32,15 @@ export const handle: Handle = async ({ event, resolve }) => {
       },
     },
   });
+
+  // Gate here rather than in an /admin layout load: form actions don't run layout loads.
+  if (isAdminPath(event.url.pathname) && event.url.pathname !== ADMIN_LOGIN_PATH) {
+    event.locals.isAdmin = await isAdminSession(event.cookies.get(ADMIN_COOKIE), secretEnv.ADMIN_DASHBOARD_PASS);
+    if (!event.locals.isAdmin) {
+      if (event.request.method !== 'GET') error(403, 'Forbidden');
+      redirect(303, `${ADMIN_LOGIN_PATH}?next=${encodeURIComponent(event.url.pathname + event.url.search)}`);
+    }
+  }
 
   return resolve(event, {
     filterSerializedResponseHeaders(name) {

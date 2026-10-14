@@ -97,8 +97,10 @@ export type Database = {
           stat_amount_note: string | null;
           stat_mode: Database['public']['Enums']['effect_stat_mode'] | null;
           target: Json | null;
+          target_rule: Json | null;
           to_side: Database['public']['Enums']['effect_side'] | null;
           to_zones: number[];
+          unresolved_name_refs: string[];
           verb_id: number;
         };
         Insert: {
@@ -119,8 +121,10 @@ export type Database = {
           stat_amount_note?: string | null;
           stat_mode?: Database['public']['Enums']['effect_stat_mode'] | null;
           target?: Json | null;
+          target_rule?: Json | null;
           to_side?: Database['public']['Enums']['effect_side'] | null;
           to_zones?: number[];
+          unresolved_name_refs?: string[];
           verb_id: number;
         };
         Update: {
@@ -141,8 +145,10 @@ export type Database = {
           stat_amount_note?: string | null;
           stat_mode?: Database['public']['Enums']['effect_stat_mode'] | null;
           target?: Json | null;
+          target_rule?: Json | null;
           to_side?: Database['public']['Enums']['effect_side'] | null;
           to_zones?: number[];
+          unresolved_name_refs?: string[];
           verb_id?: number;
         };
         Relationships: [
@@ -165,9 +171,11 @@ export type Database = {
           card_id: number;
           locked: boolean;
           model: string | null;
+          output: Json | null;
           pending_draft: Json | null;
           pending_text_hash: string | null;
           prompt_version: string | null;
+          source: string;
           tagged_at: string;
           text_hash: string;
         };
@@ -175,9 +183,11 @@ export type Database = {
           card_id: number;
           locked?: boolean;
           model?: string | null;
+          output?: Json | null;
           pending_draft?: Json | null;
           pending_text_hash?: string | null;
           prompt_version?: string | null;
+          source?: string;
           tagged_at?: string;
           text_hash: string;
         };
@@ -185,9 +195,11 @@ export type Database = {
           card_id?: number;
           locked?: boolean;
           model?: string | null;
+          output?: Json | null;
           pending_draft?: Json | null;
           pending_text_hash?: string | null;
           prompt_version?: string | null;
+          source?: string;
           tagged_at?: string;
           text_hash?: string;
         };
@@ -319,6 +331,7 @@ export type Database = {
           card_id: number;
           cause: Database['public']['Enums']['effect_trigger_cause'] | null;
           cause_card: Json | null;
+          cause_card_rule: Json | null;
           cause_side: Database['public']['Enums']['effect_side'] | null;
           effect_id: number;
           event_verb_id: number;
@@ -326,12 +339,14 @@ export type Database = {
           id: number;
           subject: Json | null;
           subject_is_self: boolean;
+          subject_rule: Json | null;
           subject_side: Database['public']['Enums']['effect_side'] | null;
         };
         Insert: {
           card_id: number;
           cause?: Database['public']['Enums']['effect_trigger_cause'] | null;
           cause_card?: Json | null;
+          cause_card_rule?: Json | null;
           cause_side?: Database['public']['Enums']['effect_side'] | null;
           effect_id: number;
           event_verb_id: number;
@@ -339,12 +354,14 @@ export type Database = {
           id?: never;
           subject?: Json | null;
           subject_is_self?: boolean;
+          subject_rule?: Json | null;
           subject_side?: Database['public']['Enums']['effect_side'] | null;
         };
         Update: {
           card_id?: number;
           cause?: Database['public']['Enums']['effect_trigger_cause'] | null;
           cause_card?: Json | null;
+          cause_card_rule?: Json | null;
           cause_side?: Database['public']['Enums']['effect_side'] | null;
           effect_id?: number;
           event_verb_id?: number;
@@ -352,6 +369,7 @@ export type Database = {
           id?: never;
           subject?: Json | null;
           subject_is_self?: boolean;
+          subject_rule?: Json | null;
           subject_side?: Database['public']['Enums']['effect_side'] | null;
         };
         Relationships: [
@@ -1242,6 +1260,31 @@ export type Database = {
         };
         Returns: undefined;
       };
+      effect_record_suggestions: {
+        Args: {
+          p_card_id: number;
+          p_items: Json;
+        };
+        Returns: undefined;
+      };
+      effect_store_card_tags: {
+        Args: {
+          p_card_id: number;
+          p_output: Json;
+          p_rows: Json;
+          p_model: string;
+          p_prompt_version: string;
+          p_mode: string;
+          p_text_hash?: string;
+        };
+        Returns: string;
+      };
+      effect_zone_ids: {
+        Args: {
+          terms: Json;
+        };
+        Returns: number[];
+      };
       get_cards_with_special_chars: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1283,7 +1326,7 @@ export type Database = {
       effect_text_source: 'card' | 'pendulum';
       effect_trigger_cause: 'cost' | 'effect' | 'battle' | 'material';
       effect_turn: 'any' | 'yours' | 'opponents';
-      effect_type: 'ignition' | 'trigger' | 'quick' | 'continuous' | 'activation';
+      effect_type: 'ignition' | 'trigger' | 'quick' | 'continuous' | 'activation' | 'procedure';
       effect_vocab_kind: 'verb' | 'zone';
       game: 'TCG' | 'OCG' | 'Rush';
     };
