@@ -175,6 +175,7 @@ export type Database = {
           pending_draft: Json | null;
           pending_text_hash: string | null;
           prompt_version: string | null;
+          retag_reason: string | null;
           source: string;
           tagged_at: string;
           text_hash: string;
@@ -187,6 +188,7 @@ export type Database = {
           pending_draft?: Json | null;
           pending_text_hash?: string | null;
           prompt_version?: string | null;
+          retag_reason?: string | null;
           source?: string;
           tagged_at?: string;
           text_hash: string;
@@ -199,6 +201,7 @@ export type Database = {
           pending_draft?: Json | null;
           pending_text_hash?: string | null;
           prompt_version?: string | null;
+          retag_reason?: string | null;
           source?: string;
           tagged_at?: string;
           text_hash?: string;
@@ -1240,7 +1243,18 @@ export type Database = {
           card_id: number | null;
           locked: boolean | null;
           never_tagged: boolean | null;
+          retag_reason: string | null;
           text_hash: string | null;
+        };
+        Relationships: [];
+      };
+      effect_vocab_usage: {
+        Row: {
+          actions: number | null;
+          id: number | null;
+          kind: Database['public']['Enums']['effect_vocab_kind'] | null;
+          term: string | null;
+          triggers: number | null;
         };
         Relationships: [];
       };
@@ -1260,12 +1274,23 @@ export type Database = {
         };
         Returns: undefined;
       };
+      effect_delete_orphan_tags: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       effect_record_suggestions: {
         Args: {
           p_card_id: number;
           p_items: Json;
         };
         Returns: undefined;
+      };
+      effect_request_retag: {
+        Args: {
+          p_card_ids: number[];
+          p_reason: string;
+        };
+        Returns: number;
       };
       effect_store_card_tags: {
         Args: {

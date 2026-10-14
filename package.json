@@ -33,7 +33,9 @@
     "effect-search:gold": "dotenv -e .env.local -- tsx scripts/effect-search/gold.ts",
     "effect-search:backfill": "dotenv -e .env.local -- tsx scripts/effect-search/backfill.ts",
     "check:scripts": "tsc -p scripts/tsconfig.json",
-    "effect-search:sample": "dotenv -e .env.local -- tsx scripts/effect-search/sample.ts"
+    "effect-search:sample": "dotenv -e .env.local -- tsx scripts/effect-search/sample.ts",
+    "check:workers": "tsc -p src/workers/tsconfig.json",
+    "effect-tagger:deploy": "wrangler deploy -c wrangler.effect-tagger.jsonc"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261009.1",

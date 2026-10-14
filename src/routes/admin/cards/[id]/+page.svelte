@@ -62,7 +62,10 @@
     {#if !data.tags}<span class="chip preset-tonal-surface text-xs">untagged</span>{/if}
     {#if data.tags?.locked}<span class="chip preset-tonal-primary text-xs">locked ({data.tags.source})</span>{/if}
     {#if data.tags?.pending_draft}<span class="chip preset-tonal-warning text-xs">errata draft to review</span>{/if}
-    {#if data.tags && data.stale && !data.tags.pending_draft}<span class="chip preset-tonal-warning text-xs">text changed since tagging</span>{/if}
+    {#if data.tags && data.stale && !data.tags.pending_draft && !data.tags.retag_reason}<span class="chip preset-tonal-warning text-xs"
+        >text changed since tagging</span
+      >{/if}
+    {#if data.tags?.retag_reason}<span class="chip preset-tonal-warning text-xs" title={data.tags.retag_reason}>re-tag queued</span>{/if}
   </div>
   <p class="text-sm opacity-80">{data.card.typeLine}</p>
   {#if data.tags}
@@ -117,11 +120,20 @@
         <button class="btn preset-tonal-surface btn-sm" type="button" onclick={() => (editor = pretty(data.tags?.output ?? null))}>Reset</button>
       </div>
     </form>
-    {#if data.tags?.locked}
-      <form method="POST" action="?/unlock" use:enhance>
-        <button class="btn preset-tonal-surface btn-sm" type="submit">Unlock (allow automatic re-tagging)</button>
-      </form>
-    {/if}
+    <div class="flex flex-wrap gap-2">
+      {#if data.tags?.locked}
+        <form method="POST" action="?/unlock" use:enhance>
+          <button class="btn preset-tonal-surface btn-sm" type="submit">Unlock (allow automatic re-tagging)</button>
+        </form>
+      {/if}
+      {#if data.tags}
+        <form method="POST" action="?/retag" use:enhance>
+          <button class="btn preset-tonal-surface btn-sm" type="submit" disabled={Boolean(data.tags.retag_reason)}>
+            {data.tags.retag_reason ? 'Re-tag queued' : 'Re-tag on next run'}
+          </button>
+        </form>
+      {/if}
+    </div>
   </section>
 </div>
 

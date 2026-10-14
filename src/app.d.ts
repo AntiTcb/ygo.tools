@@ -10,6 +10,8 @@ declare global {
         COUNTER: DurableObjectNamespace;
         /** /event-map events and venues. */
         EVENT_MAP_DB: D1Database;
+        /** Effect search tagging Workflow (wrangler.effect-tagger.jsonc); params are a RunPlan. */
+        EFFECT_TAG_WORKFLOW?: { create(options: { params: unknown }): Promise<{ id: string }> };
       };
       context: {
         waitUntil(promise: Promise<any>): void;

@@ -78,6 +78,46 @@ export const workersAiRestClient = (opts: { accountId: string; apiToken: string;
   };
 };
 
+/** The part of the Workers AI binding (`env.AI`) used here. */
+export type AiBinding = {
+  run(model: string, input: Record<string, unknown>, options?: Record<string, unknown>): Promise<unknown>;
+};
+
+/**
+ * Workers AI through the `AI` binding (inside a Worker: no API token needed). Streams like the REST
+ * client, and routes through AI Gateway when `gatewayId` is set.
+ */
+export const workersAiBindingClient = (ai: AiBinding, gatewayId?: string): ChatClient => {
+  return async (req) => {
+    const input: Record<string, unknown> = { messages: req.messages, stream: true, stream_options: { include_usage: true } };
+    if (req.jsonSchema) input.response_format = { type: 'json_schema', json_schema: { name: req.jsonSchema.name, schema: req.jsonSchema.schema } };
+    if (req.reasoningEffort) input.reasoning_effort = req.reasoningEffort;
+    if (req.temperature !== undefined) input.temperature = req.temperature;
+    if (req.maxTokens !== undefined) input.max_tokens = req.maxTokens;
+
+    let text: string;
+    try {
+      const out = await ai.run(req.model, input, gatewayId ? { gateway: { id: gatewayId } } : undefined);
+      if (out instanceof ReadableStream) text = await new Response(out).text();
+      // Non-streamed binding results may use the native `{ response }` shape instead of OpenAI's.
+      else if (out && typeof out === 'object' && typeof (out as { response?: unknown }).response === 'string') {
+        text = JSON.stringify({
+          choices: [{ message: { content: (out as { response: string }).response } }],
+          usage: (out as { usage?: unknown }).usage,
+        });
+      } else text = JSON.stringify(out);
+    } catch (e) {
+      const message = (e as Error).message;
+      // Capacity/rate errors are transient; bad requests are not.
+      const retryable = !/\b(400|401|403|404)\b|invalid|not supported/i.test(message);
+      throw new ChatError(`Workers AI binding: ${message}`, null, retryable);
+    }
+    const parsed = parseChatResponse(text);
+    if (parsed.content === null) throw new ChatError(`Workers AI returned no content: ${text.slice(0, 500)}`, null, true);
+    return { content: parsed.content, usage: parsed.usage };
+  };
+};
+
 type OpenAiChunk = {
   choices?: { delta?: { content?: string | null } }[];
   usage?: OpenAiResponse['usage'];
