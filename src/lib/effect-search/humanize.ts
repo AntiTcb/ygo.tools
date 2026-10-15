@@ -82,15 +82,26 @@ const leafParts = (leaf: TargetLeaf): LeafParts => {
   if (leaf.exclude_monster_kinds && leaf.exclude_monster_kinds.length <= MAX_EXCLUDED_KINDS) {
     adjectives.push(leaf.exclude_monster_kinds.map((k) => `non-${KIND_WORDS[k] ?? k}`).join(' '));
   }
+  if (leaf.exclude_attributes) adjectives.push(leaf.exclude_attributes.map((a) => `non-${a}`).join(' '));
   if (leaf.attributes) adjectives.push(leaf.attributes.join('/'));
   if (archetypes.length) adjectives.push(archetypes.map((a) => `"${a}"`).join('/'));
+  if (leaf.exclude_races) adjectives.push(leaf.exclude_races.map((r) => `non-${r}`).join(' '));
   if (leaf.races) adjectives.push(leaf.races.join('/'));
   if (leaf.monster_kinds) adjectives.push(leaf.monster_kinds.map((k) => KIND_WORDS[k] ?? k).join('/'));
 
   const types = leaf.card_types ?? [];
   // Monster-only properties imply a monster even when the tag left card_types out.
   const monsterish = Boolean(
-    leaf.attributes || leaf.races || leaf.monster_kinds || leaf.level || leaf.rank || leaf.link_rating || leaf.atk || leaf.def,
+    leaf.attributes ||
+    leaf.races ||
+    leaf.exclude_attributes ||
+    leaf.exclude_races ||
+    leaf.monster_kinds ||
+    leaf.level ||
+    leaf.rank ||
+    leaf.link_rating ||
+    leaf.atk ||
+    leaf.def,
   );
   let noun: string | null = null;
   if (leaf.spell_trap_types) {

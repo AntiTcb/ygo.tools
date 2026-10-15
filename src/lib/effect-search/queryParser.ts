@@ -5,7 +5,7 @@ import { parserReplySchema, type ParserReply, type SearchQueryInput } from './qu
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type Vocab } from './tagSchema';
 
 /** Bump when the parser prompt changes (AI Gateway caches by request, so this also busts the cache). */
-export const PARSER_PROMPT_VERSION = 'q1';
+export const PARSER_PROMPT_VERSION = 'q2';
 
 const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported: string } }[] = [
   {
@@ -84,7 +84,7 @@ Return {"query": {...}} or, if the request isn't about what card effects do, {"u
 - target ("does"): what the action applies to. A specific card name -> {"card": "<exact name as typed>"}. A description -> card fields (below). The cards themselves ("special summon themselves", "this card") -> {"card": "__self__"}. Omit when the request doesn't restrict it.
 - responds_to: subject_is_self true when the event happens to the card itself ("when this card is sent to the GY"); otherwise "target" describes the card the event happens to. cause ("cost", "effect", "battle", "material") and cause_card describe what caused it.
 - card_filter: constraints on the cards being searched for, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that...").
-- Card fields: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}; level / rank / link_rating / atk / def as {"op": "eq|neq|lt|lte|gt|gte", "value": n}; archetypes (e.g. ["Frog"]); names; exclude_names; exclude_monster_kinds; any_of (list of alternatives).
+- Card fields: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}; level / rank / link_rating / atk / def as {"op": "eq|neq|lt|lte|gt|gte", "value": n}; archetypes (e.g. ["Frog"]); names; exclude_names; exclude_monster_kinds; exclude_attributes / exclude_races ("non-WATER", "non-Machine"); any_of (list of alternatives).
 - Leave out anything the request doesn't say. Prefer the broadest reasonable reading.
 
 ## Verbs

@@ -11,7 +11,7 @@ import type { TagOutput } from '../../src/lib/effect-search/tagSchema';
 import type { Json } from '../../src/lib/db/database.types';
 import { args, mapPool, supabase } from './lib';
 
-const { values } = args({ 'dry-run': { type: 'boolean', default: false }, concurrency: { type: 'string', default: '8' } });
+const { values } = args({ 'dry-run': { type: 'boolean', default: false }, concurrency: { type: 'string', default: '4' } });
 const db = supabase();
 
 const tags = (await fetchAll((f, t) => db.from('effect_card_tags').select('card_id,output').order('card_id').range(f, t))) as unknown as {
@@ -41,22 +41,38 @@ console.log(`${tags.length} tagged cards; ${changes.length} cards with ${changes
 for (const c of changes.slice(0, 3)) for (const e of c.changed) console.log(`  ${c.cardId} [${e.text_source} ${e.effect_index}] ${e.snippet}`);
 if (values['dry-run']) process.exit(0);
 
+/** Retries a write a few times: long runs of small writes occasionally drop a connection. */
+const write = async (label: string, run: () => PromiseLike<{ error: { message: string } | null }>) => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const { error } = await run();
+      if (!error) return;
+      if (attempt >= 4) throw new Error(`${label}: ${error.message}`);
+    } catch (e) {
+      if (attempt >= 4) throw e;
+    }
+    await new Promise((r) => setTimeout(r, 1000 * attempt));
+  }
+};
+
 let done = 0;
 await mapPool(changes, Number(values.concurrency), async (c) => {
-  const { error } = await db
-    .from('effect_card_tags')
-    .update({ output: c.output as unknown as Json })
-    .eq('card_id', c.cardId);
-  if (error) throw new Error(`${c.cardId}: ${error.message}`);
+  await write(String(c.cardId), () =>
+    db
+      .from('effect_card_tags')
+      .update({ output: c.output as unknown as Json })
+      .eq('card_id', c.cardId),
+  );
   for (const e of c.changed) {
-    const { error: effectError } = await db
-      .from('effect_effects')
-      .update({ snippet: e.snippet })
-      .eq('card_id', c.cardId)
-      .eq('text_source', e.text_source)
-      .eq('effect_index', e.effect_index);
-    if (effectError) throw new Error(`${c.cardId}: ${effectError.message}`);
+    await write(String(c.cardId), () =>
+      db
+        .from('effect_effects')
+        .update({ snippet: e.snippet })
+        .eq('card_id', c.cardId)
+        .eq('text_source', e.text_source)
+        .eq('effect_index', e.effect_index),
+    );
   }
-  if (++done % 500 === 0) console.log(`${done}/${changes.length}`);
+  if (++done % 250 === 0) console.log(`${done}/${changes.length}`);
 });
 console.log(`repaired ${done} cards.`);

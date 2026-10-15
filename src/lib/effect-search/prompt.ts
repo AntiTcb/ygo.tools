@@ -1,7 +1,7 @@
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type TagOutputInput } from './tagSchema';
 
 /** Bump whenever the prompt or labelling conventions change; stored on each tagged card and run. */
-export const TAG_PROMPT_VERSION = 'v5';
+export const TAG_PROMPT_VERSION = 'v6';
 
 export type VocabTerm = { term: string; description: string; usable_as_action?: boolean; usable_as_event?: boolean };
 
@@ -247,7 +247,7 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
   - Quoted names followed by "card(s)", "monster(s)", "Spell", "Trap" are archetypes ("archetypes": ["Frog"]); a quoted name standing alone is a specific card: put it in the action's "name_refs" ("Special Summon 1 "Toadally Awesome"" -> name_refs ["Toadally Awesome"]). "except "X"" -> exclude_names.
   - "level" is for Level; "rank" is for Rank (Xyz); "link_rating" for Link Rating. "Level 4 or lower" -> {"op": "lte", "value": 4}.
   - "atk" / "def" for printed ATK/DEF limits on what the action affects; never drop them: "1 WATER monster with 1000 or less ATK" -> {"card_types": ["monster"], "attributes": ["WATER"], "atk": {"op": "lte", "value": 1000}}; "with 2000 or more DEF" -> "def": {"op": "gte", "value": 2000}. The same applies to trigger subjects and cause cards.
-  - monster_kinds: card frames/abilities ("Xyz Monster" -> ["xyz"], "Tuner" -> ["tuner"]); "non-Tuner" -> exclude_monster_kinds ["tuner"].
+  - monster_kinds: card frames/abilities ("Xyz Monster" -> ["xyz"], "Tuner" -> ["tuner"]); "non-Tuner" -> exclude_monster_kinds ["tuner"]; "non-WATER" -> exclude_attributes ["WATER"]; "non-Machine" -> exclude_races ["Machine"] ("1 non-WATER Machine monster" -> {"card_types": ["monster"], "races": ["Machine"], "exclude_attributes": ["WATER"]}).
   - Allowed values: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}.
 - contextual: true when what the action can affect also depends on game state that the target can't express ("a monster with the same Level as the destroyed monster", "monsters that were banished this turn", "a monster that was used as material"); put the static part in target and explain the rest in context_note. Battle position and face-up/face-down qualifiers ("face-up monster", "Attack Position monsters", "Set card") are ignored: they are not contextual.
 - Actions on "that card"/"that monster" (the card a trigger is about, e.g. "negate the activation, and if you do, destroy that card") have target null and are not contextual.

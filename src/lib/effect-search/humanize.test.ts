@@ -14,6 +14,9 @@ describe('humanTarget', () => {
       'WATER Machine monster with 1600 or lower ATK',
     );
     expect(humanTarget(null)).toBe('card');
+    expect(humanTarget({ races: ['Machine'], exclude_attributes: ['WATER'], atk: { op: 'lte', value: 1600 } })).toBe(
+      'non-WATER Machine monster with 1600 or lower ATK',
+    );
   });
 });
 

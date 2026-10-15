@@ -87,6 +87,9 @@ export const targetLeafSchema = z.object({
   card_types: z.array(z.enum(CARD_TYPES)).min(1).optional(),
   attributes: z.array(z.enum(ATTRIBUTE_NAMES)).min(1).optional(),
   races: z.array(z.enum(RACE_NAMES)).min(1).optional(),
+  /** "non-WATER" / "non-Machine": imply a monster. */
+  exclude_attributes: z.array(z.enum(ATTRIBUTE_NAMES)).min(1).optional(),
+  exclude_races: z.array(z.enum(RACE_NAMES)).min(1).optional(),
   monster_kinds: z.array(z.enum(MONSTER_KINDS)).min(1).optional(),
   exclude_monster_kinds: z.array(z.enum(MONSTER_KINDS)).min(1).optional(),
   spell_trap_types: z.array(z.enum(SPELL_TRAP_TYPES)).min(1).optional(),
