@@ -61,6 +61,37 @@
       "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
       "NOMINATIM_CONTACT": "https://ygo.tools",
     },
+    // Previews inherit no bindings from the top level. These share production's resources,
+    // except the rate limiter, which counts separately.
+    "d1_databases": [
+      {
+        "binding": "EVENT_MAP_DB",
+        "database_name": "ygo-event-map",
+        "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
+        "migrations_dir": "migrations/event-map",
+      },
+    ],
+    "ai": {
+      "binding": "AI",
+    },
+    "ratelimits": [
+      {
+        "name": "SEARCH_PARSE_LIMITER",
+        "namespace_id": "1102",
+        "simple": {
+          "limit": 10,
+          "period": 60,
+        },
+      },
+    ],
+    "workflows": [
+      {
+        "binding": "EFFECT_TAG_WORKFLOW",
+        "name": "effect-tag-workflow",
+        "class_name": "EffectTagWorkflow",
+        "script_name": "ygotools-effect-tagger",
+      },
+    ],
   },
   "env": {
     "production": {
