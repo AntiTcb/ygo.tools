@@ -198,8 +198,14 @@ export type Vocab = {
 export const AMOUNT_VERBS: ReadonlySet<string> = new Set(['inflict_damage', 'gain_lp', 'lose_lp']);
 
 /** Problems the zod schema can't see: terms outside the vocabulary, inconsistent fields. */
+/** No printed card has this many effects; more means the generation looped. */
+export const MAX_EFFECTS = 20;
+
 export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
   const errors: string[] = [];
+  if (out.effects.length > MAX_EFFECTS) {
+    return [`${out.effects.length} effects: one entry per effect of the card, and no card has more than ${MAX_EFFECTS}`];
+  }
   const actions = new Set(vocab.actionVerbs);
   const events = new Set(vocab.eventVerbs);
   const zones = new Set(vocab.zones);
