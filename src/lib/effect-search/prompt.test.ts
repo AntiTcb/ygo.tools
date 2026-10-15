@@ -84,6 +84,13 @@ describe('validateTagOutput', () => {
     ]);
   });
 
+  it('rejects a looping generation with far too many effects', () => {
+    const effects = Array.from({ length: 21 }, (_, i) => ({ effect_index: i, snippet: 's', effect_type: 'ignition' }));
+    expect(validateTagOutput(tagOutputSchema.parse({ effects }), vocab)).toEqual([
+      '21 effects: one entry per effect of the card, and no card has more than 20',
+    ]);
+  });
+
   it('allows amounts on LP/damage actions but not on other verbs without a stat', () => {
     const out = tagOutputSchema.parse({
       effects: [

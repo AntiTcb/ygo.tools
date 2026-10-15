@@ -5,6 +5,7 @@
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
   import MapMarkerIcon from '~icons/mdi/map-marker-radius';
+  import TextSearchIcon from '~icons/mdi/text-search';
 
   const artworks = getArtworksState();
   const helperTiles = $derived(
@@ -17,6 +18,7 @@
   const toolIcon = (href: string) => {
     if (href === '/damagecalc') return CalculatorIcon;
     if (href === '/event-map') return MapMarkerIcon;
+    if (href === '/search') return TextSearchIcon;
     return DatabaseIcon;
   };
 </script>
