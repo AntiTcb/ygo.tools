@@ -92,6 +92,13 @@
         "script_name": "ygotools-effect-tagger",
       },
     ],
+    // Previews don't inherit top-level settings.
+    "observability": {
+      "logs": {
+        "enabled": true,
+        "invocation_logs": true,
+      },
+    },
   },
   "env": {
     "production": {
@@ -131,6 +138,12 @@
           "script_name": "ygotools-effect-tagger",
         },
       ],
+      "observability": {
+        "logs": {
+          "enabled": true,
+          "invocation_logs": true,
+        },
+      },
       "routes": [
         {
           "custom_domain": true,
