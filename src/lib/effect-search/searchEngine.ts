@@ -2,7 +2,7 @@ import { evalRuleNode } from '../db/cardFilterEval';
 import type { ComplexFrameTypeRow, RuleNode } from '../db/cardFilterRule';
 import { resolveVirtualRuleTree } from '../db/cardFilterResolve';
 import { fetchAll, loadCardPool, type CardPool, type Db, type PoolCard } from './db';
-import { describeAction, describeTrigger } from './describe';
+import { humanizeAction, humanizeTrigger } from './humanize';
 import { isNamedCard, SELF, TIERS, type QueryTarget, type SearchQuery, type Tier } from './query';
 import { currentCardName, makeNameResolver } from './store';
 import { targetToRule } from './targetRule';
@@ -274,7 +274,7 @@ export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchRespo
         effectId: a.effect_id,
         tier,
         specificity,
-        why: describeAction(action),
+        why: humanizeAction(action),
         note: a.contextual ? a.context_note : null,
       });
     }
@@ -341,7 +341,7 @@ export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchRespo
         effectId: r.effect_id,
         tier,
         specificity: targetSpecificity(r.subject as Target | null) + targetSpecificity(r.cause_card as Target | null),
-        why: `when ${describeTrigger(trigger)}`,
+        why: humanizeTrigger(trigger),
         note: null,
       });
     }

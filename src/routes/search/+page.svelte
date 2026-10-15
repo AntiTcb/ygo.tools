@@ -228,8 +228,9 @@
                 <a class="anchor font-semibold" href="/database?name={encodeURIComponent(hit.card.name)}">{hit.card.name}</a>
                 {#each hit.reasons as r, i (i)}
                   <p class="text-sm">{r.snippet}</p>
-                  <p class="font-mono text-xs opacity-70">
-                    {r.why}{#if r.note}&nbsp;— depends: {r.note}{/if}
+                  <p class="text-xs opacity-70">
+                    <span class="font-semibold">Matched:</span>
+                    {r.why}.{#if r.note}&nbsp;Depends on game state: {r.note}.{/if}
                   </p>
                 {/each}
               </div>
