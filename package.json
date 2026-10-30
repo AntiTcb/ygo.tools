@@ -75,7 +75,7 @@
     "nprogress": "^0.2.0",
     "oxfmt": "^0.74.0",
     "oxlint": "^1.89.0",
-    "runed": "^0.38.0",
+    "runed": "~0.37.1",
     "sk-seo": "^0.5.4",
     "supabase": "^2.122.0",
     "super-sitemap": "^2.0.6",
