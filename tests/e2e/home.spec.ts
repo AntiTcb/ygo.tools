@@ -8,10 +8,11 @@ test.describe('home page', () => {
     await expect(page.getByTestId('home-card-helpers').getByRole('heading', { name: 'Card Helpers', level: 2 })).toBeVisible();
 
     const toolTitles = page.getByTestId('home-tool-tile').locator('h5');
-    await expect(toolTitles).toHaveCount(3);
+    await expect(toolTitles).toHaveCount(4);
     await expect(toolTitles.nth(0)).toHaveText('Card Database');
     await expect(toolTitles.nth(1)).toHaveText('Damage Calculation Calculator');
-    await expect(toolTitles.nth(2)).toHaveText('Event Map');
+    await expect(toolTitles.nth(2)).toHaveText('Effect Search');
+    await expect(toolTitles.nth(3)).toHaveText('Event Map');
 
     const helperTiles = page.getByTestId('home-helper-tile');
     await expect(helperTiles).toHaveCount(3);

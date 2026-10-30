@@ -49,6 +49,18 @@ const matches = (target: Target, row: CardFilterRow) => {
 };
 
 describe('targetToRule', () => {
+  it('handles "non-WATER Machine" (excluded Attributes and Types imply a monster)', () => {
+    const earthMachine = card({ id: 6010, level: 4, atk: 1500, def: 1000, attribute_id: 5, species_id: 7, frame_type_id: 1 });
+    const waterMachine = card({ id: 6011, level: 4, atk: 1500, def: 1000, attribute_id: 3, species_id: 7, frame_type_id: 1 });
+    const t: Target = { races: ['Machine'], exclude_attributes: ['WATER'] };
+    expect(matches(t, earthMachine)).toBe(true);
+    expect(matches(t, waterMachine)).toBe(false);
+    expect(matches({ exclude_races: ['Aqua'] }, toadally)).toBe(false);
+    expect(matches({ exclude_races: ['Aqua'] }, tunerFish)).toBe(true);
+    expect(matches({ exclude_attributes: ['WATER'] }, quickPlay)).toBe(false);
+    expect(describeTarget(t)).toBe('non-WATER Machine card');
+  });
+
   it('matches a Rank 2 WATER Xyz target against Toadally Awesome only', () => {
     const t: Target = { attributes: ['WATER'], monster_kinds: ['xyz'], rank: { op: 'lte', value: 2 } };
     expect(matches(t, toadally)).toBe(true);

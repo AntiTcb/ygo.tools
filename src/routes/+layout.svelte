@@ -14,6 +14,7 @@
   import MapMarkerIcon from '~icons/mdi/map-marker-radius';
   import PawIcon from '~icons/mdi/paw';
   import RobotIcon from '~icons/mdi/robot';
+  import TextSearchIcon from '~icons/mdi/text-search';
   import '../app.css';
 
   let { children } = $props();
@@ -60,6 +61,12 @@
     <div class="flex flex-col items-center justify-center text-center">
       <DatabaseIcon class="size-6 md:size-7" />
       <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Card Search</Navigation.TriggerText>
+    </div>
+  </Navigation.TriggerAnchor>
+  <Navigation.TriggerAnchor href="/search" class={navClass('/search')} aria-current={navCurrent('/search')}>
+    <div class="flex flex-col items-center justify-center text-center">
+      <TextSearchIcon class="size-6 md:size-7" />
+      <Navigation.TriggerText class="text-sm text-wrap whitespace-normal">Effect Search</Navigation.TriggerText>
     </div>
   </Navigation.TriggerAnchor>
   <Navigation.TriggerAnchor href="/event-map" class={navClass('/event-map')} aria-current={navCurrent('/event-map')}>

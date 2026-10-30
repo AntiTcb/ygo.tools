@@ -12,6 +12,10 @@ declare global {
         EVENT_MAP_DB: D1Database;
         /** Effect search tagging Workflow (wrangler.effect-tagger.jsonc); params are a RunPlan. */
         EFFECT_TAG_WORKFLOW?: { create(options: { params: unknown }): Promise<{ id: string }> };
+        /** Workers AI, for /search query parsing. */
+        AI?: import('$lib/effect-search/ai').AiBinding;
+        /** Per-IP limit on /search model calls. */
+        SEARCH_PARSE_LIMITER?: { limit(options: { key: string }): Promise<{ success: boolean }> };
       };
       context: {
         waitUntil(promise: Promise<any>): void;
