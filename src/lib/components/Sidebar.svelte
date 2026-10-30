@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { isNavActive } from '$lib/nav/isNavActive';
+  import { isNavActive } from '#lib/nav/isNavActive.js';
   import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import type { Snippet } from 'svelte';
   import HomeIcon from '~icons/mdi/home';

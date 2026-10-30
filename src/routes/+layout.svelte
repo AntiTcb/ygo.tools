@@ -1,12 +1,13 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import AppUpdateNotifier from '$components/AppUpdateNotifier.svelte';
-  import Footer from '$components/Footer.svelte';
-  import Header from '$components/Header.svelte';
-  import Sidebar from '$components/Sidebar.svelte';
-  import { setArtworksState } from '$lib/assets/yugiohArtwork.svelte';
-  import { isNavActive } from '$lib/nav/isNavActive';
+  import AppUpdateNotifier from '#lib/components/AppUpdateNotifier.svelte';
+  import Footer from '#lib/components/Footer.svelte';
+  import Header from '#lib/components/Header.svelte';
+  import Sidebar from '#lib/components/Sidebar.svelte';
+  import { setArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { isNavActive } from '#lib/nav/isNavActive.js';
   import { Navigation } from '@skeletonlabs/skeleton-svelte';
+  import { deepMerge, MetaTags, type MetaTagsProps } from 'svelte-meta-tags';
   import { Toaster } from 'svelte-sonner';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
@@ -20,11 +21,32 @@
 
   let currentPage = $derived.by(() => page.url.pathname);
 
+  // Shared head tags; pages add the rest (title, description, keywords) by returning `pageMetaTags` from their load.
+  const metaTags = $derived.by((): MetaTagsProps | undefined => {
+    if (!page.data.pageMetaTags) return undefined;
+    const base: MetaTagsProps = {
+      robots: 'index, follow',
+      canonical: page.url.href,
+      openGraph: { type: 'website' },
+      twitter: { cardType: 'summary_large_image' },
+      additionalMetaTags: [
+        { name: 'author', content: 'AntiTcb' },
+        { property: 'twitter:domain', content: page.url.hostname },
+        { property: 'twitter:url', content: page.url.href },
+      ],
+    };
+    return deepMerge(base, page.data.pageMetaTags);
+  });
+
   const artworks = setArtworksState();
 
   const navClass = (href: string) => (isNavActive(currentPage, href) ? 'nav-active' : '');
   const navCurrent = (href: string) => (isNavActive(currentPage, href) ? 'page' : undefined);
 </script>
+
+{#if metaTags}
+  <MetaTags {...metaTags} />
+{/if}
 
 <div class="bg-surface-800 grid grid-cols-[1fr] lg:grid-cols-[auto_1fr]">
   {#if currentPage !== '/'}

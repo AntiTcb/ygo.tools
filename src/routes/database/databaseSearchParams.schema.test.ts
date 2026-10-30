@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultRuleTree } from '$lib/db/cardFilterRule';
+import { defaultRuleTree } from '#lib/db/cardFilterRule.js';
 import { databaseSearchParamsSchema } from './databaseSearchParams.schema';
 
 describe('databaseSearchParamsSchema', () => {

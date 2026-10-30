@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { findGizmekUkaSummons, findGizmekUkaTargets, isLegalGizmekUkaSummon } from '$lib/db/gizmekuka';
+  import { browser } from '$app/env';
+  import MonsterCardPicker from '#lib/components/MonsterCardPicker.svelte';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { findGizmekUkaSummons, findGizmekUkaTargets, isLegalGizmekUkaSummon } from '#lib/db/gizmekuka.js';
   import { useSearchParams } from 'runed/kit';
-  import Seo from 'sk-seo';
   import type { PageProps } from './$types';
   import { gizmekukaSearchParamsSchema } from './gizmekukaSearchParams.schema';
 
@@ -93,12 +92,6 @@
     if (params.targetPage > targetTotalPages) params.targetPage = targetTotalPages;
   });
 </script>
-
-<Seo
-  title="Gizmek Uka Helper"
-  description="Find Gizmek Uka summons whose ATK equals their own DEF and share an Attribute, or the reverse — legal Attribute-matching targets."
-  keywords="yugioh, ygo, gizmek uka, attribute, atk, def, Yu-Gi-Oh!"
-  author="AntiTcb" />
 
 <div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Gizmek Uka Helper</h1>

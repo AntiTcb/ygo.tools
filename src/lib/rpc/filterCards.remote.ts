@@ -1,6 +1,6 @@
 import { getRequestEvent, query } from '$app/server';
-import { queryNeuronCardIdsByRule } from '$lib/db/cardFilterQuery';
-import { ruleNodeSchema, validateRuleLimits, type RuleNode } from '$lib/db/cardFilterRule';
+import { queryNeuronCardIdsByRule } from '#lib/db/cardFilterQuery.js';
+import { ruleNodeSchema, validateRuleLimits, type RuleNode } from '#lib/db/cardFilterRule.js';
 
 const hasVirtualCat = (node: RuleNode): boolean => {
   if (node.kind === 'cond' && node.condition.kind === 'cat') {

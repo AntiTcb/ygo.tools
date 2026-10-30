@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BattleModifiers } from '$lib/damageCalc.svelte';
+  import { BattleModifiers } from '#lib/damageCalc.svelte.js';
 
   let { modifiers = $bindable<BattleModifiers>(), showExamples = $bindable<boolean>(false) }: { modifiers: BattleModifiers; showExamples: boolean } =
     $props();

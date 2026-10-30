@@ -1,9 +1,9 @@
-import type { Json } from '$lib/db/database.types';
-import { toTaggerCard, TAGGABLE_CARD_COLUMNS } from '$lib/effect-search/cardText';
-import { loadComplexFrames, loadNameIndexFor, loadRelatedIds, loadVocab, storeCardTags, type Db } from '$lib/effect-search/db';
-import { exactTargetComparer, scoreCard } from '$lib/effect-search/evalScore';
-import { requestRetag } from '$lib/effect-search/runner';
-import { tagOutputSchema, validateTagOutput, type TagOutput } from '$lib/effect-search/tagSchema';
+import type { Json } from '#lib/db/database.types.js';
+import { toTaggerCard, TAGGABLE_CARD_COLUMNS } from '#lib/effect-search/cardText.js';
+import { loadComplexFrames, loadNameIndexFor, loadRelatedIds, loadVocab, storeCardTags, type Db } from '#lib/effect-search/db.js';
+import { exactTargetComparer, scoreCard } from '#lib/effect-search/evalScore.js';
+import { requestRetag } from '#lib/effect-search/runner.js';
+import { tagOutputSchema, validateTagOutput, type TagOutput } from '#lib/effect-search/tagSchema.js';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 

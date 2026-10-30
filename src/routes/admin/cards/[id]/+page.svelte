@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import { describeAction, describeTrigger } from '$lib/effect-search/describe';
-  import type { TagOutput } from '$lib/effect-search/tagSchema';
+  import { describeAction, describeTrigger } from '#lib/effect-search/describe.js';
+  import type { TagOutput } from '#lib/effect-search/tagSchema.js';
 
   let { data, form } = $props();
 

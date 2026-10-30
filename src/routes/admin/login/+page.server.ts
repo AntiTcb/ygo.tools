@@ -1,14 +1,14 @@
-import { dev } from '$app/environment';
-import { env } from '$env/dynamic/private';
-import { ADMIN_COOKIE, adminSessionToken, checkAdminPassword, safeAdminRedirect } from '$lib/server/adminAuth';
+import { dev } from '$app/env';
+import { ADMIN_DASHBOARD_PASS } from '$app/env/private';
+import { ADMIN_COOKIE, adminSessionToken, checkAdminPassword, safeAdminRedirect } from '#lib/server/adminAuth.js';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = ({ locals }) => ({ configured: Boolean(env.ADMIN_DASHBOARD_PASS), signedIn: Boolean(locals.isAdmin) });
+export const load: PageServerLoad = ({ locals }) => ({ configured: Boolean(ADMIN_DASHBOARD_PASS), signedIn: Boolean(locals.isAdmin) });
 
 export const actions: Actions = {
   login: async ({ request, cookies, url }) => {
-    const password = env.ADMIN_DASHBOARD_PASS;
+    const password = ADMIN_DASHBOARD_PASS;
     const attempt = String((await request.formData()).get('password') ?? '');
     if (!(await checkAdminPassword(attempt, password))) return fail(401, { wrong: true });
     cookies.set(ADMIN_COOKIE, await adminSessionToken(password!), {
