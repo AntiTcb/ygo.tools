@@ -8,7 +8,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "pnpm run types && wrangler dev .svelte-kit/cloudflare/_worker.js",
-    "cf:deploy": "pnpm run types && pnpm run build && wrangler deploy --env=production",
+    "cf:deploy": "pnpm run types && pnpm run build && wrangler deploy",
     "check": "pnpm run types && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo",
     "check:watch": "pnpm run types && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo --watch",
     "lint": "oxlint --deny-warnings",
