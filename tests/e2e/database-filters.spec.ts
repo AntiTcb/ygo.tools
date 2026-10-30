@@ -33,6 +33,30 @@ test.describe('/database card search', () => {
     await expect(page.getByTestId('database-card-name').first()).toContainText(/Blue-Eyes/i);
   });
 
+  test('effect search keeps caret position when a debounced URL update lands mid-typing', async ({ page }) => {
+    await gotoDatabase(page);
+    const effect = page.getByTestId('database-search-effect');
+    await effect.fill('abcdef');
+    await page.waitForURL(/_data=/);
+    // Insert a keystroke inside the window between Runed's debounced `goto` committing the URL and the URL→param resync.
+    const caret = await effect.evaluate(async (el: HTMLTextAreaElement) => {
+      const orig = history.replaceState.bind(history);
+      history.replaceState = (...args: Parameters<History['replaceState']>) => {
+        orig(...args);
+        history.replaceState = orig;
+        el.setRangeText('Q', 3, 3, 'end');
+        el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      };
+      el.setRangeText('X', 0, 0, 'end');
+      el.setSelectionRange(3, 3);
+      el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 1500));
+      return el.selectionStart;
+    });
+    await expect(effect).toHaveValue('XabQcdef');
+    expect(caret).toBe(4);
+  });
+
   test('effect contains search returns results', async ({ page }) => {
     await gotoDatabase(page);
     await page.getByTestId('database-search-effect').fill('destroy');
