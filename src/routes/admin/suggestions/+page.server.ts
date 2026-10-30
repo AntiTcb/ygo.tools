@@ -1,5 +1,5 @@
-import { fetchAll } from '$lib/effect-search/db';
-import { approveSuggestions, mergeSuggestions, rejectSuggestions, type VocabKind } from '$lib/effect-search/vocabAdmin';
+import { fetchAll } from '#lib/effect-search/db.js';
+import { approveSuggestions, mergeSuggestions, rejectSuggestions, type VocabKind } from '#lib/effect-search/vocabAdmin.js';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 

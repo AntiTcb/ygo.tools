@@ -7,7 +7,7 @@ export class YugiohArtwork {
   constructor() {
     $effect(() => {
       fetch('https://artworks.ygoresources.com/manifest.json')
-        .then((res) => res.json())
+        .then((res) => res.json<Manifest>())
         .then((d: Manifest) => {
           this.manifest = d;
         });

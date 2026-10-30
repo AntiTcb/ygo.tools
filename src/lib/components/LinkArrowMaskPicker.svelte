@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LINK_ARROW_GRID } from '$lib/db/linkArrows';
+  import { LINK_ARROW_GRID } from '#lib/db/linkArrows.js';
   import ArrowDown from '~icons/lucide/arrow-down';
   import ArrowDownLeft from '~icons/lucide/arrow-down-left';
   import ArrowDownRight from '~icons/lucide/arrow-down-right';

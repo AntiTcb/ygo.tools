@@ -1,3 +1,6 @@
+// Top-level settings are production (Workers Builds runs `wrangler deploy` on main); the `previews` block is
+// what each Worker Preview starts from (`wrangler preview` on other branches). Previews inherit nothing, so
+// every var and binding they need is repeated there. https://developers.cloudflare.com/workers/previews/
 {
     "$schema": "./node_modules/wrangler/config-schema.json",
     "name": "ygotools",
@@ -12,6 +15,12 @@
     },
     "workers_dev": false,
     "preview_urls": true,
+    "routes": [
+        {
+            "custom_domain": true,
+            "pattern": "ygo.tools",
+        },
+    ],
     "vars": {
         "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
         "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
@@ -42,45 +51,24 @@
             "invocation_logs": true,
         },
     },
+    // Secrets (SUPABASE_SERVICE_KEY, ADMIN_DASHBOARD_PASS) come from `wrangler preview base-config secret put`.
     "previews": {
         "vars": {
             "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
             "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
             "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
             "NOMINATIM_CONTACT": "https://ygo.tools",
-        }
-    },
-    "env": {
-        "production": {
-            "vars": {
-                "PUBLIC_SUPABASE_URL": "https://sbygo.alexgravely.dev",
-                "PUBLIC_SUPABASE_ANON_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc0NDY2MjkwMCwiZXhwIjo0OTAwMzM2NTAwLCJyb2xlIjoiYW5vbiJ9.hufXok3PvE4Q-mh5N_djtIxBMOY5yPxeM6vMLoKCifE",
-                "PUBLIC_MAPBOX_TOKEN": "pk.eyJ1IjoiYW50aXRjYiIsImEiOiJjbXV2djd4cmMwN3g0MnlteXBydmNrYm5kIn0.BlJjusx5QfENLMksinjajg",
-                "NOMINATIM_CONTACT": "https://ygo.tools",
-            },
-            // Bindings aren't inherited by named environments.
-            "d1_databases": [
-                {
-                    "binding": "EVENT_MAP_DB",
-                    "database_name": "ygo-event-map",
-                    "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
-                    "migrations_dir": "migrations/event-map",
-                },
-            ],
-            "workflows": [
-                {
-                    "binding": "EFFECT_TAG_WORKFLOW",
-                    "name": "effect-tag-workflow",
-                    "class_name": "EffectTagWorkflow",
-                    "script_name": "ygotools-effect-tagger",
-                },
-            ],
-            "routes": [
-                {
-                    "custom_domain": true,
-                    "pattern": "ygo.tools",
-                },
-            ],
         },
+        // The production database: the app only reads it, and the scraper's data is what previews need to show.
+        // A branch that adds migrations must apply them here before its Preview can use them.
+        "d1_databases": [
+            {
+                "binding": "EVENT_MAP_DB",
+                "database_name": "ygo-event-map",
+                "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
+                "migrations_dir": "migrations/event-map",
+            },
+        ],
+        // No EFFECT_TAG_WORKFLOW: a Preview would start real tagging runs, so /admin shows "Run now" as unavailable.
     },
 }

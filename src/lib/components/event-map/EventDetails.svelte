@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { formatDateRange, formatTime } from '$lib/event-map/dates';
-  import { describeEventTime, eventTimeHint } from '$lib/event-map/event-time';
-  import { distanceKm, formatDistance, formatDuration } from '$lib/event-map/geo';
-  import type { Route as DrivingRoute } from '$lib/event-map/mapbox';
-  import { EVENT_TYPE_LABELS, type EventItem, type EventType, type LngLat } from '$lib/event-map/types';
+  import { formatDateRange, formatTime } from '#lib/event-map/dates.js';
+  import { describeEventTime, eventTimeHint } from '#lib/event-map/event-time.js';
+  import { distanceKm, formatDistance, formatDuration } from '#lib/event-map/geo.js';
+  import type { Route as DrivingRoute } from '#lib/event-map/mapbox.js';
+  import { EVENT_TYPE_LABELS, type EventItem, type EventType, type LngLat } from '#lib/event-map/types.js';
   import ClockIcon from '~icons/lucide/clock';
   import ExternalLinkIcon from '~icons/lucide/external-link';
   import LoaderIcon from '~icons/lucide/loader-circle';

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { HOME_HELPER_TILES, HOME_TOOL_TILES } from '$lib/home/homeTiles';
-  import Seo from 'sk-seo';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { HOME_HELPER_TILES, HOME_TOOL_TILES } from '#lib/home/homeTiles.js';
   import CalculatorIcon from 'virtual:icons/mdi/calculator';
   import DatabaseIcon from '~icons/mdi/database-search';
   import MapMarkerIcon from '~icons/mdi/map-marker-radius';
@@ -20,12 +19,6 @@
     return DatabaseIcon;
   };
 </script>
-
-<Seo
-  title="YGO Tools"
-  description="A collection of tools for Yu-Gi-Oh! players to become the greatest duelists"
-  keywords="yugioh, ygo, tools, Yu-Gi-Oh!"
-  author="AntiTcb" />
 
 <div class="flex flex-col gap-6">
   <section data-testid="home-tools">

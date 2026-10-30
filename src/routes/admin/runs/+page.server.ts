@@ -1,8 +1,9 @@
-import type { RunPlan } from '$lib/effect-search/runner';
+import type { RunPlan } from '#lib/effect-search/runner.js';
 import { fail } from '@sveltejs/kit';
+import { env } from 'cloudflare:workers';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, platform }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   const db = locals.supabase;
   const [runs, queued, retag] = await Promise.all([
     db
@@ -20,14 +21,14 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     runs: runs.data ?? [],
     queued: queued.count ?? 0,
     retagRequests: retag.count ?? 0,
-    canRun: Boolean(platform?.env?.EFFECT_TAG_WORKFLOW),
+    canRun: Boolean(env.EFFECT_TAG_WORKFLOW),
   };
 };
 
 export const actions: Actions = {
   /** Starts a tagging run now instead of waiting for the hourly cron. */
-  runNow: async ({ locals, platform }) => {
-    const workflow = platform?.env?.EFFECT_TAG_WORKFLOW;
+  runNow: async ({ locals }) => {
+    const workflow = env.EFFECT_TAG_WORKFLOW;
     if (!workflow) return fail(503, { error: 'The tagging Workflow binding is unavailable here (it only exists on Cloudflare).' });
     const running = await locals.supabase.from('effect_tag_runs').select('id', { count: 'exact', head: true }).eq('status', 'running');
     if (running.count) return fail(409, { error: 'A run is already in progress.' });

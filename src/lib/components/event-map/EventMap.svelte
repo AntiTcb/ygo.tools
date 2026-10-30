@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { ExpressionSpecification, GeoJSONSource, Map as MapboxMap, Marker } from 'mapbox-gl';
-  import type { MapArea } from '$lib/event-map/map-areas';
-  import type { EventItem, LngLat } from '$lib/event-map/types';
+  import type { MapArea } from '#lib/event-map/map-areas.js';
+  import type { EventItem, LngLat } from '#lib/event-map/types.js';
   import type { Feature, FeatureCollection, LineString, Point } from 'geojson';
   import LocateFixed from '~icons/lucide/locate-fixed?raw';
 

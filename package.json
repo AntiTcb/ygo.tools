@@ -8,9 +8,9 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "pnpm run types && wrangler dev .svelte-kit/cloudflare/_worker.js",
-    "cf:deploy": "pnpm run types && pnpm run build && wrangler deploy --env=production",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo --watch",
+    "cf:deploy": "pnpm run types && pnpm run build && wrangler deploy",
+    "check": "pnpm run types && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo",
+    "check:watch": "pnpm run types && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo --watch",
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
@@ -53,10 +53,9 @@
     "@skeletonlabs/skeleton-svelte": "^5.0.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
-    "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/adapter-cloudflare": "^7.2.9",
+    "@sveltejs/adapter-cloudflare": "^8.0.1",
     "@sveltejs/enhanced-img": "^1.0.0",
-    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/kit": "^3.1.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.20",
@@ -75,12 +74,12 @@
     "nprogress": "^0.2.0",
     "oxfmt": "^0.74.0",
     "oxlint": "^1.89.0",
-    "runed": "~0.37.1",
-    "sk-seo": "^0.5.4",
+    "runed": "^0.38.0",
     "supabase": "^2.122.0",
     "super-sitemap": "^2.0.6",
     "svelte": "^5.57.2",
     "svelte-check": "^4.7.7",
+    "svelte-meta-tags": "^5.0.3",
     "svelte-search": "^2.1.2",
     "svelte-sonner": "^1.2.1",
     "tailwindcss": "^4.3.3",
@@ -99,5 +98,9 @@
     "node": ">=24.18.0",
     "pnpm": ">=12.15.0"
   },
-  "packageManager": "pnpm@12.15.0"
+  "packageManager": "pnpm@12.15.0",
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
+  }
 }

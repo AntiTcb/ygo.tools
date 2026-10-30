@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { googleCalendarUrl, outlookCalendarUrl } from '$lib/event-map/calendar-links';
-  import type { EventItem } from '$lib/event-map/types';
+  import { googleCalendarUrl, outlookCalendarUrl } from '#lib/event-map/calendar-links.js';
+  import type { EventItem } from '#lib/event-map/types.js';
   import { Menu, Portal, type MenuRootProps } from '@skeletonlabs/skeleton-svelte';
   import CalendarPlusIcon from '~icons/lucide/calendar-plus';
   import DownloadIcon from '~icons/lucide/download';

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { formatWeekend } from '$lib/event-map/dates';
-  import type { Filters } from '$lib/event-map/filters';
-  import { EVENT_TYPE_LABELS, type EventType } from '$lib/event-map/types';
+  import { formatWeekend } from '#lib/event-map/dates.js';
+  import type { Filters } from '#lib/event-map/filters.js';
+  import { EVENT_TYPE_LABELS, type EventType } from '#lib/event-map/types.js';
   import { Switch, ToggleGroup } from '@skeletonlabs/skeleton-svelte';
   import type { Snippet } from 'svelte';
   import ChevronLeftIcon from '~icons/lucide/chevron-left';

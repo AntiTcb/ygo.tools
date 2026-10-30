@@ -1,14 +1,14 @@
-import { env } from '$env/dynamic/public';
-import type { EventItem } from '$lib/event-map/types';
-import { parseRegion } from '$lib/event-map/types';
-import { eventMapDb } from '$lib/server/event-map/db';
-import { lastScrapedAt, listEvents } from '$lib/server/event-map/events';
+import { PUBLIC_MAPBOX_TOKEN } from '$app/env/public';
+import type { EventItem } from '#lib/event-map/types.js';
+import { parseRegion } from '#lib/event-map/types.js';
+import { eventMapDb } from '#lib/server/event-map/db.js';
+import { lastScrapedAt, listEvents } from '#lib/server/event-map/events.js';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, platform, setHeaders }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
   // Only `region` is read here, so changing the other filter params doesn't re-run this load.
   const region = parseRegion(url.searchParams.get('region'));
-  const db = eventMapDb(platform);
+  const db = eventMapDb();
 
   let events: EventItem[] = [];
   let updatedAt: string | null = null;
@@ -26,6 +26,6 @@ export const load: PageServerLoad = async ({ url, platform, setHeaders }) => {
     events,
     updatedAt,
     // Public (pk.*) token; restrict it to ygo.tools in the Mapbox dashboard.
-    mapboxToken: env.PUBLIC_MAPBOX_TOKEN ?? '',
+    mapboxToken: PUBLIC_MAPBOX_TOKEN ?? '',
   };
 };
