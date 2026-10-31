@@ -38,12 +38,12 @@
     "effect-tagger:deploy": "wrangler deploy -c wrangler.effect-tagger.jsonc"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261027.1",
+    "@cloudflare/workers-types": "^5.20261028.1",
     "@iconify-json/clarity": "^1.2.4",
     "@iconify-json/fa-solid": "^1.2.2",
     "@iconify-json/fa6-regular": "^1.2.4",
     "@iconify-json/heroicons": "^1.2.3",
-    "@iconify-json/lucide": "^1.2.147",
+    "@iconify-json/lucide": "^1.2.148",
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/vscode-icons": "^1.2.94",
     "@macfja/svelte-persistent-store": "^2.4.2",
