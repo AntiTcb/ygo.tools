@@ -4,11 +4,10 @@
   import RegexSearchField from '#lib/components/RegexSearchField.svelte';
   import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
   import { evalRuleNode, type CardFilterRow } from '#lib/db/cardFilterEval.js';
-  import { isStatFilterEmpty, resolveVirtualRuleTree, treeNeedsClientEval } from '#lib/db/cardFilterResolve.js';
+  import { isStatFilterEmpty, resolveVirtualRuleTree } from '#lib/db/cardFilterResolve.js';
   import { validateRuleLimits, type RuleNode } from '#lib/db/cardFilterRule.js';
   import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
   import { compileRegex } from '#lib/db/regexSearch.js';
-  import { filterNeuronCardIds } from '#lib/rpc/filterCards.remote.js';
   import { searchSbCards } from '#lib/rpc/searchSupabaseCards.remote.js';
   import { useSearchParams } from 'runed/kit';
   import { untrack } from 'svelte';
@@ -219,37 +218,22 @@
 
     const resolved = resolveVirtualRuleTree(search.ruleTree, lookups.complexFrameTypes);
 
-    let statQuery: ReturnType<typeof filterNeuronCardIds> | null = null;
-    let statClientEval = false;
     if (statActive) {
       const limResolved = validateRuleLimits(resolved);
       if (!limResolved.ok) {
         toast.error(limResolved.message);
         return [];
       }
-      if (treeNeedsClientEval(resolved)) {
-        statClientEval = true;
-      } else {
-        statQuery = filterNeuronCardIds(resolved);
-      }
     }
 
     const nameQuery = nameActive ? searchSbCards(trimmedName) : null;
 
-    let statIdSet: Set<number> | null = null;
-    if (statActive) {
-      if (statClientEval) {
-        statIdSet = new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id));
-      } else if (statQuery) {
-        const r = await statQuery;
-        if (r.error) {
-          toast.error(`${r.error} — using offline stat filter on loaded cards.`);
-          statIdSet = new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id));
-        } else {
-          statIdSet = new Set(r.ids);
-        }
-      }
-    }
+    /**
+     * Evaluate stat rules against the already-loaded cards. The remote `filterNeuronCardIds` query is capped at
+     * `REMOTE_FETCH_LIMIT` ids, so intersecting its result with the text filters silently dropped most matches
+     * for any broad rule (e.g. card type = Monster).
+     */
+    const statIdSet = statActive ? new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id)) : null;
 
     const cardNameMatches = nameQuery ? await nameQuery : [];
     const cardNameIds = cardNameMatches?.map((x) => x.id) ?? [];
