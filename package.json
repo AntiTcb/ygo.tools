@@ -75,7 +75,7 @@
     "oxfmt": "^0.75.0",
     "oxlint": "^1.90.0",
     "runed": "^0.38.0",
-    "supabase": "^2.122.0",
+    "supabase": "^3.1.0",
     "super-sitemap": "^2.0.6",
     "svelte": "^5.57.3",
     "svelte-check": "^4.7.7",
