@@ -92,3 +92,6 @@ export const repairSnippets = <E extends Pick<TagEffect, 'snippet' | 'text_sourc
     return snippet !== e.snippet && snippet.length >= e.snippet.trim().length * 0.9 ? { ...e, snippet } : e;
   });
 };
+
+/** Is `snippet` printed in `text` (ignoring whitespace and quote differences)? */
+export const isPrintedSnippet = (text: string, snippet: string): boolean => locate(text, snippet, 0) !== null;

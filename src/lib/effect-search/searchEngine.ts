@@ -104,7 +104,10 @@ export const resolveTarget = async (db: Db, pool: CardPool, t: QueryTarget | nul
     return { kind: 'unknown', name: t.card, suggestions };
   }
   const rule = targetToRule(t, makeNameResolver(pool.names)).rule;
-  return { kind: 'cards', rule, cards: pool.cards.filter((c) => matcher.matches(rule, c)), key };
+  const cards = pool.cards.filter((c) => matcher.matches(rule, c));
+  // A description every card fits ("any card", "a monster, Spell or Trap") asks for nothing in particular.
+  if (cards.length === pool.cards.length) return { kind: 'none' };
+  return { kind: 'cards', rule, cards, key };
 };
 
 const MONSTER_KIND_COUNT = 14;
@@ -117,7 +120,9 @@ export const targetSpecificity = (t: Target | null): number => {
   if (!t) return 0;
   let n = 0;
   for (const [k, v] of Object.entries(t)) {
-    if (v === undefined || k === 'card_types' || k === 'exclude_names') continue;
+    if (v === undefined || k === 'exclude_names') continue;
+    // Most verbs only apply to monsters, so "a monster" (or "any card") restricts nothing; "a Spell/Trap" does.
+    if (k === 'card_types' && t.card_types?.includes('monster')) continue;
     if (k === 'monster_kinds' && Array.isArray(v) && v.length >= MONSTER_KIND_COUNT - 2) continue;
     n++;
   }
@@ -151,7 +156,8 @@ export const classify = (
     }
     case 'cards': {
       if (eff.isSelf) return matcher.matches(want.rule, eff.owner) ? 'property' : null;
-      if (eff.nameRefs.some((n) => want.cards.some((c) => c.id === n))) return 'name';
+      // An effect naming one of the described cards fits only that one, unless it is the only one described.
+      if (eff.nameRefs.some((n) => want.cards.some((c) => c.id === n))) return want.cards.length === 1 ? 'name' : 'partial';
       if (!eff.rule) return 'unrestricted';
       if (!matcher.anyMatch(eff.rule, want.cards, want.key)) return null;
       if (eff.specificity === 0) return 'unrestricted';

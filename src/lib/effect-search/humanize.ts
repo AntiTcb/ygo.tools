@@ -218,7 +218,8 @@ const amountText = (a: TagAction) =>
 
 /** "Special Summons 1 Aqua monster from your GY"; "Cost: discards this card". */
 export const humanizeAction = (a: TagAction): string => {
-  const phrase = a.is_self || a.name_refs.length ? null : targetPhrase(a.target, (a.quantity ?? 1) > 1);
+  // No quantity can mean "all" ("destroy all Spells/Traps") or unstated; the plural reads right for both.
+  const phrase = a.is_self || a.name_refs.length ? null : targetPhrase(a.target, (a.quantity ?? 2) > 1);
   const objectText = a.is_self
     ? 'this card'
     : [a.quantity ? String(a.quantity) : '', a.name_refs.length ? quote(a.name_refs) : phrase!.text].filter(Boolean).join(' ');

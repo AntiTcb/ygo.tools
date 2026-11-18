@@ -49,6 +49,8 @@ describe('humanizeAction', () => {
   it('describes player-affecting verbs and stat changes', () => {
     expect(action({ verb: 'inflict_damage', to_side: 'opponent', stat_amount: 800 })).toBe('Inflicts 800 damage to your opponent');
     expect(action({ verb: 'draw', quantity: 2 })).toBe('Draws 2 cards');
+    expect(action({ verb: 'negate_activation' })).toBe('Negates the activation of cards');
+    expect(action({ verb: 'destroy', from_zones: ['field'], target: { card_types: ['spell', 'trap'] } })).toMatch(/^Destroys Spell\/Traps /);
     expect(action({ verb: 'change_stats', is_self: true, stat: 'atk', stat_mode: 'gain', stat_amount: 500 })).toBe('This card gains 500 ATK');
   });
 

@@ -18,7 +18,8 @@ export type Sort = (typeof SORTS)[number];
 
 export const PAGE_SIZE = 100;
 
-export type ResultView = { filters: Record<Facet, string[]>; sort: Sort; page: number };
+/** `pageSize` is for scripts (the URL never sets it). */
+export type ResultView = { filters: Record<Facet, string[]>; sort: Sort; page: number; pageSize?: number };
 
 /** URL param per facet. */
 export const FACET_PARAM: Record<Facet, string> = { kind: 'kind', attribute: 'attr', race: 'race', archetype: 'arch' };
@@ -139,7 +140,8 @@ export const applyView = <T>(ranked: readonly T[], cardOf: (item: T) => ViewCard
   const filtered = ranked.filter((item) => passes(cardOf(item), view.filters));
   const sorted =
     view.sort === 'relevance' ? filtered : filtered.toSorted((a, b) => comparators[view.sort as Exclude<Sort, 'relevance'>](cardOf(a), cardOf(b)));
-  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const size = view.pageSize ?? PAGE_SIZE;
+  const pageCount = Math.max(1, Math.ceil(sorted.length / size));
   const page = Math.min(view.page, pageCount);
-  return { items: sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), matching: sorted.length, page, pageCount, facets };
+  return { items: sorted.slice((page - 1) * size, page * size), matching: sorted.length, page, pageCount, facets };
 };

@@ -66,6 +66,7 @@ describe('targetSpecificity', () => {
 
   it('counts restricting fields', () => {
     expect(targetSpecificity({ attributes: ['WATER'] })).toBe(1);
+    expect(targetSpecificity({ card_types: ['spell', 'trap'] })).toBe(1);
     expect(targetSpecificity({ attributes: ['WATER'], races: ['Aqua'], rank: { op: 'lte', value: 2 } })).toBe(3);
   });
 });
@@ -102,6 +103,14 @@ describe('classify', () => {
     expect(classify(want, effect({ races: ['Aqua'] }), matcher)).toBe('partial');
     expect(classify(want, effect({ attributes: ['FIRE'] }), matcher)).toBeNull();
     expect(classify(want, effect({ card_types: ['monster'] }), matcher)).toBe('unrestricted');
+  });
+
+  it('ranks an effect naming one of several described cards as partial', () => {
+    const water = rule({ attributes: ['WATER'] });
+    const many: ResolvedTarget = { kind: 'cards', rule: water, cards: [toadally, tunerFish], key: 'water' };
+    const one: ResolvedTarget = { kind: 'cards', rule: water, cards: [toadally], key: 'toadally' };
+    expect(classify(many, effect(null, { nameRefs: [12642] }), matcher)).toBe('partial');
+    expect(classify(one, effect(null, { nameRefs: [12642] }), matcher)).toBe('name');
   });
 
   it('gives "match" when the query has no target, and nothing for unknown names', () => {

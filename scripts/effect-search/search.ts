@@ -52,7 +52,7 @@ console.log(`searched in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 if (out.kind === 'unknown_card') {
   console.log(`No card named "${out.name}". Did you mean: ${out.suggestions.map((s) => s.name).join(', ')}?`);
 } else {
-  console.log(`${out.total} cards${out.truncated ? ' (truncated)' : ''}`);
+  console.log(`${out.total} cards (showing page 1 of ${out.pageCount})`);
   for (const h of out.hits.slice(0, Number(values.limit))) {
     console.log(`[${h.tier}] ${h.card.name}`);
     for (const r of h.reasons.slice(0, 1)) console.log(`    ${r.why}${r.note ? ` (${r.note})` : ''}\n    "${r.snippet.slice(0, 140)}"`);
