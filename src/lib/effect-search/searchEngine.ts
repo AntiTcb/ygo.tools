@@ -450,3 +450,7 @@ export const textSearch = async (db: Db, request: string, limit = 60): Promise<{
   if (error) throw new Error(error.message);
   return data.map((c) => ({ id: c.id, name: currentCardName(c.name) }));
 };
+
+/** Every archetype name, sorted (for the query editor's suggestions). */
+export const archetypeNames = async (db: Db): Promise<string[]> =>
+  [...new Set((await getCardPool(db)).cards.flatMap((c) => c.archetypes ?? []))].sort((a, b) => a.localeCompare(b));

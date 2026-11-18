@@ -104,7 +104,8 @@ export const decodeQuery = (raw: string | null | undefined): SearchQuery | null 
 
 const sideWord = { you: 'your', opponent: "your opponent's", either: 'either player’s' } as const;
 
-export const describeQueryTarget = (t: QueryTarget | null): string => (!t ? 'any card' : isNamedCard(t) ? `"${t.card}"` : describeTarget(t));
+export const describeQueryTarget = (t: QueryTarget | null): string =>
+  !t ? 'any card' : isNamedCard(t) ? (t.card === SELF ? 'itself' : `"${t.card}"`) : describeTarget(t);
 
 export const describeQuery = (q: SearchQuery): string => {
   const verb = q.verb.replaceAll('_', ' ');

@@ -2,8 +2,11 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
   import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
-  import { describeQueryTarget, encodeQuery, isNamedCard, SELF, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
+  import { encodeQuery, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
   import { FACETS, SORTS, writeView, type Facet, type ResultView, type Sort } from '#lib/effect-search/resultView.js';
+  import { cleanTarget, pickedFrom, pickedTarget, type PickedTarget } from '#lib/effect-search/targetEdit.js';
+  import { describeTarget } from '#lib/effect-search/targetRule.js';
+  import TargetPicker from './TargetPicker.svelte';
 
   let { data } = $props();
   const artworks = getArtworksState();
@@ -68,10 +71,13 @@
 
   const verbsFor = (mode: SearchQuery['mode']) => (mode === 'does' ? data.vocab.actionVerbs : data.vocab.eventVerbs);
 
-  let targetName = $state('');
-  $effect.pre(() => {
-    targetName = data.query?.target && isNamedCard(data.query.target) && data.query.target.card !== SELF ? data.query.target.card : '';
-  });
+  // The editable card slots of the query.
+  const targetSlot = $derived(pickedFrom(data.query?.target ?? null, data.query?.mode === 'responds_to' && data.query.subject_is_self === true));
+  const causeSlot = $derived(pickedFrom(data.query?.cause_card ?? null));
+  const filterSlot = $derived(pickedFrom(data.query?.card_filter ?? null));
+
+  const slotSummary = (p: PickedTarget, selfText = 'the card itself') =>
+    p.kind === 'any' ? 'any card' : p.kind === 'self' ? selfText : p.kind === 'card' ? `"${p.card}"` : describeTarget(p.target);
 
   const tierInfo: Record<Tier, { title: string; blurb: string }> = {
     name: { title: 'Names it', blurb: 'The effect names the card you asked about.' },
@@ -161,18 +167,33 @@
             </select>
           </label>
         {/if}
-        <form
-          class="flex items-end gap-1"
-          onsubmit={(e) => {
-            e.preventDefault();
-            edit({ target: targetName.trim() ? { card: targetName.trim() } : null });
-          }}>
+        {#if data.query.mode === 'responds_to'}
           <label class="flex flex-col text-xs">
-            {data.query.mode === 'does' ? 'Applies to card' : 'Happens to card'}
-            <input class="input w-56 text-sm" bind:value={targetName} placeholder={describeQueryTarget(data.query.target)} />
+            Caused by
+            <select
+              class="select text-sm"
+              value={data.query.cause ?? 'any'}
+              onchange={(e) => edit({ cause: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['cause']) })}>
+              <option value="any">anything</option>
+              <option value="cost">a cost</option>
+              <option value="effect">an effect</option>
+              <option value="battle">battle</option>
+              <option value="material">use as material</option>
+            </select>
           </label>
-          <button class="btn preset-tonal-surface btn-sm" type="submit">Set</button>
-        </form>
+        {/if}
+        <label class="flex flex-col text-xs">
+          Side
+          <select
+            class="select text-sm"
+            value={data.query.from_side ?? 'any'}
+            onchange={(e) => edit({ from_side: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['from_side']) })}>
+            <option value="any">any</option>
+            <option value="you">yours</option>
+            <option value="opponent">opponent's</option>
+            <option value="either">either player's</option>
+          </select>
+        </label>
       </div>
       <div class="flex flex-wrap items-center gap-1 text-xs">
         <span class="opacity-70">From:</span>
@@ -183,27 +204,43 @@
             onclick={() => toggleZone(z)}>{z.replaceAll('_', ' ')}</button>
         {/each}
       </div>
-      <div class="flex flex-wrap gap-1 text-xs">
-        {#if data.query.target && !(isNamedCard(data.query.target) && data.query.target.card !== SELF)}
-          <button type="button" class="chip preset-tonal-surface" onclick={() => edit({ target: null })}
-            >✕ {describeQueryTarget(data.query.target)}</button>
-        {/if}
-        {#if data.query.card_filter}
-          <button type="button" class="chip preset-tonal-surface" onclick={() => edit({ card_filter: null })}
-            >✕ only {describeQueryTarget(data.query.card_filter)}s</button>
-        {/if}
-        {#if data.query.cause_card}
-          <button type="button" class="chip preset-tonal-surface" onclick={() => edit({ cause_card: null })}
-            >✕ caused by {describeQueryTarget(data.query.cause_card)}</button>
-        {/if}
-        {#if data.query.cause}
-          <button type="button" class="chip preset-tonal-surface" onclick={() => edit({ cause: null })}>✕ by {data.query.cause}</button>
-        {/if}
-        {#if data.query.from_side}
-          <button type="button" class="chip preset-tonal-surface" onclick={() => edit({ from_side: null })}
-            >✕ {data.query.from_side === 'you' ? 'your' : data.query.from_side === 'opponent' ? "opponent's" : 'either'} side</button>
-        {/if}
-      </div>
+      {#if data.query.mode === 'does'}
+        <TargetPicker
+          label="Applies to"
+          summary={slotSummary(targetSlot, 'the card itself')}
+          value={targetSlot}
+          kinds={['any', 'self', 'card', 'described']}
+          selfLabel="the card itself"
+          archetypes={data.archetypes}
+          idPrefix="target"
+          onchange={(p) => edit({ target: pickedTarget(p) })} />
+      {:else}
+        <TargetPicker
+          label="Happens to"
+          summary={slotSummary(targetSlot, 'the card itself')}
+          value={targetSlot}
+          kinds={['any', 'self', 'card', 'described']}
+          selfLabel="the card itself"
+          archetypes={data.archetypes}
+          idPrefix="target"
+          onchange={(p) => edit(p.kind === 'self' ? { subject_is_self: true, target: null } : { subject_is_self: null, target: pickedTarget(p) })} />
+        <TargetPicker
+          label="Caused by card"
+          summary={slotSummary(causeSlot)}
+          value={causeSlot}
+          kinds={['any', 'card', 'described']}
+          archetypes={data.archetypes}
+          idPrefix="cause"
+          onchange={(p) => edit({ cause_card: pickedTarget(p) })} />
+      {/if}
+      <TargetPicker
+        label="Only show"
+        summary={filterSlot.kind === 'described' ? `${describeTarget(filterSlot.target)}s` : 'all cards'}
+        value={filterSlot}
+        kinds={['any', 'described']}
+        archetypes={data.archetypes}
+        idPrefix="filter"
+        onchange={(p) => edit({ card_filter: p.kind === 'described' ? cleanTarget(p.target) : null })} />
     </section>
   {/if}
 

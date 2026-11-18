@@ -1,7 +1,7 @@
 import { loadVocab } from '#lib/effect-search/db.js';
 import { decodeQuery, describeQuery, encodeQuery, type SearchQuery } from '#lib/effect-search/query.js';
 import { parseView } from '#lib/effect-search/resultView.js';
-import { runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
+import { archetypeNames, runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
 import { parseRequest } from '#lib/server/effectSearch.js';
 import type { PageServerLoad } from './$types';
 
@@ -64,5 +64,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
     unsupportedReason,
     textResults,
     vocab: await vocabPromise,
+    /** Suggestions for the query editor's archetype fields. */
+    archetypes: query ? await archetypeNames(db).catch(() => []) : [],
   };
 };
