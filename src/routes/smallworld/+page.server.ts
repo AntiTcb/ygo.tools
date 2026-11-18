@@ -1,4 +1,4 @@
-import { SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS } from '$lib/db/smallWorld';
+import { SMALL_WORLD_EXCLUDED_FRAME_TYPE_IDS } from '#lib/db/smallWorld.js';
 import type { PageServerLoad } from './$types';
 
 const CARD_SELECT = 'id,name,effect_text,frame_type_id,atk,def,level,attribute_id,species_id,link_rating,pend_scale_l,pend_scale_r';

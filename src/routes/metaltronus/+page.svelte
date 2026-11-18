@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { findMetaltronusMatches, METALTRONUS_PROPERTY_LABELS } from '$lib/db/metaltronus';
+  import { browser } from '$app/env';
+  import MonsterCardPicker from '#lib/components/MonsterCardPicker.svelte';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { findMetaltronusMatches, METALTRONUS_PROPERTY_LABELS } from '#lib/db/metaltronus.js';
   import { useSearchParams } from 'runed/kit';
-  import Seo from 'sk-seo';
   import type { PageProps } from './$types';
   import { metaltronusSearchParamsSchema } from './metaltronusSearchParams.schema';
 
@@ -80,12 +79,6 @@
     if (params.page > totalPages) params.page = totalPages;
   });
 </script>
-
-<Seo
-  title="Metaltronus Helper"
-  description="Find legal Metaltronus partners: monsters that share two or more of Type, Attribute, and ATK — as summons or as targets."
-  keywords="yugioh, ygo, metaltronus, type, attribute, atk, Yu-Gi-Oh!"
-  author="AntiTcb" />
 
 <div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Metaltronus Helper</h1>

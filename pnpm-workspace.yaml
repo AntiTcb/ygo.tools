@@ -4,3 +4,5 @@ allowBuilds:
   sharp: true
   supabase: true
   workerd: true
+minimumReleaseAgeExclude:
+  - '@sveltejs/kit@3.1.1'

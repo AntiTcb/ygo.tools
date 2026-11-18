@@ -1,14 +1,14 @@
-import { loadVocab } from '$lib/effect-search/db';
-import { decodeQuery, describeQuery, encodeQuery, type SearchQuery } from '$lib/effect-search/query';
-import { runSearch, textSearch, type SearchResponse } from '$lib/effect-search/searchEngine';
-import { parseRequest } from '$lib/server/effectSearch';
+import { loadVocab } from '#lib/effect-search/db.js';
+import { decodeQuery, describeQuery, encodeQuery, type SearchQuery } from '#lib/effect-search/query.js';
+import { runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
+import { parseRequest } from '#lib/server/effectSearch.js';
 import type { PageServerLoad } from './$types';
 
 const MAX_REQUEST_LENGTH = 300;
 
 type Notice = 'rate_limited' | 'unavailable' | 'parse_failed' | 'unsupported' | 'bad_link' | null;
 
-export const load: PageServerLoad = async ({ locals, url, platform, getClientAddress }) => {
+export const load: PageServerLoad = async ({ locals, url, getClientAddress }) => {
   const db = locals.supabase;
   const q = (url.searchParams.get('q') ?? '').trim().slice(0, MAX_REQUEST_LENGTH);
   const rawAst = url.searchParams.get('ast');
@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ locals, url, platform, getClientAdd
 
   // A link with a valid `ast` replays it without calling the model.
   if (!query && q) {
-    const parsed = await parseRequest(db, q, platform?.env, getClientAddress());
+    const parsed = await parseRequest(db, q, getClientAddress());
     if (!parsed.ok) {
       notice = parsed.error === 'rate_limited' || parsed.error === 'unavailable' ? parsed.error : 'parse_failed';
       if (notice === 'parse_failed') console.error('[search] parse failed', parsed.error);

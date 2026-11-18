@@ -1,21 +1,23 @@
 <script lang="ts">
-  import { afterNavigate, goto, replaceState } from '$app/navigation';
+  import { afterNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { describeQueryTarget, encodeQuery, isNamedCard, SELF, TIERS, type SearchQuery, type Tier } from '$lib/effect-search/query';
-  import Seo from 'sk-seo';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { describeQueryTarget, encodeQuery, isNamedCard, SELF, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
 
   let { data } = $props();
   const artworks = getArtworksState();
 
   // A fresh parse put the query in `data`; write it into the URL so the link replays without the model.
-  // replaceState throws until the router is initialized, which happens just after the first
-  // afterNavigate callbacks run, hence the timeout.
+  // Shallow navigation throws until the router is initialized, which happens just after the first
+  // afterNavigate callbacks run, hence the timeout. The shallow navigation runs afterNavigate again, so write
+  // each parsed query once.
+  let written: string | null = null;
   afterNavigate(() => {
-    if (!data.parsedFresh || !data.ast || page.url.searchParams.has('ast')) return;
-    const url = new URL(page.url);
+    if (!data.parsedFresh || !data.ast || written === data.ast || page.url.searchParams.has('ast')) return;
+    written = data.ast;
+    const url = new URL(page.url.href);
     url.searchParams.set('ast', data.ast);
-    setTimeout(() => replaceState(url, page.state));
+    setTimeout(() => goto(url, { state: page.state, shallow: true, replace: true }));
   });
 
   let request = $state('');
@@ -34,9 +36,9 @@
   const edit = (patch: Partial<SearchQuery>) => {
     if (!data.query) return;
     const next = { ...data.query, ...patch };
-    const url = new URL(page.url);
+    const url = new URL(page.url.href);
     url.searchParams.set('ast', encodeQuery(next));
-    void goto(url, { keepFocus: true, noScroll: true });
+    void goto(url, { reset: false });
   };
 
   const toggleZone = (zone: string) => {
@@ -80,12 +82,6 @@
     bad_link: 'That search link is invalid or out of date. Try searching again.',
   };
 </script>
-
-<Seo
-  title="Effect Search"
-  description="Search Yu-Gi-Oh! cards by what their effects do, in plain English: “cards that can Special Summon Toadally Awesome from the GY”."
-  keywords="yugioh, ygo, effect search, card search, natural language, Yu-Gi-Oh!"
-  author="AntiTcb" />
 
 <div class="mx-auto flex w-full max-w-5xl flex-col gap-3">
   <section class="card flex flex-col gap-2 p-3 sm:p-4">

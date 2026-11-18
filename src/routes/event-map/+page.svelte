@@ -1,21 +1,20 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import EventCalendar from '$components/event-map/EventCalendar.svelte';
-  import EventDetails from '$components/event-map/EventDetails.svelte';
-  import EventMap from '$components/event-map/EventMap.svelte';
-  import FilterBar from '$components/event-map/FilterBar.svelte';
-  import LocationControl from '$components/event-map/LocationControl.svelte';
-  import SubscribeDialog from '$components/event-map/SubscribeDialog.svelte';
-  import '$components/event-map/event-map.css';
-  import { buildIcs } from '$lib/event-map/calendar-links';
-  import { overlapsRange, today, weekendOf } from '$lib/event-map/dates';
-  import { applyFilters, effectiveRadius, filtersToParams, parseFilters, type Filters } from '$lib/event-map/filters';
-  import { areaOf, MAP_AREAS } from '$lib/event-map/map-areas';
-  import { drivingRoute, type Place, type Route } from '$lib/event-map/mapbox';
-  import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '$lib/event-map/types';
+  import EventCalendar from '#lib/components/event-map/EventCalendar.svelte';
+  import EventDetails from '#lib/components/event-map/EventDetails.svelte';
+  import EventMap from '#lib/components/event-map/EventMap.svelte';
+  import FilterBar from '#lib/components/event-map/FilterBar.svelte';
+  import LocationControl from '#lib/components/event-map/LocationControl.svelte';
+  import SubscribeDialog from '#lib/components/event-map/SubscribeDialog.svelte';
+  import '#lib/components/event-map/event-map.css';
+  import { buildIcs } from '#lib/event-map/calendar-links.js';
+  import { overlapsRange, today, weekendOf } from '#lib/event-map/dates.js';
+  import { applyFilters, effectiveRadius, filtersToParams, parseFilters, type Filters } from '#lib/event-map/filters.js';
+  import { areaOf, MAP_AREAS } from '#lib/event-map/map-areas.js';
+  import { drivingRoute, type Place, type Route } from '#lib/event-map/mapbox.js';
+  import { parseRegion, regionParams, REGIONS, type CalendarRange, type EventItem, type EventType } from '#lib/event-map/types.js';
   import { SegmentedControl } from '@skeletonlabs/skeleton-svelte';
-  import Seo from 'sk-seo';
   import { fly } from 'svelte/transition';
   import ArrowDownIcon from '~icons/lucide/arrow-down';
   import CalendarDaysIcon from '~icons/lucide/calendar-days';
@@ -65,7 +64,7 @@
     const params = regionParams(data.region);
     for (const [key, value] of filtersToParams(next)) params.set(key, value);
     const qs = params.toString();
-    goto(qs ? `?${qs}` : page.url.pathname, { replaceState: true, noScroll: true, keepFocus: true });
+    goto(qs ? `?${qs}` : page.url.pathname, { replace: true, reset: false });
   };
 
   /** Switches region. Filters are dropped: states, weekends and formats differ per region. */
@@ -73,7 +72,7 @@
     const next = parseRegion(region);
     if (next === data.region) return;
     const qs = regionParams(next).toString();
-    goto(qs ? `?${qs}` : page.url.pathname, { noScroll: true });
+    goto(qs ? `?${qs}` : page.url.pathname, { reset: false });
   };
 
   const radius = $derived(effectiveRadius(filters, !!origin, unit));
@@ -223,12 +222,6 @@
     updatedLabel = updated?.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) ?? null;
   });
 </script>
-
-<Seo
-  title="Event Map – {REGIONS[data.region].label}"
-  description="Find Yu-Gi-Oh! Regionals, OTS Championships and YCS events weekend by weekend: calendar, map, driving directions and calendar export."
-  keywords="yugioh, ygo, regional, ots championship, ycs, events, tournaments, map, calendar"
-  author="AntiTcb" />
 
 <div class="event-map mx-auto flex w-full flex-col gap-3">
   <div class="card space-y-3! p-3 sm:p-4">

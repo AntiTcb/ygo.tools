@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import MonsterCardPicker from '$components/MonsterCardPicker.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
+  import { browser } from '$app/env';
+  import MonsterCardPicker from '#lib/components/MonsterCardPicker.svelte';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
   import {
     findExactBridges,
     findExactTargets,
@@ -10,9 +10,8 @@
     isExactOneBridge,
     SMALL_WORLD_PROPERTY_LABELS,
     type SmallWorldProperty,
-  } from '$lib/db/smallWorld';
+  } from '#lib/db/smallWorld.js';
   import { useSearchParams } from 'runed/kit';
-  import Seo from 'sk-seo';
   import type { PageProps } from './$types';
   import { smallworldSearchParamsSchema } from './smallworldSearchParams.schema';
 
@@ -130,12 +129,6 @@
     if (params.page > totalPages) params.page = totalPages;
   });
 </script>
-
-<Seo
-  title="Small World Helper"
-  description="Resolve Yu-Gi-Oh! Small World bridges: pick a reveal monster and a one-property bridge to find legal add targets from your deck."
-  keywords="yugioh, ygo, small world, bridge, search, Yu-Gi-Oh!"
-  author="AntiTcb" />
 
 <div class="card mx-auto w-full p-3 sm:p-4">
   <h1 class="h3 mb-2">Small World Helper</h1>

@@ -1,4 +1,4 @@
-import { BattleModifiers, type MonsterProps } from '$lib/damageCalc.svelte';
+import { BattleModifiers, type MonsterProps } from '#lib/damageCalc.svelte.js';
 import { z } from 'zod';
 
 const inflictTypeSchema = z.enum(['deal', 'take', 'deal/take']);

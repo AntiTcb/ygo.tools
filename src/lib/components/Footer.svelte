@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { dragScroll } from '$lib/nav/dragScroll';
-  import { getHorizontalScrollOverflow } from '$lib/nav/horizontalScrollOverflow';
-  import { isNavActive } from '$lib/nav/isNavActive';
+  import { dragScroll } from '#lib/nav/dragScroll.js';
+  import { getHorizontalScrollOverflow } from '#lib/nav/horizontalScrollOverflow.js';
+  import { isNavActive } from '#lib/nav/isNavActive.js';
   import { Navigation } from '@skeletonlabs/skeleton-svelte';
   import type { Attachment } from 'svelte/attachments';
   import type { Snippet } from 'svelte';

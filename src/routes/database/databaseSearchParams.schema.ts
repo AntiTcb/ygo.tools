@@ -1,4 +1,4 @@
-import { defaultRuleTree, ruleNodeSchema } from '$lib/db/cardFilterRule';
+import { defaultRuleTree, ruleNodeSchema } from '#lib/db/cardFilterRule.js';
 import { z } from 'zod';
 
 /**

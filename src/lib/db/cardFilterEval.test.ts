@@ -285,4 +285,17 @@ describe('cardFilterResolve', () => {
       ],
     });
   });
+
+  it('evaluates card_type Monster | Trap against loaded rows', () => {
+    const tree: RuleNode = {
+      kind: 'group',
+      logic: 'and',
+      children: [{ kind: 'cond', condition: { kind: 'cat', field: 'card_type', op: 'in', values: [1, 3] } }],
+    };
+    const resolved = resolveVirtualRuleTree(tree, []);
+    const monster = row({ id: 1, frame_type_id: 1 });
+    const spell = row({ id: 2, frame_type_id: 13 });
+    const trap = row({ id: 3, frame_type_id: 14 });
+    expect([monster, spell, trap].filter((r) => evalRuleNode(r, resolved)).map((r) => r.id)).toEqual([1, 3]);
+  });
 });

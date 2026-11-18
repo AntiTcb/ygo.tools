@@ -9,6 +9,7 @@ type NeuronCardsRow = Database['public']['Tables']['neuron_cards']['Row'];
 type NeuronCardsRelationships = Database['public']['Tables']['neuron_cards']['Relationships'];
 
 type Qb = PostgrestFilterBuilder<
+  // oxlint-disable-next-line typescript/no-empty-object-type -- supabase-js's default ClientOptions type argument.
   {},
   Database['public'],
   NeuronCardsRow,

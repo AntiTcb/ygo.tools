@@ -1,20 +1,14 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import { createDamageCalculator } from '$lib/damageCalc.svelte';
+  import { browser } from '$app/env';
+  import { createDamageCalculator } from '#lib/damageCalc.svelte.js';
   import { useSearchParams } from 'runed/kit';
-  import Seo from 'sk-seo';
   import { untrack } from 'svelte';
   import { toast } from 'svelte-sonner';
   import ShareIcon from '~icons/mdi/share';
   import SwapIcon from '~icons/mdi/swap-horizontal';
   import BattleModifiers from './BattleModifiers.svelte';
   import Monster from './Monster.svelte';
-  import {
-    applyModifiers,
-    cloneMonster,
-    damagecalcSearchParamsSchema,
-    snapshotDamagecalcParams,
-  } from './damagecalcSearchParams.schema';
+  import { applyModifiers, cloneMonster, damagecalcSearchParamsSchema, snapshotDamagecalcParams } from './damagecalcSearchParams.schema';
 
   const params = useSearchParams(damagecalcSearchParamsSchema, {
     pushHistory: false,
@@ -108,12 +102,6 @@
     });
   };
 </script>
-
-<Seo
-  title="Yu-Gi-Oh! Damage Calculation Calculator"
-  description="A calculator for the various effects that modify how battle damage is applied to players during Damage Calculation."
-  keywords="Yu-Gi-Oh!, ygo, yugioh, damage calculation, damage calc, dmg step, damage step, dmg calc"
-  author="AntiTcb" />
 
 <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
   <div id="result" class="card col-span-2">

@@ -1,22 +1,15 @@
-import { dev } from '$app/environment';
-import { env } from '$env/dynamic/private';
-import {
-  isModelKey,
-  MODELS,
-  workersAiBindingClient,
-  workersAiRestClient,
-  type AiBinding,
-  type ChatClient,
-  type ModelKey,
-} from '$lib/effect-search/ai';
-import { loadVocab, type Db } from '$lib/effect-search/db';
+import { dev } from '$app/env';
+import { AI_GATEWAY_ID, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_AI_API_TOKEN, SEARCH_PARSER_MODEL } from '$app/env/private';
+import { isModelKey, MODELS, workersAiBindingClient, workersAiRestClient, type ChatClient, type ModelKey } from '#lib/effect-search/ai.js';
+import { loadVocab, type Db } from '#lib/effect-search/db.js';
 import {
   buildParserJsonSchema,
   buildParserPrompt,
   parseSearchRequest,
   PARSER_PROMPT_VERSION,
   type ParseResult,
-} from '$lib/effect-search/queryParser';
+} from '#lib/effect-search/queryParser.js';
+import { env } from 'cloudflare:workers';
 
 /** Default /search parser model; override with SEARCH_PARSER_MODEL (a key of MODELS). */
 const DEFAULT_PARSER_MODEL: ModelKey = 'kimi-k2.6';
@@ -24,20 +17,15 @@ const DEFAULT_PARSER_MODEL: ModelKey = 'kimi-k2.6';
 /** Parses are cached by AI Gateway for a day: the same request text gets the same query. */
 const GATEWAY_CACHE_SECONDS = 24 * 60 * 60;
 
-export type SearchPlatformEnv = {
-  AI?: AiBinding;
-  SEARCH_PARSE_LIMITER?: { limit(options: { key: string }): Promise<{ success: boolean }> };
-};
-
 /**
  * The model client for query parsing: the Workers AI binding on Cloudflare (through AI Gateway, with
  * caching), or the REST API with a token in local dev. Null when neither is configured.
  */
-const parserClient = (platformEnv: SearchPlatformEnv | undefined): ChatClient | null => {
+const parserClient = (): ChatClient | null => {
   // Local dev has no real Workers AI binding (remote bindings are off), so use the REST API there.
-  if (platformEnv?.AI && !dev) return workersAiBindingClient(platformEnv.AI, { id: env.AI_GATEWAY_ID || 'default', cacheTtl: GATEWAY_CACHE_SECONDS });
-  if (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_AI_API_TOKEN) {
-    return workersAiRestClient({ accountId: env.CLOUDFLARE_ACCOUNT_ID, apiToken: env.CLOUDFLARE_AI_API_TOKEN });
+  if (env.AI && !dev) return workersAiBindingClient(env.AI, { id: AI_GATEWAY_ID || 'default', cacheTtl: GATEWAY_CACHE_SECONDS });
+  if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_AI_API_TOKEN) {
+    return workersAiRestClient({ accountId: CLOUDFLARE_ACCOUNT_ID, apiToken: CLOUDFLARE_AI_API_TOKEN });
   }
   return null;
 };
@@ -65,14 +53,14 @@ const parserPrompt = (db: Db) => {
 export type ParseOutcome = ParseResult | { ok: false; error: 'rate_limited' | 'unavailable'; usage: null; ms: 0 };
 
 /** Turns a search request into a query, enforcing the per-IP rate limit on model calls. */
-export const parseRequest = async (db: Db, request: string, platformEnv: SearchPlatformEnv | undefined, clientIp: string): Promise<ParseOutcome> => {
-  const client = parserClient(platformEnv);
+export const parseRequest = async (db: Db, request: string, clientIp: string): Promise<ParseOutcome> => {
+  const client = parserClient();
   if (!client) return { ok: false, error: 'unavailable', usage: null, ms: 0 };
-  if (platformEnv?.SEARCH_PARSE_LIMITER) {
-    const { success } = await platformEnv.SEARCH_PARSE_LIMITER.limit({ key: `parse:${clientIp}` });
+  if (env.SEARCH_PARSE_LIMITER) {
+    const { success } = await env.SEARCH_PARSE_LIMITER.limit({ key: `parse:${clientIp}` });
     if (!success) return { ok: false, error: 'rate_limited', usage: null, ms: 0 };
   }
-  const key = env.SEARCH_PARSER_MODEL && isModelKey(env.SEARCH_PARSER_MODEL) ? env.SEARCH_PARSER_MODEL : DEFAULT_PARSER_MODEL;
+  const key = SEARCH_PARSER_MODEL && isModelKey(SEARCH_PARSER_MODEL) ? SEARCH_PARSER_MODEL : DEFAULT_PARSER_MODEL;
   const model = MODELS[key];
   const prompt = await parserPrompt(db);
   return parseSearchRequest(request, {

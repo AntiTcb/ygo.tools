@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type MonsterProps } from '$lib/damageCalc.svelte';
+  import { type MonsterProps } from '#lib/damageCalc.svelte.js';
 
   let { monster = $bindable<MonsterProps>(), defending = false }: { monster: MonsterProps; defending?: boolean } = $props();
 

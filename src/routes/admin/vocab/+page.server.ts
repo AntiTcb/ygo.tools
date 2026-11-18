@@ -1,4 +1,4 @@
-import { renameTerm, retireTerm, updateTerm, type VocabKind } from '$lib/effect-search/vocabAdmin';
+import { renameTerm, retireTerm, updateTerm, type VocabKind } from '#lib/effect-search/vocabAdmin.js';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 

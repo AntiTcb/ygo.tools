@@ -1,4 +1,4 @@
-import { createDamageCalculator, type BattleResult, type DamageCalculator } from '$lib/damageCalc.svelte';
+import { createDamageCalculator, type BattleResult, type DamageCalculator } from '#lib/damageCalc.svelte.js';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 let damageCalc: DamageCalculator;

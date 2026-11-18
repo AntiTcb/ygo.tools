@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import CardFilterBuilder from '$components/CardFilterBuilder.svelte';
-  import RegexSearchField from '$components/RegexSearchField.svelte';
-  import { getArtworksState } from '$lib/assets/yugiohArtwork.svelte.js';
-  import { evalRuleNode, type CardFilterRow } from '$lib/db/cardFilterEval';
-  import { isStatFilterEmpty, resolveVirtualRuleTree, treeNeedsClientEval } from '$lib/db/cardFilterResolve';
-  import { validateRuleLimits, type RuleNode } from '$lib/db/cardFilterRule';
-  import { buildCardStatLine } from '$lib/db/cardStatDisplay';
-  import { compileRegex } from '$lib/db/regexSearch';
-  import { filterNeuronCardIds } from '$lib/rpc/filterCards.remote';
-  import { searchSbCards } from '$lib/rpc/searchSupabaseCards.remote';
+  import { browser } from '$app/env';
+  import CardFilterBuilder from '#lib/components/CardFilterBuilder.svelte';
+  import RegexSearchField from '#lib/components/RegexSearchField.svelte';
+  import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
+  import { evalRuleNode, type CardFilterRow } from '#lib/db/cardFilterEval.js';
+  import { isStatFilterEmpty, resolveVirtualRuleTree } from '#lib/db/cardFilterResolve.js';
+  import { validateRuleLimits, type RuleNode } from '#lib/db/cardFilterRule.js';
+  import { buildCardStatLine } from '#lib/db/cardStatDisplay.js';
+  import { compileRegex } from '#lib/db/regexSearch.js';
+  import { searchSbCards } from '#lib/rpc/searchSupabaseCards.remote.js';
   import { useSearchParams } from 'runed/kit';
   import { untrack } from 'svelte';
   import { toast } from 'svelte-sonner';
@@ -86,6 +85,38 @@
   });
 
   /**
+   * Text inputs bind to local `$state`, not `params`: Runed resyncs its cache from `page.url` when each debounced `goto` lands,
+   * which reverts keystrokes typed during the debounce window and jumps the caret. URL is read once on mount and written one-way.
+   */
+  let textInput = $state<DebouncedText>(
+    untrack(() => ({
+      name: params.name,
+      effectText: params.effectText,
+      pendulumText: params.pendulumText,
+      regexEffectSearch: params.regexEffectSearch,
+      regexPendulumSearch: params.regexPendulumSearch,
+      regexEffectFlags: params.regexEffectFlags,
+      regexPendulumFlags: params.regexPendulumFlags,
+    })),
+  );
+
+  $effect(() => {
+    if (!browser) return;
+    const next = { ...textInput };
+    const current = untrack(() => ({
+      name: params.name,
+      effectText: params.effectText,
+      pendulumText: params.pendulumText,
+      regexEffectSearch: params.regexEffectSearch,
+      regexPendulumSearch: params.regexPendulumSearch,
+      regexEffectFlags: params.regexEffectFlags,
+      regexPendulumFlags: params.regexPendulumFlags,
+    }));
+    if (JSON.stringify(current) === JSON.stringify(next)) return;
+    params.update(next);
+  });
+
+  /**
    * Debounced name/effect. Stat rule tree is debounced into `appliedRuleTree` (see stat debounce effect).
    */
   let debouncedText = $state<DebouncedText>({
@@ -100,15 +131,7 @@
 
   let debouncePrimed = $state(false);
   $effect(() => {
-    const next: DebouncedText = {
-      name: params.name,
-      effectText: params.effectText,
-      pendulumText: params.pendulumText,
-      regexEffectSearch: params.regexEffectSearch,
-      regexPendulumSearch: params.regexPendulumSearch,
-      regexEffectFlags: params.regexEffectFlags,
-      regexPendulumFlags: params.regexPendulumFlags,
-    };
+    const next: DebouncedText = { ...textInput };
 
     if (!debouncePrimed) {
       debouncePrimed = true;
@@ -195,37 +218,22 @@
 
     const resolved = resolveVirtualRuleTree(search.ruleTree, lookups.complexFrameTypes);
 
-    let statQuery: ReturnType<typeof filterNeuronCardIds> | null = null;
-    let statClientEval = false;
     if (statActive) {
       const limResolved = validateRuleLimits(resolved);
       if (!limResolved.ok) {
         toast.error(limResolved.message);
         return [];
       }
-      if (treeNeedsClientEval(resolved)) {
-        statClientEval = true;
-      } else {
-        statQuery = filterNeuronCardIds(resolved);
-      }
     }
 
     const nameQuery = nameActive ? searchSbCards(trimmedName) : null;
 
-    let statIdSet: Set<number> | null = null;
-    if (statActive) {
-      if (statClientEval) {
-        statIdSet = new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id));
-      } else if (statQuery) {
-        const r = await statQuery;
-        if (r.error) {
-          toast.error(`${r.error} — using offline stat filter on loaded cards.`);
-          statIdSet = new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id));
-        } else {
-          statIdSet = new Set(r.ids);
-        }
-      }
-    }
+    /**
+     * Evaluate stat rules against the already-loaded cards. The remote `filterNeuronCardIds` query is capped at
+     * `REMOTE_FETCH_LIMIT` ids, so intersecting its result with the text filters silently dropped most matches
+     * for any broad rule (e.g. card type = Monster).
+     */
+    const statIdSet = statActive ? new Set(cardList.filter((c) => evalRuleNode(toRow(c), resolved)).map((c) => c.id)) : null;
 
     const cardNameMatches = nameQuery ? await nameQuery : [];
     const cardNameIds = cardNameMatches?.map((x) => x.id) ?? [];
@@ -290,53 +298,28 @@
     <div class="flex flex-col gap-4">
       <label class="label flex flex-col gap-1">
         <span class="label-text text-xs font-medium">Card name</span>
-        <input class="input w-full text-sm" type="text" data-testid="database-search-name" bind:value={params.name} placeholder="Search by name…" />
+        <input
+          class="input w-full text-sm"
+          type="text"
+          data-testid="database-search-name"
+          bind:value={textInput.name}
+          placeholder="Search by name…" />
       </label>
 
       <RegexSearchField
         label="Effect text"
         testIdPrefix="database-search-effect"
-        bind:pattern={
-          () => params.effectText,
-          (v) => {
-            params.effectText = v;
-          }
-        }
-        bind:useRegex={
-          () => params.regexEffectSearch,
-          (v) => {
-            params.regexEffectSearch = v;
-          }
-        }
-        bind:flags={
-          () => params.regexEffectFlags,
-          (v) => {
-            params.regexEffectFlags = v;
-          }
-        }
+        bind:pattern={textInput.effectText}
+        bind:useRegex={textInput.regexEffectSearch}
+        bind:flags={textInput.regexEffectFlags}
         placeholder="e.g. destroy.*monster  or  /negate.*activation/i" />
 
       <RegexSearchField
         label="Pendulum text"
         testIdPrefix="database-search-pendulum"
-        bind:pattern={
-          () => params.pendulumText,
-          (v) => {
-            params.pendulumText = v;
-          }
-        }
-        bind:useRegex={
-          () => params.regexPendulumSearch,
-          (v) => {
-            params.regexPendulumSearch = v;
-          }
-        }
-        bind:flags={
-          () => params.regexPendulumFlags,
-          (v) => {
-            params.regexPendulumFlags = v;
-          }
-        }
+        bind:pattern={textInput.pendulumText}
+        bind:useRegex={textInput.regexPendulumSearch}
+        bind:flags={textInput.regexPendulumFlags}
         placeholder="Pendulum effect text…" />
     </div>
 

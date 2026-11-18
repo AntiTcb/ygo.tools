@@ -1,6 +1,6 @@
 <script lang="ts">
   import { updated } from '$app/state';
-  import { APP_UPDATE_EVENT, shouldNotifyAppUpdate, showAppUpdateToast } from '$lib/appUpdate';
+  import { APP_UPDATE_EVENT, shouldNotifyAppUpdate, showAppUpdateToast } from '#lib/appUpdate.js';
   import { toast } from 'svelte-sonner';
 
   let alreadyNotified = false;
@@ -8,9 +8,12 @@
   const notify = () => {
     if (!shouldNotifyAppUpdate(true, alreadyNotified)) return;
     alreadyNotified = true;
-    showAppUpdateToast((message, options) => toast.info(message, options), () => {
-      location.reload();
-    });
+    showAppUpdateToast(
+      (message, options) => toast.info(message, options),
+      () => {
+        location.reload();
+      },
+    );
   };
 
   $effect(() => {

@@ -1,18 +1,20 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": "$app/tsconfig",
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "moduleResolution": "bundler",
-    "types": ["vitest/globals"]
+    "types": ["$app/types", "vitest/globals"],
+    // worker-configuration.d.ts types `mainModule` from the built worker, which pulls the build output
+    // into the program after `pnpm build`; the app has no hand-written JS to check.
+    "checkJs": false,
+    // Mirrors package.json "imports": `svelte-check --tsgo` (4.7.7) leaves `.svelte` files imported
+    // through subpath imports untyped, so it needs these to type-check component props.
+    "paths": {
+      "#lib": ["./src/lib/index.ts"],
+      "#lib/*": ["./src/lib/*"]
+    }
   },
-  "include": ["src/**/*", "src/routes/sitemap[[page]].xml/+server.ts", ".svelte-kit/ambient.d.ts"],
+  "include": ["src/**/*", "src/routes/sitemap[[page]].xml/+server.ts", "worker-configuration.d.ts"],
   "exclude": ["src/workers/**"]
 }

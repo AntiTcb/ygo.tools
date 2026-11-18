@@ -10,12 +10,29 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
+  # Installs once and caches node_modules; the jobs below restore it in parallel instead of reinstalling.
+  install:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          show-progress: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
   check:
     name: svelte-check
+    needs: install
     runs-on: ubuntu-latest
-    env:
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -28,11 +45,28 @@ jobs:
       - name: Run svelte-check
         run: pnpm check
 
+  lint:
+    name: oxlint
+    needs: install
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          show-progress: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Run oxlint
+        run: pnpm lint
+
   unit:
     name: Vitest (unit)
+    needs: install
     runs-on: ubuntu-latest
-    env:
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -47,7 +81,9 @@ jobs:
 
   e2e:
     name: Playwright (E2E)
+    needs: install
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -60,7 +96,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          install-playwright: "true"
+          install-playwright: 'true'
 
       - name: Run end-to-end tests
         run: pnpm test:e2e

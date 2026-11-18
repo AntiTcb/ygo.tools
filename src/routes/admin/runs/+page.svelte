@@ -1,6 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
-  import { invalidateAll } from '$app/navigation';
+  import { refreshAll } from '$app/navigation';
   import { onMount } from 'svelte';
 
   let { data, form } = $props();
@@ -8,7 +8,7 @@
   // Refresh while a run is in progress.
   onMount(() => {
     const timer = setInterval(() => {
-      if (data.runs.some((r) => r.status === 'running')) void invalidateAll();
+      if (data.runs.some((r) => r.status === 'running')) void refreshAll();
     }, 15_000);
     return () => clearInterval(timer);
   });

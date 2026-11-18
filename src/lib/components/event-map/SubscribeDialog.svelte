@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { filtersToParams, type Filters } from '$lib/event-map/filters';
-  import { regionParams, type LngLat, type Region } from '$lib/event-map/types';
+  import { filtersToParams, type Filters } from '#lib/event-map/filters.js';
+  import { regionParams, type LngLat, type Region } from '#lib/event-map/types.js';
   import { Dialog, Portal } from '@skeletonlabs/skeleton-svelte';
   import CalendarSyncIcon from '~icons/lucide/calendar-sync';
   import CheckIcon from '~icons/lucide/check';
