@@ -309,7 +309,7 @@
       </label>
     </div>
     {#each grouped as group (group.tier)}
-      <details class="card p-3" open={group.tier !== 'unrestricted' || grouped.length === 1}>
+      <details class="card p-3" open>
         {#if group.tier}
           <summary class="cursor-pointer">
             <span class="h5">{tierInfo[group.tier].title}</span>
