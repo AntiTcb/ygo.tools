@@ -1,5 +1,6 @@
 import { loadVocab } from '#lib/effect-search/db.js';
 import { decodeQuery, describeQuery, encodeQuery, type SearchQuery } from '#lib/effect-search/query.js';
+import { parseView } from '#lib/effect-search/resultView.js';
 import { runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
 import { parseRequest } from '#lib/server/effectSearch.js';
 import type { PageServerLoad } from './$types';
@@ -12,6 +13,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
   const db = locals.supabase;
   const q = (url.searchParams.get('q') ?? '').trim().slice(0, MAX_REQUEST_LENGTH);
   const rawAst = url.searchParams.get('ast');
+  const view = parseView(url.searchParams);
 
   // Verb/zone lists for the query chips.
   const vocabPromise = loadVocab(db).then(({ vocab }) => vocab);
@@ -39,7 +41,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
   let response: SearchResponse | null = null;
   if (query) {
     try {
-      response = await runSearch(db, query);
+      response = await runSearch(db, query, view);
     } catch (e) {
       console.error('[search] query failed', e);
       notice = 'parse_failed';
@@ -57,6 +59,7 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
     /** True when this load called the model; the page then writes `ast` into the URL. */
     parsedFresh,
     response,
+    view,
     notice,
     unsupportedReason,
     textResults,

@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
   import { describeQueryTarget, encodeQuery, isNamedCard, SELF, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
+  import { FACETS, SORTS, writeView, type Facet, type ResultView, type Sort } from '#lib/effect-search/resultView.js';
 
   let { data } = $props();
   const artworks = getArtworksState();
@@ -38,8 +39,26 @@
     const next = { ...data.query, ...patch };
     const url = new URL(page.url.href);
     url.searchParams.set('ast', encodeQuery(next));
+    url.searchParams.delete('page');
     void goto(url, { reset: false });
   };
+
+  /** Re-show the results with other filters, sort or page. Pages scroll back to the top; the rest keep the scroll. */
+  const setView = (patch: Partial<ResultView>) => {
+    if (!data.ast) return;
+    const url = new URL(page.url.href);
+    url.searchParams.set('ast', data.ast);
+    void goto(writeView(url, { ...data.view, page: 1, ...patch }), { reset: 'page' in patch });
+  };
+
+  const toggleFacet = (facet: Facet, value: string) => {
+    const values = data.view.filters[facet];
+    setView({ filters: { ...data.view.filters, [facet]: values.includes(value) ? values.filter((v) => v !== value) : [...values, value] } });
+  };
+
+  const facetTitle: Record<Facet, string> = { kind: 'Card', attribute: 'Attribute', race: 'Type', archetype: 'Archetype' };
+  const sortLabel: Record<Sort, string> = { relevance: 'Best match', name: 'Name', atk: 'ATK', def: 'DEF', level: 'Level/Rank/Link' };
+  const anyFilter = $derived(Object.values(data.view.filters).some((v) => v.length));
 
   const toggleZone = (zone: string) => {
     if (!data.query) return;
@@ -67,11 +86,12 @@
     match: { title: 'Matches', blurb: '' },
   };
 
+  /** Best-match order shows the page grouped by tier; other sorts show one list (the tier labels each hit). */
   const grouped = $derived.by(() => {
-    if (data.response?.kind !== 'results') return [];
-    return TIERS.map((tier) => ({ tier, hits: data.response!.kind === 'results' ? data.response!.hits.filter((h) => h.tier === tier) : [] })).filter(
-      (g) => g.hits.length,
-    );
+    const r = data.response;
+    if (r?.kind !== 'results') return [];
+    if (r.sort !== 'relevance') return [{ tier: null, hits: r.hits }];
+    return TIERS.map((tier) => ({ tier, hits: r.hits.filter((h) => h.tier === tier) })).filter((g) => g.hits.length);
   });
 
   const noticeText: Record<string, string> = {
@@ -200,16 +220,68 @@
       </div>
     </section>
   {:else if data.response?.kind === 'results'}
-    <p class="px-1 text-sm opacity-80" data-testid="search-count">
-      {data.response.total} cards{#if data.response.truncated}&nbsp;(showing the first {data.response.hits.length}){/if}
-    </p>
+    {@const res = data.response}
+    {#if res.total}
+      <section class="card flex flex-col gap-2 p-3 text-xs" data-testid="search-refine">
+        {#each FACETS as facet (facet)}
+          {@const values = res.facets[facet]}
+          {#if values.length > 1 || values.some((v) => v.selected)}
+            <div class="flex flex-wrap items-baseline gap-1">
+              <span class="w-20 shrink-0 opacity-70">{facetTitle[facet]}:</span>
+              {#if facet === 'archetype'}
+                {#each values.filter((v) => v.selected) as v (v.value)}
+                  <button type="button" class="chip preset-filled-primary-500" onclick={() => toggleFacet(facet, v.value)}
+                    >✕ {v.value} ({v.count})</button>
+                {/each}
+                {#if values.some((v) => !v.selected)}
+                  <select
+                    class="select w-auto py-0 text-xs"
+                    aria-label="Add an archetype filter"
+                    value=""
+                    onchange={(e) => e.currentTarget.value && toggleFacet(facet, e.currentTarget.value)}>
+                    <option value="">add…</option>
+                    {#each values.filter((v) => !v.selected) as v (v.value)}<option value={v.value}>{v.value} ({v.count})</option>{/each}
+                  </select>
+                {/if}
+              {:else}
+                {#each values as v (v.value)}
+                  <button
+                    type="button"
+                    class="chip {v.selected ? 'preset-filled-primary-500' : 'preset-tonal-surface'}"
+                    aria-pressed={v.selected}
+                    onclick={() => toggleFacet(facet, v.value)}>{v.value} <span class="opacity-70">{v.count}</span></button>
+                {/each}
+              {/if}
+            </div>
+          {/if}
+        {/each}
+      </section>
+    {/if}
+    <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-sm">
+      <p class="opacity-80" data-testid="search-count">
+        {#if anyFilter}{res.matching} of {res.total} cards
+          <button type="button" class="anchor ml-1 text-xs" onclick={() => setView({ filters: { kind: [], attribute: [], race: [], archetype: [] } })}
+            >clear filters</button
+          >{:else}{res.total} cards{/if}
+      </p>
+      <label class="flex items-center gap-1 text-xs">
+        Sort
+        <select class="select w-auto py-0 text-xs" value={res.sort} onchange={(e) => setView({ sort: e.currentTarget.value as Sort })}>
+          {#each SORTS as s (s)}<option value={s}>{sortLabel[s]}</option>{/each}
+        </select>
+      </label>
+    </div>
     {#each grouped as group (group.tier)}
       <details class="card p-3" open={group.tier !== 'unrestricted' || grouped.length === 1}>
-        <summary class="cursor-pointer">
-          <span class="h5">{tierInfo[group.tier].title}</span>
-          <span class="text-sm opacity-70"> · {group.hits.length}</span>
-          {#if tierInfo[group.tier].blurb}<p class="text-xs opacity-70">{tierInfo[group.tier].blurb}</p>{/if}
-        </summary>
+        {#if group.tier}
+          <summary class="cursor-pointer">
+            <span class="h5">{tierInfo[group.tier].title}</span>
+            <span class="text-sm opacity-70"> · {group.hits.length}</span>
+            {#if tierInfo[group.tier].blurb}<p class="text-xs opacity-70">{tierInfo[group.tier].blurb}</p>{/if}
+          </summary>
+        {:else}
+          <summary class="cursor-pointer"><span class="h5">Sorted by {sortLabel[res.sort]}</span></summary>
+        {/if}
         <ul class="mt-2 flex flex-col gap-2">
           {#each group.hits as hit (hit.card.id)}
             <li class="border-surface-500/20 flex gap-3 border-t pt-2" data-testid="search-hit">
@@ -221,7 +293,11 @@
                   loading="lazy" />
               {/if}
               <div class="flex min-w-0 flex-col gap-1">
-                <a class="anchor font-semibold" href="/database?name={encodeURIComponent(hit.card.name)}">{hit.card.name}</a>
+                <div>
+                  <a class="anchor font-semibold" href="/database?name={encodeURIComponent(hit.card.name)}">{hit.card.name}</a>
+                  {#if !group.tier}<span class="chip preset-tonal-surface ml-1 py-0 text-[0.65rem]">{tierInfo[hit.tier].title}</span>{/if}
+                  <p class="text-xs opacity-70">{hit.card.typeLine}</p>
+                </div>
                 {#each hit.reasons as r, i (i)}
                   <p class="text-sm">{r.snippet}</p>
                   <p class="text-xs opacity-70">
@@ -235,6 +311,18 @@
         </ul>
       </details>
     {/each}
+    {#if res.pageCount > 1}
+      <nav class="flex items-center justify-center gap-2 text-sm" aria-label="Result pages" data-testid="search-pages">
+        <button type="button" class="btn preset-tonal-surface btn-sm" disabled={res.page <= 1} onclick={() => setView({ page: res.page - 1 })}
+          >Previous</button>
+        <span>Page {res.page} of {res.pageCount}</span>
+        <button
+          type="button"
+          class="btn preset-tonal-surface btn-sm"
+          disabled={res.page >= res.pageCount}
+          onclick={() => setView({ page: res.page + 1 })}>Next</button>
+      </nav>
+    {/if}
   {/if}
 
   {#if data.textResults.length}

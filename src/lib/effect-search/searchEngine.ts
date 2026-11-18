@@ -2,8 +2,10 @@ import { evalRuleNode } from '../db/cardFilterEval';
 import type { ComplexFrameTypeRow, RuleNode } from '../db/cardFilterRule';
 import { resolveVirtualRuleTree } from '../db/cardFilterResolve';
 import { fetchAll, loadCardPool, type CardPool, type Db, type PoolCard } from './db';
+import { cardTypeLine } from './cardText';
 import { humanizeAction, humanizeTrigger } from './humanize';
 import { isNamedCard, SELF, TIERS, type QueryTarget, type SearchQuery, type Tier } from './query';
+import { applyView, parseView, type Facet, type FacetCount, type ResultView, type Sort, type ViewCard } from './resultView';
 import { currentCardName, makeNameResolver } from './store';
 import { targetToRule } from './targetRule';
 import type { TagAction, TagTrigger, Target } from './tagSchema';
@@ -165,17 +167,27 @@ export const classify = (
 // ---------------------------------------------------------------------------
 
 export type SearchHit = {
-  card: { id: number; name: string };
+  card: { id: number; name: string; typeLine: string };
   tier: Tier;
   /** Up to three matching effects: the sentence and a one-line reading of what matched. */
   reasons: { snippet: string; why: string; note: string | null }[];
 };
 
 export type SearchResponse =
-  | { kind: 'results'; hits: SearchHit[]; total: number; truncated: boolean }
+  | {
+      kind: 'results';
+      /** The current page, in display order. */
+      hits: SearchHit[];
+      /** Cards matching the query, before the result filters. */
+      total: number;
+      /** Cards left after the result filters. */
+      matching: number;
+      page: number;
+      pageCount: number;
+      sort: Sort;
+      facets: Record<Facet, FacetCount[]>;
+    }
   | { kind: 'unknown_card'; field: 'target' | 'cause_card'; name: string; suggestions: { id: number; name: string }[] };
-
-const MAX_HITS = 400;
 
 const sideOk = (want: SearchQuery['from_side'], got: string | null) => !want || got === null || got === want || got === 'either' || want === 'either';
 
@@ -214,8 +226,8 @@ type TriggerRow = {
   cause_card_rule: unknown;
 };
 
-/** Runs a parsed query against the stored tags. */
-export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchResponse> => {
+/** Runs a parsed query against the stored tags, then filters, sorts and pages the results per `view`. */
+export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = parseView(new URLSearchParams())): Promise<SearchResponse> => {
   const pool = await getCardPool(db);
   const matcher = new RuleMatcher(pool.complexRows);
 
@@ -225,7 +237,10 @@ export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchRespo
   const verbId = verbs.data.find((v) => v.term === query.verb)?.id;
   const zoneIds = (terms: string[]) => terms.map((t) => zones.data.find((z) => z.term === t)?.id).filter((x): x is number => x !== undefined);
   const zoneTerm = new Map(zones.data.map((z) => [z.id, z.term]));
-  if (verbId === undefined) return { kind: 'results', hits: [], total: 0, truncated: false };
+  if (verbId === undefined) {
+    const { items, ...pageInfo } = applyView<SearchHit>([], (h) => h as never, view);
+    return { kind: 'results', ...pageInfo, hits: items, total: 0, sort: view.sort };
+  }
 
   const target = await resolveTarget(db, pool, query.target, matcher, 'target');
   if (target.kind === 'unknown') return { kind: 'unknown_card', field: 'target', name: target.name, suggestions: target.suggestions };
@@ -371,7 +386,13 @@ export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchRespo
         b.specificity - a.specificity ||
         currentCardName(pool.byId.get(a.cardId)!.name).localeCompare(currentCardName(pool.byId.get(b.cardId)!.name)),
     );
-  const shown = ranked.slice(0, MAX_HITS);
+  const viewCards = new Map<number, ViewCard>(
+    ranked.map(({ cardId }) => {
+      const c = pool.byId.get(cardId)!;
+      return [cardId, { ...c, name: currentCardName(c.name) }];
+    }),
+  );
+  const { items: shown, ...pageInfo } = applyView(ranked, (r) => viewCards.get(r.cardId)!, view);
 
   const effectIds = [...new Set(shown.flatMap((r) => r.effects.slice(0, 3).map((e) => e.effectId)))];
   const snippets = new Map<number, string>();
@@ -386,10 +407,11 @@ export const runSearch = async (db: Db, query: SearchQuery): Promise<SearchRespo
 
   return {
     kind: 'results',
+    ...pageInfo,
     total: ranked.length,
-    truncated: ranked.length > shown.length,
+    sort: view.sort,
     hits: shown.map((r) => ({
-      card: { id: r.cardId, name: currentCardName(pool.byId.get(r.cardId)!.name) },
+      card: { id: r.cardId, name: viewCards.get(r.cardId)!.name, typeLine: cardTypeLine(pool.byId.get(r.cardId)!, pool.frameNames) },
       tier: r.tier,
       reasons: r.effects.slice(0, 3).map((e) => ({ snippet: snippets.get(e.effectId) ?? '', why: e.why, note: e.note })),
     })),
