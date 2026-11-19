@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fixTagEffects, fixTarget, summonFromZones } from './tagFixes';
+import { dropLeakedAlternatives, fixTagEffects, fixTarget, summonFromZones } from './tagFixes';
 import type { TagAction, TagEffect, Target } from './tagSchema';
 
 const lte4 = { op: 'lte', value: 4 } as const;
@@ -82,5 +82,38 @@ describe('fixTagEffects', () => {
     const [a, b] = fixTagEffects([fixable, fine] as unknown as TagEffect[]);
     expect(a!.actions[0]!.from_zones).toEqual(['hand']);
     expect(b).toBe(fine);
+  });
+});
+
+describe('leaked alternatives', () => {
+  const summon = 'Send 1 other face-up card you control to the GY; Special Summon 1 Level 1 FIRE monster from your hand or Deck.';
+  const search =
+    'You can banish this card from your GY, then target 1 "Snake-Eye" or "Diabellstar" monster in your GY; add 1 Level 1 FIRE monster from your Deck to your hand.';
+  const cardText = `${summon} ${search}`;
+  const leaked: Target = {
+    card_types: ['monster'],
+    level: { op: 'eq', value: 1 },
+    any_of: [{ attributes: ['FIRE'] }, { archetypes: ['Snake-Eye'] }, { archetypes: ['Diabellstar'] }],
+  };
+
+  it('drops alternatives printed only in another effect (Original Sinful Spoils - Snake-Eye)', () => {
+    const [e] = fixTagEffects(
+      [{ snippet: summon, actions: [action({ is_self: false, from_zones: ['hand', 'deck'], target: leaked })], triggers: [] }],
+      cardText,
+    );
+    expect(e!.actions[0]!.target).toEqual({ card_types: ['monster'], level: { op: 'eq', value: 1 }, attributes: ['FIRE'] });
+  });
+
+  it('keeps alternatives printed in the effect, and targets where every alternative looks leaked', () => {
+    expect(dropLeakedAlternatives(leaked, search, cardText)).toBe(leaked);
+    const allLeaked: Target = { any_of: [{ archetypes: ['Snake-Eye'] }, { archetypes: ['Diabellstar'] }] };
+    expect(dropLeakedAlternatives(allLeaked, summon, cardText)).toBe(allLeaked);
+  });
+
+  it('leaves effects alone without the card text, or when the snippet is not printed as is', () => {
+    const effect = { snippet: summon, actions: [action({ is_self: false, target: leaked })], triggers: [] };
+    expect(fixTagEffects([effect])[0]).toBe(effect);
+    const cut = { ...effect, snippet: 'Send 1 other face-up card you control to the GY; Special Summon 1 Level 1 FIRE monster from your hand or' };
+    expect(fixTagEffects([cut], 'Something else entirely.')[0]).toBe(cut);
   });
 });

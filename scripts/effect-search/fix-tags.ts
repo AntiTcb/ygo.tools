@@ -6,6 +6,7 @@
 //   pnpm effect-search:fix-tags --dry-run   # counts and a few samples
 //   pnpm effect-search:fix-tags
 import { fetchAll, loadCardPool, loadRelatedIds, storeCardTags } from '../../src/lib/effect-search/db';
+import { repairSnippets } from '../../src/lib/effect-search/snippets';
 import { fixTagEffects } from '../../src/lib/effect-search/tagFixes';
 import type { TagOutput } from '../../src/lib/effect-search/tagSchema';
 import { args, mapPool, supabase } from './lib';
@@ -26,11 +27,15 @@ const tags = (await fetchAll((f, t) =>
   db.from('effect_card_tags').select('card_id,output,locked,model,prompt_version,text_hash,source').order('card_id').range(f, t),
 )) as unknown as Row[];
 
+const pool = await loadCardPool(db);
 const changes = tags.flatMap((t) => {
-  if (!t.output?.effects) return [];
-  const effects = fixTagEffects(t.output.effects);
-  const changed = effects.filter((e, i) => e !== t.output!.effects[i]);
-  return changed.length ? [{ tag: t, output: { ...t.output, effects }, before: t.output.effects.filter((e, i) => e !== effects[i]), changed }] : [];
+  const card = pool.byId.get(t.card_id);
+  if (!t.output?.effects || !card) return [];
+  // Fixed from the snippets as printed (what the tagger stores now); only cards a fix changes are re-stored.
+  const repaired = repairSnippets(t.output.effects, { card: card.effect_text, pendulum: card.pendulum_text });
+  const effects = fixTagEffects(repaired, [card.effect_text, card.pendulum_text].filter(Boolean).join('\n'));
+  const changed = effects.filter((e, i) => e !== repaired[i]);
+  return changed.length ? [{ tag: t, output: { ...t.output, effects }, before: repaired.filter((e, i) => e !== effects[i]), changed }] : [];
 });
 const locked = changes.filter((c) => c.tag.locked);
 const todo = changes.filter((c) => !c.tag.locked && c.tag.source === 'tagger');
@@ -45,7 +50,6 @@ for (const c of changes.slice(0, 4)) {
 if (locked.length) console.log(`Locked cards to fix by hand in /admin: ${locked.map((c) => c.tag.card_id).join(', ')}`);
 if (values['dry-run'] || !todo.length) process.exit(0);
 
-const pool = await loadCardPool(db);
 let done = 0;
 const failed: string[] = [];
 await mapPool(todo, Number(values.concurrency), async (c) => {

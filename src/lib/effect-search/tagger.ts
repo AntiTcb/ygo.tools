@@ -85,7 +85,10 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
     lastContent = content;
     const checked = checkTaggerReply(content, cfg.vocab);
     if ('output' in checked) {
-      const effects = fixTagEffects(repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText }));
+      const effects = fixTagEffects(
+        repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText }),
+        [card.effectText, card.pendulumText].filter(Boolean).join('\n'),
+      );
       return { ok: true, output: { ...checked.output, effects }, attempts: attempt, usage };
     }
     lastError = checked.errors.join('; ');

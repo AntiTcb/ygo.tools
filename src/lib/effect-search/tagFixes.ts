@@ -1,3 +1,5 @@
+import { isPrintedSnippet } from './snippets';
+import { effectText, isLeakedAlternative } from './tagLeaks';
 import type { TagAction, TagEffect, Target, TargetLeaf } from './tagSchema';
 
 /**
@@ -82,8 +84,27 @@ export const summonFromZones = (text: string): string[] | null => {
   return zones.every(Boolean) ? [...new Set(zones as string[])] : null;
 };
 
-const fixAction = (a: TagAction, text: string): TagAction => {
-  const target = fixTarget(a.target, text);
+// ---------------------------------------------------------------------------
+// "Level 1 FIRE or "Snake-Eye" or "Diabellstar" monster": alternatives copied in from another effect.
+// ---------------------------------------------------------------------------
+
+/**
+ * Drops the alternatives of `t.any_of` that are printed elsewhere on the card but not in this effect
+ * (`effect`: its text, see effectText). Unchanged when none or all of them look leaked. The result may hold a
+ * single alternative; fixTarget merges it into the target.
+ */
+export const dropLeakedAlternatives = (t: Target | null, effect: string, cardText: string): Target | null => {
+  if (!t?.any_of) return t;
+  const kept = t.any_of.filter((alt) => !isLeakedAlternative(alt, effect, cardText));
+  return kept.length === t.any_of.length || !kept.length ? t : { ...t, any_of: kept };
+};
+
+/**
+ * `cardText` (all the card's text) enables the fixes that compare an effect with the rest of the card; they
+ * only apply to effects whose snippet is printed as is (a cut-short snippet would make anything look leaked).
+ */
+const fixAction = (a: TagAction, text: string, leakText: string | null, cardText: string): TagAction => {
+  const target = fixTarget(leakText === null ? a.target : dropLeakedAlternatives(a.target, leakText, cardText), text);
   let out = target === a.target ? a : { ...a, target };
   if (a.verb === 'special_summon' && a.is_self && !a.from_zones.length) {
     const zones = summonFromZones(text);
@@ -92,12 +113,14 @@ const fixAction = (a: TagAction, text: string): TagAction => {
   return out;
 };
 
-export const fixTagEffects = <E extends Pick<TagEffect, 'snippet' | 'actions' | 'triggers'>>(effects: E[]): E[] =>
+export const fixTagEffects = <E extends Pick<TagEffect, 'snippet' | 'actions' | 'triggers'>>(effects: E[], cardText: string | null = null): E[] =>
   effects.map((e) => {
-    const actions = e.actions.map((a) => fixAction(a, e.snippet));
+    const leakText = cardText && isPrintedSnippet(cardText, e.snippet) ? effectText(e.snippet, cardText) : null;
+    const fix = (t: Target | null) => fixTarget(leakText === null ? t : dropLeakedAlternatives(t, leakText, cardText!), e.snippet);
+    const actions = e.actions.map((a) => fixAction(a, e.snippet, leakText, cardText ?? ''));
     const triggers = e.triggers.map((t) => {
-      const subject = fixTarget(t.subject, e.snippet);
-      const cause_card = fixTarget(t.cause_card, e.snippet);
+      const subject = fix(t.subject);
+      const cause_card = fix(t.cause_card);
       return subject === t.subject && cause_card === t.cause_card ? t : { ...t, subject, cause_card };
     });
     return actions.every((a, i) => a === e.actions[i]) && triggers.every((t, i) => t === e.triggers[i]) ? e : { ...e, actions, triggers };
