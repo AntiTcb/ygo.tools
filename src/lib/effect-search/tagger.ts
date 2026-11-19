@@ -1,3 +1,4 @@
+import { fixTagEffects } from './tagFixes';
 import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage, type ReasoningEffort } from './ai';
 import { buildUserPrompt, type TaggerCard } from './prompt';
 import { repairSnippets } from './snippets';
@@ -84,7 +85,7 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
     lastContent = content;
     const checked = checkTaggerReply(content, cfg.vocab);
     if ('output' in checked) {
-      const effects = repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText });
+      const effects = fixTagEffects(repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText }));
       return { ok: true, output: { ...checked.output, effects }, attempts: attempt, usage };
     }
     lastError = checked.errors.join('; ');

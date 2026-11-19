@@ -39,7 +39,8 @@
     "effect-search:parser-eval": "dotenv -e .env.local -- tsx scripts/effect-search/parser-eval.ts",
     "effect-search:search": "dotenv -e .env.local -- tsx scripts/effect-search/search.ts",
     "effect-search:repair-snippets": "dotenv -e .env.local -- tsx scripts/effect-search/repair-snippets.ts",
-    "effect-search:search-eval": "dotenv -e .env.local -- tsx scripts/effect-search/search-eval.ts"
+    "effect-search:search-eval": "dotenv -e .env.local -- tsx scripts/effect-search/search-eval.ts",
+    "effect-search:fix-tags": "dotenv -e .env.local -- tsx scripts/effect-search/fix-tags.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261030.1",
