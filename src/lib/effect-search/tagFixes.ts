@@ -115,7 +115,9 @@ const fixAction = (a: TagAction, text: string, leakText: string | null, cardText
 
 export const fixTagEffects = <E extends Pick<TagEffect, 'snippet' | 'actions' | 'triggers'>>(effects: E[], cardText: string | null = null): E[] =>
   effects.map((e) => {
-    const leakText = cardText && isPrintedSnippet(cardText, e.snippet) ? effectText(e.snippet, cardText) : null;
+    // A snippet cut short ('add 1 ' before a quoted name) is still "printed": it must also end a sentence.
+    const whole = /[.!?)"]$/.test(e.snippet.trim()) && Boolean(cardText) && isPrintedSnippet(cardText!, e.snippet);
+    const leakText = whole ? effectText(e.snippet, cardText!) : null;
     const fix = (t: Target | null) => fixTarget(leakText === null ? t : dropLeakedAlternatives(t, leakText, cardText!), e.snippet);
     const actions = e.actions.map((a) => fixAction(a, e.snippet, leakText, cardText ?? ''));
     const triggers = e.triggers.map((t) => {

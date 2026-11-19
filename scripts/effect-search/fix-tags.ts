@@ -3,7 +3,7 @@
 // keeping each card's model and prompt version. No model calls. Tags written since the fixes are fixed
 // as they are created; this fixes the ones from before. Locked (hand-corrected) cards are only listed.
 //
-//   pnpm effect-search:fix-tags --dry-run   # counts and a few samples
+//   pnpm effect-search:fix-tags --dry-run   # counts and a few samples (--samples 50 for more)
 //   pnpm effect-search:fix-tags
 import { fetchAll, loadCardPool, loadRelatedIds, storeCardTags } from '../../src/lib/effect-search/db';
 import { repairSnippets } from '../../src/lib/effect-search/snippets';
@@ -11,7 +11,11 @@ import { fixTagEffects } from '../../src/lib/effect-search/tagFixes';
 import type { TagOutput } from '../../src/lib/effect-search/tagSchema';
 import { args, mapPool, supabase } from './lib';
 
-const { values } = args({ 'dry-run': { type: 'boolean', default: false }, concurrency: { type: 'string', default: '4' } });
+const { values } = args({
+  'dry-run': { type: 'boolean', default: false },
+  concurrency: { type: 'string', default: '4' },
+  samples: { type: 'string', default: '4' },
+});
 const db = supabase();
 
 type Row = {
@@ -42,7 +46,7 @@ const todo = changes.filter((c) => !c.tag.locked && c.tag.source === 'tagger');
 console.log(
   `${tags.length} tagged cards; ${changes.length} to fix (${locked.length} locked, ${changes.length - locked.length - todo.length} hand-made: skipped).`,
 );
-for (const c of changes.slice(0, 4)) {
+for (const c of changes.slice(0, Number(values.samples))) {
   console.log(`  card ${c.tag.card_id}: ${c.changed[0]!.snippet.slice(0, 90)}`);
   console.log(`    before ${JSON.stringify(c.before[0]!.actions.map((a) => [a.from_zones, a.target]))}`);
   console.log(`    after  ${JSON.stringify(c.changed[0]!.actions.map((a) => [a.from_zones, a.target]))}`);

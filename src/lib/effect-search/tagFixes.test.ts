@@ -117,3 +117,30 @@ describe('leaked alternatives', () => {
     expect(fixTagEffects([cut], 'Something else entirely.')[0]).toBe(cut);
   });
 });
+
+describe('leaked alternatives in a cut-short snippet', () => {
+  it('leaves an effect alone when its snippet stops mid-sentence', () => {
+    const text = 'When this card is Normal or Special Summoned: You can add 1 "Majespecter" Spell/Trap from your Deck to your hand.';
+    const target: Target = { any_of: [{ card_types: ['spell', 'trap'] }, { archetypes: ['Majespecter'] }] };
+    const effect = {
+      snippet: 'When this card is Normal or Special Summoned: You can add 1 ',
+      actions: [action({ verb: 'add_to_hand', is_self: false, target })],
+      triggers: [],
+    };
+    expect(fixTagEffects([effect], `${text} You can only use this effect of "Majespecter Fox - Kyubi" once per turn.`)[0]).toBe(effect);
+  });
+});
+
+describe('leaked alternatives: what counts as printed', () => {
+  it('reads "non-Tuner" as printing Tuner, and ignores missing numbers', () => {
+    const text = 'You can Special Summon up to 4 Level 2 non-Tuner monsters from your hand. Cannot be used as Synchro Material.';
+    const t: Target = { level: { op: 'eq', value: 2 }, any_of: [{ exclude_monster_kinds: ['tuner'] }, { exclude_monster_kinds: ['synchro'] }] };
+    // The non-Tuner alternative stays; "Synchro" is only printed outside the effect.
+    expect(dropLeakedAlternatives(t, 'You can Special Summon up to 4 Level 2 non-Tuner monsters from your hand.', text)).toEqual({
+      level: { op: 'eq', value: 2 },
+      any_of: [{ exclude_monster_kinds: ['tuner'] }],
+    });
+    const levels: Target = { any_of: [{ level: { op: 'gte', value: 1 } }, { level: { op: 'gte', value: 3 } }] };
+    expect(dropLeakedAlternatives(levels, 'Add 1 monster.', 'Add 1 monster. Level 3 or higher.')).toBe(levels);
+  });
+});

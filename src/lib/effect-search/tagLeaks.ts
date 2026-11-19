@@ -27,7 +27,8 @@ export type Leak = {
 };
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const word = (s: string) => new RegExp(`(?<![\\w-])${escapeRegExp(s)}(?![\\w])`, 'i');
+/** A whole word: "Warrior" isn't in "Beast-Warrior", but "Tuner" is in "non-Tuner". */
+const word = (s: string) => new RegExp(`(?:(?<![\\w-])|(?<=\\bnon-))${escapeRegExp(s)}(?![\\w])`, 'i');
 const number = (n: number) => new RegExp(`(?<![\\d,])${n}(?![\\d])`);
 
 const MONSTER_KIND_TEXT: Record<string, RegExp | null> = {
@@ -225,7 +226,10 @@ export const effectText = (snippet: string, cardText: string): string => {
  * from another effect, like a GY effect's "Snake-Eye" in the card's Special Summon effect.)
  */
 export const isLeakedAlternative = (alt: TargetLeaf, effect: string, cardText: string): boolean =>
-  targetTerms(alt).some((t) => !t.re.test(effect) && t.re.test(cardText));
+  targetTerms(alt).some((t) => !NUMERIC_FIELDS.has(t.field) && !t.re.test(effect) && t.re.test(cardText));
+
+/** A number missing from an effect proves little ("Level 1 or higher"): not evidence of a leaked alternative. */
+const NUMERIC_FIELDS: ReadonlySet<string> = new Set(['level', 'rank', 'link_rating', 'atk', 'def']);
 
 /** An Extra Deck monster's material line ('"Cyber Dragon" + "Cyber Dragon"'): its first line, with no full stop. */
 export const materialLine = (cardText: string): string | null => {
