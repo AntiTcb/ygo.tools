@@ -8,10 +8,10 @@
 //   pnpm effect-search:search-eval --only mill,draw
 import { MODELS } from '../../src/lib/effect-search/ai';
 import { loadVocab } from '../../src/lib/effect-search/db';
-import { describeQuery, searchQuerySchema, TIERS, type SearchQuery } from '../../src/lib/effect-search/query';
+import { describeQuery, isNamedCard, searchQuerySchema, TIERS, type SearchQuery } from '../../src/lib/effect-search/query';
 import { buildParserJsonSchema, buildParserPrompt, parseSearchRequest } from '../../src/lib/effect-search/queryParser';
 import { parseView } from '../../src/lib/effect-search/resultView';
-import { getCardPool, runSearch } from '../../src/lib/effect-search/searchEngine';
+import { getCardPool, lookupCard, runSearch } from '../../src/lib/effect-search/searchEngine';
 import { isPrintedSnippet } from '../../src/lib/effect-search/snippets';
 import { currentCardName } from '../../src/lib/effect-search/store';
 import { aiClient, args, effortFor, parseModel, supabase } from './lib';
@@ -62,6 +62,8 @@ const check = async (c: SearchCase, query: SearchQuery): Promise<{ problems: str
   const res = await runSearch(db, query, view);
   if (res.kind === 'unknown_card') return { problems: [`unknown card "${res.name}"`], total: 0 };
   const hits = new Map(res.hits.map((h) => [h.card.name.toLowerCase(), h]));
+  // "affected_by" shows the source card's effect; a described source has no one card to check against.
+  const source = query.mode === 'affected_by' ? (isNamedCard(query.source) ? lookupCard(pool, query.source.card) : null) : undefined;
   const problems: string[] = [];
   for (const inc of c.include) {
     const { card, tier } = typeof inc === 'string' ? { card: inc, tier: null } : inc;
@@ -71,7 +73,8 @@ const check = async (c: SearchCase, query: SearchQuery): Promise<{ problems: str
       continue;
     }
     if (tier && TIERS.indexOf(hit.tier) > TIERS.indexOf(tier)) problems.push(`${card} is ${hit.tier}, want ${tier}`);
-    const text = textOf.get(card.toLowerCase())!;
+    if (source === null) continue;
+    const text = textOf.get(currentCardName(source?.name ?? card).toLowerCase())!;
     const unprinted = hit.reasons.filter((r) => !isPrintedSnippet(text, r.snippet));
     problems.push(...unprinted.map((r) => `${card}: snippet not on the card: "${r.snippet.slice(0, 60)}…"`));
   }

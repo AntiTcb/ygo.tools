@@ -88,13 +88,47 @@ export type ResolvedTarget =
   | { kind: 'cards'; rule: RuleNode; cards: PoolCard[]; key: string }
   | { kind: 'unknown'; name: string; suggestions: { id: number; name: string }[] };
 
-/** Exact name (case-insensitive, rename suffix ignored) from the pool, else fuzzy suggestions. */
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * The card a typed name means: the exact name (case-insensitive, rename suffix ignored), else the one
+ * card whose name starts with it ("Mixousia" -> "Mixousia the Confounder"), else the one card whose
+ * name contains it as whole words. Undefined when nothing or several cards fit.
+ */
+export const lookupCard = (pool: CardPool, name: string): PoolCard | undefined => {
+  const typed = name.trim();
+  const id = makeNameResolver(pool.names)(typed);
+  if (id !== undefined) return pool.byId.get(id);
+  const q = typed.toLowerCase().replace(/^"|"$/g, '');
+  if (q.length < 4) return undefined;
+  const e = escapeRegExp(q);
+  for (const re of [new RegExp(`^${e}(?![\\w])`), new RegExp(`(?<![\\w])${e}(?![\\w])`)]) {
+    const hits = pool.cards.filter((c) => re.test(currentCardName(c.name).toLowerCase()));
+    if (hits.length === 1) return hits[0];
+    if (hits.length > 1) return undefined;
+  }
+  return undefined;
+};
+
+/** The query with every card name it names replaced by the full name of the card it resolves to. */
+export const canonicalNames = (pool: CardPool, q: SearchQuery): SearchQuery => {
+  const fix = (t: QueryTarget | null): QueryTarget | null => {
+    if (!isNamedCard(t) || t.card === SELF) return t;
+    const card = lookupCard(pool, t.card);
+    const name = card && currentCardName(card.name);
+    return name && name !== t.card ? { card: name } : t;
+  };
+  const next = { ...q, target: fix(q.target), cause_card: fix(q.cause_card), source: fix(q.source) };
+  return next.target === q.target && next.cause_card === q.cause_card && next.source === q.source ? q : next;
+};
+
+/** Exact or unambiguous name (see lookupCard) from the pool, else fuzzy suggestions. */
 export const resolveTarget = async (db: Db, pool: CardPool, t: QueryTarget | null, matcher: RuleMatcher, key: string): Promise<ResolvedTarget> => {
   if (!t) return { kind: 'none' };
   if (isNamedCard(t)) {
     if (t.card === SELF) return { kind: 'self' };
-    const id = makeNameResolver(pool.names)(t.card.trim());
-    if (id !== undefined) return { kind: 'card', card: pool.byId.get(id)! };
+    const card = lookupCard(pool, t.card);
+    if (card) return { kind: 'card', card };
     const { data } = await db.rpc('search_cards', { card_name: t.card.trim() });
     const seen = new Set<number>();
     const suggestions = (data ?? [])
@@ -193,7 +227,7 @@ export type SearchResponse =
       sort: Sort;
       facets: Record<Facet, FacetCount[]>;
     }
-  | { kind: 'unknown_card'; field: 'target' | 'cause_card'; name: string; suggestions: { id: number; name: string }[] };
+  | { kind: 'unknown_card'; field: 'target' | 'cause_card' | 'source'; name: string; suggestions: { id: number; name: string }[] };
 
 const sideOk = (want: SearchQuery['from_side'], got: string | null) => !want || got === null || got === want || got === 'either' || want === 'either';
 
@@ -232,6 +266,14 @@ type TriggerRow = {
   cause_card_rule: unknown;
 };
 
+const SUMMON_VERBS: ReadonlySet<string> = new Set(['special_summon', 'normal_summon', 'flip_summon']);
+const EXTRA_DECK_KINDS = ['fusion', 'synchro', 'xyz', 'link'] as const;
+
+const makeRuleCheck = (t: Target, pool: CardPool, matcher: RuleMatcher) => {
+  const rule = targetToRule(t, makeNameResolver(pool.names)).rule;
+  return (c: PoolCard) => matcher.matches(rule, c);
+};
+
 /** Runs a parsed query against the stored tags, then filters, sorts and pages the results per `view`. */
 export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = parseView(new URLSearchParams())): Promise<SearchResponse> => {
   const pool = await getCardPool(db);
@@ -243,7 +285,7 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
   const verbId = verbs.data.find((v) => v.term === query.verb)?.id;
   const zoneIds = (terms: string[]) => terms.map((t) => zones.data.find((z) => z.term === t)?.id).filter((x): x is number => x !== undefined);
   const zoneTerm = new Map(zones.data.map((z) => [z.id, z.term]));
-  if (verbId === undefined) {
+  if (verbId === undefined && query.mode !== 'cards') {
     const { items, ...pageInfo } = applyView<SearchHit>([], (h) => h as never, view);
     return { kind: 'results', ...pageInfo, hits: items, total: 0, sort: view.sort };
   }
@@ -255,22 +297,101 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
 
   type Found = { cardId: number; effectId: number; tier: Tier; specificity: number; why: string; note: string | null };
   const found: Found[] = [];
+  /** "cards" mode: cards that match without any effect to show. */
+  const plain: number[] = [];
 
-  if (query.mode === 'does') {
+  const fetchActions = (ownerIds: number[] | null) => {
     const from = zoneIds(query.from_zones);
     const to = zoneIds(query.to_zones);
-    const rows = await fetchAll<ActionRow>((f, t) => {
-      let q = db
-        .from('effect_actions')
-        .select(
-          'card_id,effect_id,is_self,is_cost,target,target_rule,name_refs,contextual,context_note,from_zones,to_zones,from_side,to_side,quantity,stat,stat_mode,stat_amount,stat_amount_note',
-        )
-        .eq('verb_id', verbId);
-      if (from.length) q = q.overlaps('from_zones', from);
-      if (to.length) q = q.overlaps('to_zones', to);
-      if (query.is_cost !== null) q = q.eq('is_cost', query.is_cost);
-      return q.order('id').range(f, t);
-    });
+    const select =
+      'card_id,effect_id,is_self,is_cost,target,target_rule,name_refs,contextual,context_note,from_zones,to_zones,from_side,to_side,quantity,stat,stat_mode,stat_amount,stat_amount_note';
+    const page = (ids: number[] | null) =>
+      fetchAll<ActionRow>((f, t) => {
+        let q = db.from('effect_actions').select(select).eq('verb_id', verbId!);
+        if (ids) q = q.in('card_id', ids);
+        if (from.length) q = q.overlaps('from_zones', from);
+        if (to.length) q = q.overlaps('to_zones', to);
+        if (query.is_cost !== null) q = q.eq('is_cost', query.is_cost);
+        return q.order('id').range(f, t);
+      });
+    if (!ownerIds) return page(null);
+    const chunks: number[][] = [];
+    for (let i = 0; i < ownerIds.length; i += 200) chunks.push(ownerIds.slice(i, i + 200));
+    return Promise.all(chunks.map(page)).then((r) => r.flat());
+  };
+
+  const describeAction = (a: ActionRow) =>
+    humanizeAction({
+      ...a,
+      verb: query.verb,
+      from_zones: a.from_zones.map((z) => zoneTerm.get(z) ?? '?'),
+      to_zones: a.to_zones.map((z) => zoneTerm.get(z) ?? '?'),
+      target: a.target as Target | null,
+      name_refs: a.name_refs.map((id) => currentCardName(pool.byId.get(id)?.name ?? `#${id}`)),
+    } as unknown as TagAction);
+
+  if (query.mode === 'cards') {
+    for (const c of pool.cards) if (passesFilter(c)) plain.push(c.id);
+  } else if (query.mode === 'affected_by') {
+    const source = await resolveTarget(db, pool, query.source, matcher, 'source');
+    if (source.kind === 'unknown') return { kind: 'unknown_card', field: 'source', name: source.name, suggestions: source.suggestions };
+    const owners = source.kind === 'card' ? [source.card] : source.kind === 'cards' ? source.cards : [];
+    const rows = owners.length ? await fetchActions(owners.map((o) => o.id)) : [];
+    // What the verb and zones imply about the affected cards: summons move monsters; the hand and Deck hold no
+    // Extra Deck monsters; the Extra Deck holds nothing else.
+    const isMonster = makeRuleCheck({ card_types: ['monster'] }, pool, matcher);
+    const isExtraDeck = makeRuleCheck({ monster_kinds: [...EXTRA_DECK_KINDS] }, pool, matcher);
+    const isPendulum = makeRuleCheck({ monster_kinds: ['pendulum'] }, pool, matcher);
+    const base = pool.cards.filter((c) => passesFilter(c) && (!SUMMON_VERBS.has(query.verb!) || isMonster(c)));
+    // The action's zones narrow what it can reach: the hand and Deck hold no Extra Deck monsters, and the
+    // Extra Deck holds only those (and face-up Pendulums).
+    const zonePools = new Map<string, PoolCard[]>();
+    const reachable = (zones: string[]) => {
+      const key = [...zones].sort().join(',');
+      let set = zonePools.get(key);
+      if (!set) {
+        set =
+          zones.length && zones.every((z) => z === 'hand' || z === 'deck')
+            ? base.filter((c) => !isExtraDeck(c))
+            : zones.length && zones.every((z) => z === 'extra_deck')
+              ? base.filter((c) => isExtraDeck(c) || isPendulum(c))
+              : base;
+        zonePools.set(key, set);
+      }
+      return set;
+    };
+    const matchSets = new Map<string, PoolCard[]>();
+    const matching = (rule: RuleNode | null, zones: string[]) => {
+      const key = `${[...zones].sort().join(',')}\u0000${JSON.stringify(rule)}`;
+      let set = matchSets.get(key);
+      if (!set) {
+        set = rule ? reachable(zones).filter((c) => matcher.matches(rule, c)) : reachable(zones);
+        matchSets.set(key, set);
+      }
+      return set;
+    };
+    const baseIds = new Set(base.map((c) => c.id));
+    for (const a of rows) {
+      const owner = pool.byId.get(a.card_id)!;
+      if (!sideOk(query.from_side, a.from_side) || !sideOk(query.to_side, a.to_side)) continue;
+      const why = `${owners.length > 1 ? `${currentCardName(owner.name)}: ` : ''}${describeAction(a)}`;
+      const note = a.contextual ? a.context_note : null;
+      const specificity = targetSpecificity(a.target as Target | null);
+      const push = (cardId: number, tier: Tier) => found.push({ cardId, effectId: a.effect_id, tier, specificity, why, note });
+      if (a.is_self) {
+        if (baseIds.has(owner.id)) push(owner.id, 'self');
+        continue;
+      }
+      for (const id of a.name_refs) if (baseIds.has(id)) push(id, 'name');
+      const rule = a.target_rule as RuleNode | null;
+      // An action on named cards only ("Special Summon 1 "Toadally Awesome"") affects nothing else.
+      if (!rule && a.name_refs.length) continue;
+      const tier: Tier = !rule || specificity === 0 ? 'unrestricted' : a.contextual ? 'contextual' : 'property';
+      const zones = a.from_zones.map((z) => zoneTerm.get(z) ?? '?');
+      for (const c of matching(rule, zones)) if (c.id !== owner.id && !a.name_refs.includes(c.id)) push(c.id, tier);
+    }
+  } else if (query.mode === 'does') {
+    const rows = await fetchActions(null);
     for (const a of rows) {
       const owner = pool.byId.get(a.card_id);
       if (!owner || !passesFilter(owner)) continue;
@@ -282,20 +403,12 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
         matcher,
       );
       if (!tier) continue;
-      const action = {
-        ...a,
-        verb: query.verb,
-        from_zones: a.from_zones.map((z) => zoneTerm.get(z) ?? '?'),
-        to_zones: a.to_zones.map((z) => zoneTerm.get(z) ?? '?'),
-        target: a.target as Target | null,
-        name_refs: a.name_refs.map((id) => currentCardName(pool.byId.get(id)?.name ?? `#${id}`)),
-      } as unknown as TagAction;
       found.push({
         cardId: a.card_id,
         effectId: a.effect_id,
         tier,
         specificity,
-        why: humanizeAction(action),
+        why: describeAction(a),
         note: a.contextual ? a.context_note : null,
       });
     }
@@ -307,7 +420,7 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
       let q = db
         .from('effect_triggers')
         .select('card_id,effect_id,subject_is_self,subject,subject_rule,from_zones,subject_side,cause,cause_side,cause_card,cause_card_rule')
-        .eq('event_verb_id', verbId);
+        .eq('event_verb_id', verbId!);
       if (from.length) q = q.overlaps('from_zones', from);
       if (query.cause) q = q.eq('cause', query.cause);
       if (query.subject_is_self) q = q.eq('subject_is_self', true);
@@ -370,9 +483,13 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
 
   // Best tier per card, with that tier's effects as the reasons.
   const byCard = new Map<number, Found[]>();
-  for (const f of found) byCard.set(f.cardId, [...(byCard.get(f.cardId) ?? []), f]);
+  for (const f of found) {
+    const fs = byCard.get(f.cardId);
+    if (fs) fs.push(f);
+    else byCard.set(f.cardId, [f]);
+  }
   const ranked = [...byCard.entries()]
-    .map(([cardId, fs]) => {
+    .map(([cardId, fs]): { cardId: number; tier: Tier; specificity: number; effects: Found[] } => {
       const best = fs.reduce((b, f) => (rank(f.tier) < rank(b) ? f.tier : b), fs[0]!.tier);
       // One effect can hold several matching actions with the same description; show each reason once.
       const seen = new Set<string>();
@@ -385,6 +502,7 @@ export const runSearch = async (db: Db, query: SearchQuery, view: ResultView = p
         });
       return { cardId, tier: best, specificity: effects[0]!.specificity, effects };
     })
+    .concat(plain.map((cardId) => ({ cardId, tier: 'match' as Tier, specificity: 0, effects: [] })))
     // Within a tier, narrower targets first: "Special Summon 1 Aqua monster" before "1 monster".
     .sort(
       (a, b) =>

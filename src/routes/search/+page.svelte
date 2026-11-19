@@ -2,10 +2,11 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
   import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
-  import { encodeQuery, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
+  import { encodeQuery, QUERY_MODES, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
   import { FACETS, SORTS, writeView, type Facet, type ResultView, type Sort } from '#lib/effect-search/resultView.js';
   import { cleanTarget, pickedFrom, pickedTarget, type PickedTarget } from '#lib/effect-search/targetEdit.js';
   import { describeTarget } from '#lib/effect-search/targetRule.js';
+  import CardNameInput from './CardNameInput.svelte';
   import TargetPicker from './TargetPicker.svelte';
 
   let { data } = $props();
@@ -34,6 +35,8 @@
     "monsters that trigger when sent to the GY as a cost for a WATER monster's effect",
     'spells that banish from the opponent graveyard',
     'level 4 or lower monsters that special summon themselves from the hand',
+    'cards that can be summoned by Original Sinful Spoils - Snake-Eye',
+    'Level 1 FIRE monsters',
   ];
 
   /** Re-run with an edited query (no model call: the edited query goes in `ast`). */
@@ -69,12 +72,27 @@
     edit({ from_zones: zones });
   };
 
-  const verbsFor = (mode: SearchQuery['mode']) => (mode === 'does' ? data.vocab.actionVerbs : data.vocab.eventVerbs);
+  const verbsFor = (mode: SearchQuery['mode']) => (mode === 'responds_to' ? data.vocab.eventVerbs : data.vocab.actionVerbs);
+
+  /** Switching modes keeps the verb when the new mode has it, else picks the first one. */
+  const setMode = (mode: SearchQuery['mode']) => {
+    const verbs = verbsFor(mode);
+    const verb = mode === 'cards' || (data.query?.verb && verbs.includes(data.query.verb)) ? (data.query?.verb ?? null) : (verbs[0] ?? null);
+    edit({ mode, verb });
+  };
+
+  const modeLabel: Record<SearchQuery['mode'], string> = {
+    does: 'Cards that do…',
+    responds_to: 'Cards that respond to…',
+    affected_by: "Cards a card's effect can…",
+    cards: 'Just cards (no effect)',
+  };
 
   // The editable card slots of the query.
   const targetSlot = $derived(pickedFrom(data.query?.target ?? null, data.query?.mode === 'responds_to' && data.query.subject_is_self === true));
   const causeSlot = $derived(pickedFrom(data.query?.cause_card ?? null));
   const filterSlot = $derived(pickedFrom(data.query?.card_filter ?? null));
+  const sourceSlot = $derived(pickedFrom(data.query?.source ?? null));
 
   const slotSummary = (p: PickedTarget, selfText = 'the card itself') =>
     p.kind === 'any' ? 'any card' : p.kind === 'self' ? selfText : p.kind === 'card' ? `"${p.card}"` : describeTarget(p.target);
@@ -114,12 +132,13 @@
     <h1 class="h3">Effect Search</h1>
     <p class="text-sm opacity-80">Describe what a card's effect should do. Results come from AI-tagged card effects and can be wrong.</p>
     <form method="GET" class="flex gap-2">
-      <input
-        class="input w-full"
+      <CardNameInput
+        id="search-request"
         name="q"
+        ariaLabel="Search request"
         bind:value={request}
         placeholder="cards that can special summon Toadally Awesome from the GY"
-        maxlength="300" />
+        maxlength={300} />
       <button class="btn preset-filled-primary-500" type="submit">Search</button>
     </form>
     {#if !data.q && !data.query}
@@ -142,19 +161,20 @@
       <p class="font-semibold">{data.description}</p>
       <div class="flex flex-wrap items-end gap-2">
         <label class="flex flex-col text-xs">
-          Effect
-          <select class="select text-sm" value={data.query.mode} onchange={(e) => edit({ mode: e.currentTarget.value as SearchQuery['mode'] })}>
-            <option value="does">does</option>
-            <option value="responds_to">responds to</option>
+          Search for
+          <select class="select text-sm" value={data.query.mode} onchange={(e) => setMode(e.currentTarget.value as SearchQuery['mode'])}>
+            {#each QUERY_MODES as m (m)}<option value={m}>{modeLabel[m]}</option>{/each}
           </select>
         </label>
-        <label class="flex flex-col text-xs">
-          Verb
-          <select class="select text-sm" value={data.query.verb} onchange={(e) => edit({ verb: e.currentTarget.value })}>
-            {#each verbsFor(data.query.mode) as v (v)}<option value={v}>{v.replaceAll('_', ' ')}</option>{/each}
-          </select>
-        </label>
-        {#if data.query.mode === 'does'}
+        {#if data.query.mode !== 'cards'}
+          <label class="flex flex-col text-xs">
+            Verb
+            <select class="select text-sm" value={data.query.verb} onchange={(e) => edit({ verb: e.currentTarget.value })}>
+              {#each verbsFor(data.query.mode) as v (v)}<option value={v}>{v.replaceAll('_', ' ')}</option>{/each}
+            </select>
+          </label>
+        {/if}
+        {#if data.query.mode === 'does' || data.query.mode === 'affected_by'}
           <label class="flex flex-col text-xs">
             Cost
             <select
@@ -182,29 +202,48 @@
             </select>
           </label>
         {/if}
-        <label class="flex flex-col text-xs">
-          Side
-          <select
-            class="select text-sm"
-            value={data.query.from_side ?? 'any'}
-            onchange={(e) => edit({ from_side: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['from_side']) })}>
-            <option value="any">any</option>
-            <option value="you">yours</option>
-            <option value="opponent">opponent's</option>
-            <option value="either">either player's</option>
-          </select>
-        </label>
+        {#if data.query.mode !== 'cards'}
+          <label class="flex flex-col text-xs">
+            Side
+            <select
+              class="select text-sm"
+              value={data.query.from_side ?? 'any'}
+              onchange={(e) => edit({ from_side: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['from_side']) })}>
+              <option value="any">any</option>
+              <option value="you">yours</option>
+              <option value="opponent">opponent's</option>
+              <option value="either">either player's</option>
+            </select>
+          </label>
+        {/if}
       </div>
-      <div class="flex flex-wrap items-center gap-1 text-xs">
-        <span class="opacity-70">From:</span>
-        {#each data.vocab.zones as z (z)}
-          <button
-            type="button"
-            class="chip {data.query.from_zones.includes(z) ? 'preset-filled-primary-500' : 'preset-tonal-surface'}"
-            onclick={() => toggleZone(z)}>{z.replaceAll('_', ' ')}</button>
-        {/each}
-      </div>
-      {#if data.query.mode === 'does'}
+      {#if data.query.mode !== 'cards'}
+        <div class="flex flex-wrap items-center gap-1 text-xs">
+          <span class="opacity-70">From:</span>
+          {#each data.vocab.zones as z (z)}
+            <button
+              type="button"
+              class="chip {data.query.from_zones.includes(z) ? 'preset-filled-primary-500' : 'preset-tonal-surface'}"
+              onclick={() => toggleZone(z)}>{z.replaceAll('_', ' ')}</button>
+          {/each}
+        </div>
+      {/if}
+      {#if data.query.mode === 'cards'}
+        <!-- Only the result filter below. -->
+      {:else if data.query.mode === 'affected_by'}
+        <TargetPicker
+          label="Whose effect"
+          summary={sourceSlot.kind === 'card'
+            ? `"${sourceSlot.card}"`
+            : sourceSlot.kind === 'described'
+              ? `a ${describeTarget(sourceSlot.target)}`
+              : 'choose a card'}
+          value={sourceSlot}
+          kinds={['card', 'described']}
+          archetypes={data.archetypes}
+          idPrefix="source"
+          onchange={(p) => edit({ source: pickedTarget(p) })} />
+      {:else if data.query.mode === 'does'}
         <TargetPicker
           label="Applies to"
           summary={slotSummary(targetSlot, 'the card itself')}

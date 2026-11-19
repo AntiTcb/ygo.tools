@@ -154,4 +154,28 @@ export const SEARCH_CASES: SearchCase[] = [
     include: ['Change of Heart', 'Brain Control'],
     exclude: ['Raigeki'],
   },
+  {
+    id: 'summoned-by-snake-eye-spoils',
+    request: 'Cards that can be summoned by Original Sinful Spoils - Snake-Eye',
+    query: { mode: 'affected_by', verb: 'special_summon', source: { card: 'Original Sinful Spoils - Snake-Eye' } },
+    include: [{ card: 'Snake-Eye Ash', tier: 'property' }, 'Snake-Eyes Poplar'],
+    exclude: ['Infernoid Evil', 'Diabellstar the Black Witch', 'Blue-Eyes White Dragon'],
+    note: 'It summons a Level 1 FIRE monster from the hand or Deck: not Fusion Monsters (Infernoid Evil), nor Diabellstar (reported: no results).',
+  },
+  {
+    id: 'summoned-by-partial-name',
+    request: 'Cards that can be summoned by Mixousia',
+    query: { mode: 'affected_by', verb: 'special_summon', source: { card: 'Mixousia' } },
+    include: ['Elemental HERO Flame Wingman'],
+    exclude: ['Blue-Eyes White Dragon'],
+    note: '"Mixousia" is the only card starting with that name (Mixousia the Confounder): it Fusion Summons any Fusion Monster (reported: no results).',
+  },
+  {
+    id: 'just-cards',
+    request: 'Level 1 FIRE monsters',
+    query: { mode: 'cards', card_filter: { card_types: ['monster'], attributes: ['FIRE'], level: { op: 'eq', value: 1 } } },
+    include: ['Snake-Eye Ash', 'Infernoid Evil'],
+    exclude: ['Blue-Eyes White Dragon', 'Diabellstar the Black Witch'],
+    note: 'No effect asked for: just the cards (reported: no results).',
+  },
 ];

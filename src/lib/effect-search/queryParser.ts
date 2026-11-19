@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import type { ChatClient, ChatUsage, ReasoningEffort } from './ai';
 import type { PromptVocab } from './prompt';
-import { parserReplySchema, type ParserReply, type SearchQueryInput } from './query';
+import { parserReplySchema, type ParserReply, type SearchQuery, type SearchQueryInput } from './query';
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type Vocab } from './tagSchema';
 
 /** Bump when the parser prompt changes (AI Gateway caches by request, so this also busts the cache). */
-export const PARSER_PROMPT_VERSION = 'q2';
+export const PARSER_PROMPT_VERSION = 'q3';
 
 const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported: string } }[] = [
   {
@@ -65,6 +65,26 @@ const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported:
       },
     },
   },
+  {
+    q: 'cards that can be summoned by Original Sinful Spoils - Snake-Eye',
+    reply: { query: { mode: 'affected_by', verb: 'special_summon', source: { card: 'Original Sinful Spoils - Snake-Eye' } } },
+  },
+  {
+    q: 'what WATER monsters can Swap Frog send to the GY',
+    reply: {
+      query: {
+        mode: 'affected_by',
+        verb: 'send_to_gy',
+        source: { card: 'Swap Frog' },
+        card_filter: { card_types: ['monster'], attributes: ['WATER'] },
+      },
+    },
+  },
+  {
+    q: 'Level 1 FIRE monsters',
+    reply: { query: { mode: 'cards', card_filter: { card_types: ['monster'], attributes: ['FIRE'], level: { op: 'eq', value: 1 } } } },
+  },
+  { q: 'Snake-Eye link monsters', reply: { query: { mode: 'cards', card_filter: { archetypes: ['Snake-Eye'], monster_kinds: ['link'] } } } },
   { q: 'what is the best deck right now', reply: { unsupported: 'That is not a question about what card effects do.' } },
 ];
 
@@ -74,16 +94,20 @@ export const buildParserPrompt = (
   vocab: PromptVocab,
 ): string => `You turn a Yu-Gi-Oh! player's search request into a structured query over a database of card effects. Output only JSON.
 
-Return {"query": {...}} or, if the request isn't about what card effects do, {"unsupported": "<short reason>"}.
+Return {"query": {...}} or, if the request isn't about Yu-Gi-Oh! cards or what their effects do, {"unsupported": "<short reason>"}.
 
 ## Query fields
-- mode: "does" when the request is about what a card's effect does ("cards that special summon X"); "responds_to" when it is about what an effect triggers on ("cards that activate when X is destroyed").
-- verb: the action ("does") or event ("responds_to"); one of the verbs below. Searching ("search", "add from deck") is add_to_hand from the deck; "mill" is send_to_gy from the deck; "revive"/"reborn" is special_summon from the GY.
+- mode:
+  - "does": what the results' effects do ("cards that special summon X", "cards that search a Frog").
+  - "responds_to": what the results' effects trigger on ("cards that activate when X is destroyed").
+  - "affected_by": the results are the cards a named card's effects can act on ("cards that can be summoned by X", "what can X search", "targets for X's effect", "what does X special summon"). Put that card in "source" ({"card": "<name as typed>"}, or card fields for a kind of card) and its action in "verb".
+  - "cards": the request only describes cards, with no effect to look for ("Level 1 FIRE monsters", "Spellcaster Fusion monsters", "Frog cards"). Put the description in card_filter and set verb null.
+- verb: the action ("does", "affected_by") or event ("responds_to"); one of the verbs below; null only in "cards" mode. Searching ("search", "add from deck") is add_to_hand from the deck; "mill" is send_to_gy from the deck; "revive"/"reborn" is special_summon from the GY.
 - from_zones / to_zones: zones the request names. from_side: "you" / "opponent" / "either" when the request says whose zone ("your opponent's GY" -> opponent).
 - is_cost: true when the request is specifically about costs ("whose cost...", "by paying/discarding as a cost"); otherwise omit.
 - target ("does"): what the action applies to. A specific card name -> {"card": "<exact name as typed>"}. A description -> card fields (below). The cards themselves ("special summon themselves", "this card") -> {"card": "__self__"}. Omit when the request doesn't restrict it.
 - responds_to: subject_is_self true when the event happens to the card itself ("when this card is sent to the GY"); otherwise "target" describes the card the event happens to. cause ("cost", "effect", "battle", "material") and cause_card describe what caused it.
-- card_filter: constraints on the cards being searched for, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that...").
+- card_filter: constraints on the result cards, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that...").
 - Card fields: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}; level / rank / link_rating / atk / def as {"op": "eq|neq|lt|lte|gt|gte", "value": n}; archetypes (e.g. ["Frog"]); names; exclude_names; exclude_monster_kinds; exclude_attributes / exclude_races ("non-WATER", "non-Machine"); any_of (list of alternatives).
 - Leave out anything the request doesn't say. Prefer the broadest reasonable reading.
 
@@ -106,7 +130,7 @@ export const buildParserJsonSchema = (vocab: Vocab): Record<string, unknown> => 
     if (!node || typeof node !== 'object') return;
     const props = (node as { properties?: Record<string, unknown> }).properties;
     if (props && 'mode' in props && 'verb' in props) {
-      props.verb = { type: 'string', enum: verbs };
+      props.verb = { type: ['string', 'null'], enum: [...verbs, null] };
       props.from_zones = { type: 'array', items: { type: 'string', enum: [...vocab.zones] } };
       props.to_zones = { type: 'array', items: { type: 'string', enum: [...vocab.zones] } };
     }
@@ -120,6 +144,17 @@ export type ParseResult =
   | { ok: true; reply: ParserReply; usage: ChatUsage; ms: number }
   | { ok: false; error: string; usage: ChatUsage | null; ms: number };
 
+/** What makes a query unrunnable (mode/verb/source mismatches), or null. */
+export const queryProblem = (q: SearchQuery, vocab: Vocab): string | null => {
+  if (q.mode === 'cards') return q.card_filter ? null : '"cards" mode needs a card_filter';
+  const action = q.mode !== 'responds_to';
+  if (!q.verb || !(action ? vocab.actionVerbs : vocab.eventVerbs).includes(q.verb)) {
+    return `"${q.verb}" is not ${action ? 'an action' : 'an event'} verb`;
+  }
+  if (q.mode === 'affected_by' && !q.source) return '"affected_by" mode needs a source';
+  return null;
+};
+
 /** Validates a parser reply: shape, and verbs/zones from the vocabulary in the right role. */
 export const checkParserReply = (content: string, vocab: Vocab): { reply: ParserReply } | { error: string } => {
   let raw: unknown;
@@ -132,8 +167,8 @@ export const checkParserReply = (content: string, vocab: Vocab): { reply: Parser
   if (!parsed.success) return { error: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') };
   if ('query' in parsed.data) {
     const q = parsed.data.query;
-    const verbs = q.mode === 'does' ? vocab.actionVerbs : vocab.eventVerbs;
-    if (!verbs.includes(q.verb)) return { error: `"${q.verb}" is not ${q.mode === 'does' ? 'an action' : 'an event'} verb` };
+    const problem = queryProblem(q, vocab);
+    if (problem) return { error: problem };
     const bad = [...q.from_zones, ...q.to_zones].find((z) => !vocab.zones.includes(z));
     if (bad) return { error: `unknown zone "${bad}"` };
   }

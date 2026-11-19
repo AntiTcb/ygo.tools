@@ -1,7 +1,7 @@
 import { loadVocab } from '#lib/effect-search/db.js';
 import { decodeQuery, describeQuery, encodeQuery, type SearchQuery } from '#lib/effect-search/query.js';
 import { parseView } from '#lib/effect-search/resultView.js';
-import { archetypeNames, runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
+import { archetypeNames, canonicalNames, getCardPool, runSearch, textSearch, type SearchResponse } from '#lib/effect-search/searchEngine.js';
 import { parseRequest } from '#lib/server/effectSearch.js';
 import type { PageServerLoad } from './$types';
 
@@ -41,6 +41,8 @@ export const load: PageServerLoad = async ({ locals, url, getClientAddress }) =>
   let response: SearchResponse | null = null;
   if (query) {
     try {
+      // "Mixousia" -> "Mixousia the Confounder", so the heading and the link show what was searched.
+      query = canonicalNames(await getCardPool(db), query);
       response = await runSearch(db, query, view);
     } catch (e) {
       console.error('[search] query failed', e);

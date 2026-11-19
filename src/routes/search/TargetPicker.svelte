@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PickedTarget } from '#lib/effect-search/targetEdit.js';
   import { untrack } from 'svelte';
+  import CardNameInput from './CardNameInput.svelte';
   import TargetFields from './TargetFields.svelte';
 
   type Kind = PickedTarget['kind'];
@@ -69,7 +70,9 @@
           e.preventDefault();
           if (cardName.trim()) onchange({ kind: 'card', card: cardName.trim() });
         }}>
-        <input class="input w-64 text-sm" aria-label="{label}: card name" placeholder="Card name" bind:value={cardName} />
+        <div class="w-72">
+          <CardNameInput id="{idPrefix}-card" whole class="text-sm" ariaLabel="{label}: card name" placeholder="Card name" bind:value={cardName} />
+        </div>
         <button class="btn preset-tonal-surface btn-sm" type="submit" disabled={!cardName.trim()}>Set</button>
       </form>
     {:else if kind === 'described'}

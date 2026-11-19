@@ -17,10 +17,19 @@ export type QueryTarget = z.infer<typeof queryTargetSchema>;
 
 export const isNamedCard = (t: QueryTarget | null | undefined): t is { card: string } => Boolean(t && 'card' in t && typeof t.card === 'string');
 
+export const QUERY_MODES = ['does', 'responds_to', 'affected_by', 'cards'] as const;
+export type QueryMode = (typeof QUERY_MODES)[number];
+
 export const searchQuerySchema = z.object({
-  /** "does": cards whose effects perform the verb; "responds_to": cards whose effects trigger on it. */
-  mode: z.enum(['does', 'responds_to']),
-  verb: z.string().min(1),
+  /**
+   * - does: cards whose effects perform the verb
+   * - responds_to: cards whose effects trigger on it
+   * - affected_by: cards that the `source` card's effects can perform the verb on ("cards X can summon")
+   * - cards: just the cards `card_filter` describes (no verb)
+   */
+  mode: z.enum(QUERY_MODES),
+  /** Required except in "cards" mode. */
+  verb: z.string().min(1).nullable().default(null),
   from_zones: z.array(z.string()).default([]),
   to_zones: z.array(z.string()).default([]),
   from_side: sideSchema.nullable().default(null),
@@ -35,6 +44,8 @@ export const searchQuerySchema = z.object({
   cause: z.enum(['cost', 'effect', 'battle', 'material']).nullable().default(null),
   /** responds_to: the card whose effect/summon caused the event ("a WATER monster's effect"). */
   cause_card: queryTargetSchema.nullable().default(null),
+  /** affected_by: the card (or kind of card) whose effects perform the verb. */
+  source: queryTargetSchema.nullable().default(null),
   /** Constraints on the result cards themselves ("WATER monsters that..."). */
   card_filter: z
     .lazy(() => targetSchema)
@@ -108,9 +119,15 @@ export const describeQueryTarget = (t: QueryTarget | null): string =>
   !t ? 'any card' : isNamedCard(t) ? (t.card === SELF ? 'itself' : `"${t.card}"`) : describeTarget(t);
 
 export const describeQuery = (q: SearchQuery): string => {
-  const verb = q.verb.replaceAll('_', ' ');
+  const verb = (q.verb ?? 'do something to').replaceAll('_', ' ');
   const zones = q.from_zones.length ? ` from ${q.from_side ? `${sideWord[q.from_side]} ` : ''}${q.from_zones.join('/')}` : '';
   const filter = q.card_filter ? `${describeTarget(q.card_filter)}s` : 'Cards';
+  if (q.mode === 'cards') return q.card_filter ? filter : 'All cards';
+  if (q.mode === 'affected_by') {
+    const cost = q.is_cost === true ? ' as a cost' : '';
+    const source = q.source ? (isNamedCard(q.source) ? `"${q.source.card}"` : `a ${describeTarget(q.source)}`) : 'a card';
+    return `${filter} that ${source} can ${verb}${zones}${cost}`;
+  }
   if (q.mode === 'does') {
     const cost = q.is_cost === true ? ' as a cost' : q.is_cost === false ? ' (not as a cost)' : '';
     return `${filter} that ${verb} ${describeQueryTarget(q.target)}${zones}${cost}`;
