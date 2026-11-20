@@ -2,7 +2,7 @@
 // Compares models for /search query parsing on a fixed set of requests: validity, the fields that
 // matter most (mode, verb, zones, target kind, cost) and latency.
 //
-//   pnpm effect-search:parser-eval --models kimi-k2.6,gemma-4-26b,gpt-oss-20b
+//   pnpm effect-search:parser-eval --models glm-5.3,gemma-4-26b,gpt-oss-20b
 import { MODELS, usageCostUsd } from '../../src/lib/effect-search/ai';
 import { loadVocab } from '../../src/lib/effect-search/db';
 import { isNamedCard, type SearchQuery } from '../../src/lib/effect-search/query';
@@ -51,7 +51,7 @@ const score = (q: SearchQuery, e: Expect): string[] => {
   return misses;
 };
 
-const { values } = args({ models: { type: 'string', default: 'kimi-k2.6,gemma-4-26b,gpt-oss-20b,llama-3.3-70b-fast,glm-5.3-flash' } });
+const { values } = args({ models: { type: 'string', default: 'glm-5.3,gemma-4-26b,gpt-oss-20b,llama-3.3-70b-fast' } });
 const db = supabase();
 const { prompt, vocab } = await loadVocab(db);
 const systemPrompt = buildParserPrompt(prompt);

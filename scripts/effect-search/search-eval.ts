@@ -19,7 +19,7 @@ import { SEARCH_CASES, type SearchCase } from './search-cases';
 
 const { values } = args({
   parse: { type: 'boolean', default: false },
-  model: { type: 'string', default: 'kimi-k2.6' },
+  model: { type: 'string', default: 'glm-5.3' },
   only: { type: 'string' },
 });
 const db = supabase();

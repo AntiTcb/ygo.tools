@@ -6,7 +6,7 @@ import { normalizeTagOutput, repairTagOutput, tagOutputSchema, validateTagOutput
 
 export type TaggerConfig = {
   client: ChatClient;
-  /** Workers AI model id, e.g. `@cf/moonshotai/kimi-k2.6`. */
+  /** Workers AI model id, e.g. `@cf/zai-org/glm-5.3`. */
   model: string;
   systemPrompt: string;
   jsonSchema: Record<string, unknown>;

@@ -17,7 +17,7 @@ import { TAG_PROMPT_VERSION } from '../../src/lib/effect-search/prompt';
 import { aiClient, args, mapPool, parseModel, parseReasoning, supabase, taggerConfig, usd, writeReport } from './lib';
 
 const { values } = args({
-  model: { type: 'string', default: 'kimi-k2.6' },
+  model: { type: 'string', default: 'glm-5.3' },
   reasoning: { type: 'string' },
   limit: { type: 'string' },
   concurrency: { type: 'string', default: '4' },

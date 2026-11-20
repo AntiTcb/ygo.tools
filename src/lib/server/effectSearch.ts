@@ -12,7 +12,7 @@ import {
 import { env } from 'cloudflare:workers';
 
 /** Default /search parser model; override with SEARCH_PARSER_MODEL (a key of MODELS). */
-const DEFAULT_PARSER_MODEL: ModelKey = 'kimi-k2.6';
+const DEFAULT_PARSER_MODEL: ModelKey = 'glm-5.3';
 
 /** Parses are cached by AI Gateway for a day: the same request text gets the same query. */
 const GATEWAY_CACHE_SECONDS = 24 * 60 * 60;

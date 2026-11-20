@@ -161,29 +161,23 @@ export type ReasoningEffort = 'none' | 'low' | 'high';
 /** `reasoning`: the effort levels the model accepts, cheapest first (false = not a reasoning model). */
 export type ModelInfo = { id: string; input: number; cachedInput: number | null; output: number; reasoning: false | readonly ReasoningEffort[] };
 
+// Deprecated by Workers AI on 2026-11-20 and removed: kimi-k2.6, glm-5.3-flash, deepseek-v4-pro, deepseek-v4-flash.
 export const MODELS = {
-  'kimi-k2.6': { id: '@cf/moonshotai/kimi-k2.6', input: 0.95, cachedInput: 0.16, output: 4.0, reasoning: ['none', 'high'] },
-  'glm-5.3': { id: '@cf/zai-org/glm-5.3', input: 1.4, cachedInput: 0.26, output: 4.4, reasoning: ['none', 'high'] },
-  'glm-5.3-flash': { id: '@cf/zai-org/glm-5.3-flash', input: 0.15, cachedInput: 0.03, output: 0.5, reasoning: ['none', 'high'] },
+  // Reasoning is mandatory: Workers AI turns 'none' into 'max'.
+  'glm-5.3': { id: '@cf/zai-org/glm-5.3', input: 1.4, cachedInput: 0.26, output: 4.4, reasoning: ['low', 'high'] },
+  'deepseek-v4.1-flash': {
+    id: '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
+    input: 0.3,
+    cachedInput: 0.006,
+    output: 1.2,
+    reasoning: ['none', 'low', 'high'],
+  },
+  'inkling-2-small': { id: '@cf/thinkingmachines/inkling-2-small', input: 0.3, cachedInput: 0.1, output: 1.0, reasoning: ['none', 'low', 'high'] },
   'glm-4.7-flash': { id: '@cf/zai-org/glm-4.7-flash', input: 0.06, cachedInput: null, output: 0.4, reasoning: false },
-  'deepseek-v4-pro': {
-    id: '@cf/deepseek-ai/deepseek-v4-pro-0813',
-    input: 1.32,
-    cachedInput: 0.044,
-    output: 3.96,
-    reasoning: ['none', 'low', 'high'],
-  },
-  'deepseek-v4-flash': {
-    id: '@cf/deepseek-ai/deepseek-v4-flash-0731',
-    input: 0.44,
-    cachedInput: 0.014,
-    output: 1.32,
-    reasoning: ['none', 'low', 'high'],
-  },
   'gpt-oss-120b': { id: '@cf/openai/gpt-oss-120b', input: 0.35, cachedInput: null, output: 0.75, reasoning: ['low', 'high'] },
   // Smaller/faster models, candidates for /search query parsing (latency matters more than depth).
   'gpt-oss-20b': { id: '@cf/openai/gpt-oss-20b', input: 0.2, cachedInput: null, output: 0.3, reasoning: ['low', 'high'] },
-  'gemma-4-26b': { id: '@cf/google/gemma-4-26b-a4b-it', input: 0.1, cachedInput: null, output: 0.3, reasoning: false },
+  'gemma-4-26b': { id: '@cf/google/gemma-4-26b-a4b-it', input: 0.1, cachedInput: 0.05, output: 0.3, reasoning: false },
   'llama-3.3-70b-fast': { id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', input: 0.293, cachedInput: null, output: 2.253, reasoning: false },
 } as const satisfies Record<string, ModelInfo>;
 

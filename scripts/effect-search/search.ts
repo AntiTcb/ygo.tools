@@ -12,7 +12,7 @@ import { aiClient, args, effortFor, parseModel, supabase } from './lib';
 
 const { values, positionals } = args({
   ast: { type: 'string' },
-  model: { type: 'string', default: 'kimi-k2.6' },
+  model: { type: 'string', default: 'glm-5.3' },
   limit: { type: 'string', default: '25' },
 });
 const db = supabase();

@@ -6,7 +6,7 @@ const optional = (value: string | undefined) => value || undefined;
 export const variables = defineEnvVars({
   SUPABASE_SERVICE_KEY: { schema: optional, description: 'Supabase service role key; hooks.server.ts throws when unset.' },
   ADMIN_DASHBOARD_PASS: { schema: optional, description: 'Shared /admin password (unset = dashboard disabled).' },
-  SEARCH_PARSER_MODEL: { schema: optional, description: '/search query parser model, a key of MODELS in effect-search/ai.ts (default kimi-k2.6).' },
+  SEARCH_PARSER_MODEL: { schema: optional, description: '/search query parser model, a key of MODELS in effect-search/ai.ts (default glm-5.3).' },
   AI_GATEWAY_ID: { schema: optional, description: 'AI Gateway for /search model calls (default "default").' },
   CLOUDFLARE_ACCOUNT_ID: {
     schema: optional,
