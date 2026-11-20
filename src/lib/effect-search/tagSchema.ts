@@ -87,6 +87,9 @@ export const targetLeafSchema = z.object({
   card_types: z.array(z.enum(CARD_TYPES)).min(1).optional(),
   attributes: z.array(z.enum(ATTRIBUTE_NAMES)).min(1).optional(),
   races: z.array(z.enum(RACE_NAMES)).min(1).optional(),
+  /** "non-WATER" / "non-Machine": imply a monster. */
+  exclude_attributes: z.array(z.enum(ATTRIBUTE_NAMES)).min(1).optional(),
+  exclude_races: z.array(z.enum(RACE_NAMES)).min(1).optional(),
   monster_kinds: z.array(z.enum(MONSTER_KINDS)).min(1).optional(),
   exclude_monster_kinds: z.array(z.enum(MONSTER_KINDS)).min(1).optional(),
   spell_trap_types: z.array(z.enum(SPELL_TRAP_TYPES)).min(1).optional(),
@@ -195,8 +198,14 @@ export type Vocab = {
 export const AMOUNT_VERBS: ReadonlySet<string> = new Set(['inflict_damage', 'gain_lp', 'lose_lp']);
 
 /** Problems the zod schema can't see: terms outside the vocabulary, inconsistent fields. */
+/** No printed card has this many effects; more means the generation looped. */
+export const MAX_EFFECTS = 20;
+
 export const validateTagOutput = (out: TagOutput, vocab: Vocab): string[] => {
   const errors: string[] = [];
+  if (out.effects.length > MAX_EFFECTS) {
+    return [`${out.effects.length} effects: one entry per effect of the card, and no card has more than ${MAX_EFFECTS}`];
+  }
   const actions = new Set(vocab.actionVerbs);
   const events = new Set(vocab.eventVerbs);
   const zones = new Set(vocab.zones);

@@ -32,6 +32,12 @@ export const HOME_TOOL_TILES = sortTilesByTitle([
     title: 'Event Map',
     description: 'Find Regionals, OTS Championships and YCS events weekend by weekend, with driving directions and calendar export.',
   },
+  {
+    href: '/search',
+    title: 'Effect Search',
+    description:
+      'Describe what a card should do in plain English, like “special summon Toadally Awesome from the GY”, and find the cards whose effects can.',
+  },
 ] as const satisfies readonly HomeTile[]);
 
 export const HOME_HELPER_TILES = sortTilesByTitle([

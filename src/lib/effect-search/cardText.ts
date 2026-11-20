@@ -4,7 +4,7 @@ import { formatAtkDef } from '../db/cardStatDisplay';
 import type { TaggerCard } from './prompt';
 import { RACE_IDS } from './tagSchema';
 
-const RACE_BY_ID = new Map<number, string>(Object.entries(RACE_IDS).map(([name, id]) => [id, name]));
+export const RACE_BY_ID = new Map<number, string>(Object.entries(RACE_IDS).map(([name, id]) => [id, name]));
 
 /** The `neuron_cards` columns the tagger needs. */
 export type TaggableCardRow = {

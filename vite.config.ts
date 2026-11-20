@@ -26,7 +26,9 @@ export default defineConfig({
     sveltekit({
       preprocess: vitePreprocess(),
       compilerOptions: { experimental: { async: true } },
-      adapter: adapter(),
+      // No remote bindings in local dev/tests/CI (Workers AI would need Cloudflare credentials): /search falls
+      // back to the REST API with a token from .env.local.
+      adapter: adapter({ platformProxy: { remoteBindings: false } }),
       experimental: { remoteFunctions: true },
       // Poll every minute (Kit 3 defaults to an hour) so AppUpdateNotifier shows its toast soon after a deploy.
       version: { name: pkg.version, pollInterval: 60_000 },

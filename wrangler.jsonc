@@ -36,6 +36,20 @@
             "migrations_dir": "migrations/event-map",
         },
     ],
+    // /search: Workers AI parses requests into queries; at most 10 model calls per minute per IP.
+    "ai": {
+        "binding": "AI",
+    },
+    "ratelimits": [
+        {
+            "name": "SEARCH_PARSE_LIMITER",
+            "namespace_id": "1101",
+            "simple": {
+                "limit": 10,
+                "period": 60,
+            },
+        },
+    ],
     // Effect search tagging runs (/admin "Run now"); the Workflow lives in wrangler.effect-tagger.jsonc.
     "workflows": [
         {
@@ -67,6 +81,20 @@
                 "database_name": "ygo-event-map",
                 "database_id": "1a994d9b-4a5a-4ae9-9e09-13fc61927345",
                 "migrations_dir": "migrations/event-map",
+            },
+        ],
+        // Workers AI and a rate limiter of their own, so preview traffic doesn't count against production.
+        "ai": {
+            "binding": "AI",
+        },
+        "ratelimits": [
+            {
+                "name": "SEARCH_PARSE_LIMITER",
+                "namespace_id": "1102",
+                "simple": {
+                    "limit": 10,
+                    "period": 60,
+                },
             },
         ],
         // No EFFECT_TAG_WORKFLOW: a Preview would start real tagging runs, so /admin shows "Run now" as unavailable.

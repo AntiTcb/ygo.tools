@@ -1,9 +1,10 @@
 /* oxlint-disable no-console -- CLI script: progress output is the point. */
 // Scores tagger models against the gold set (effect_gold_cards).
 //
-//   pnpm effect-search:eval                                   # kimi-k2.6, reasoning none
-//   pnpm effect-search:eval --models kimi-k2.6,glm-5.3-flash --reasoning none,high
+//   pnpm effect-search:eval                                   # glm-5.3, reasoning none
+//   pnpm effect-search:eval --models glm-5.3,gpt-oss-120b --reasoning none,high
 //   pnpm effect-search:eval --file --cards "Swap Frog,Mirror Force" --verbose
+//   pnpm effect-search:eval --max-tokens 16000                # raise the output cap (reasoning counts toward it)
 //
 // --file reads scripts/effect-search/gold.json instead of the DB. Each model/reasoning pair tags every
 // gold card; the report (scores, worst cards, field errors, cost per card and a full-backfill
@@ -19,13 +20,14 @@ import { tagOutputSchema, type TagOutput } from '../../src/lib/effect-search/tag
 import { aiClient, args, effortFor, mapPool, parseModel, parseReasoning, supabase, taggerConfig, usd, writeReport } from './lib';
 
 const { values } = args({
-  models: { type: 'string', default: 'kimi-k2.6' },
+  models: { type: 'string', default: 'glm-5.3' },
   reasoning: { type: 'string', default: 'none' },
   file: { type: 'boolean', default: false },
   cards: { type: 'string' },
   limit: { type: 'string' },
   concurrency: { type: 'string', default: '4' },
   verbose: { type: 'boolean', default: false },
+  'max-tokens': { type: 'string' },
 });
 
 const db = supabase();
@@ -60,7 +62,11 @@ for (const model of models) {
   // Effective levels, deduplicated (a model that rejects 'none' runs at its cheapest level instead).
   for (const reasoning of new Set(reasonings.map((r) => effortFor(model, r)))) {
     const label = `${model}${reasoning ? ` (reasoning ${reasoning})` : ''}`;
-    const cfg = { ...(await taggerConfig(db, model, reasoning)), client };
+    const cfg = {
+      ...(await taggerConfig(db, model, reasoning)),
+      client,
+      ...(values['max-tokens'] ? { maxTokens: Number(values['max-tokens']) } : {}),
+    };
     console.log(`\n${label}: tagging ${gold.length} gold cards...`);
     const started = Date.now();
     const perCard = await mapPool(gold, Number(values.concurrency), async (g) => {

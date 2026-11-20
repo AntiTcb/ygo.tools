@@ -62,8 +62,8 @@ describe('tagCard', () => {
 
 describe('usageCostUsd', () => {
   it('prices cached input separately', () => {
-    // 200 uncached * 0.95 + 800 cached * 0.16 + 100 out * 4.00, per million
-    expect(usageCostUsd(MODELS['kimi-k2.6'], usage)).toBeCloseTo((200 * 0.95 + 800 * 0.16 + 100 * 4) / 1e6, 12);
+    // 200 uncached * 1.40 + 800 cached * 0.26 + 100 out * 4.40, per million
+    expect(usageCostUsd(MODELS['glm-5.3'], usage)).toBeCloseTo((200 * 1.4 + 800 * 0.26 + 100 * 4.4) / 1e6, 12);
   });
 });
 
