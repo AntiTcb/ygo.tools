@@ -20,7 +20,16 @@
     amount = value?.value ?? null;
   });
 
+  // Typing applies after a short pause (no need to leave the field); leaving it or Enter applies at once.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const commitSoon = () => {
+    clearTimeout(timer);
+    timer = setTimeout(commit, 600);
+  };
+  $effect(() => () => clearTimeout(timer));
+
   const commit = () => {
+    clearTimeout(timer);
     const n = typeof amount === 'number' ? Math.trunc(amount) : Number.NaN;
     if (Number.isNaN(n)) {
       if (value) onchange(null);
@@ -42,5 +51,6 @@
     aria-label={label}
     placeholder="any"
     bind:value={amount}
+    oninput={commitSoon}
     onchange={commit} />
 </label>

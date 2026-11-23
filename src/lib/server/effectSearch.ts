@@ -13,6 +13,8 @@ import { env } from 'cloudflare:workers';
 
 /** Default /search parser model; override with SEARCH_PARSER_MODEL (a key of MODELS). */
 const DEFAULT_PARSER_MODEL: ModelKey = 'glm-5.3';
+/** Tried when the parser model is rate limited or down (its per-minute limit is low, and the tagger shares it). */
+const FALLBACK_PARSER_MODEL: ModelKey = 'deepseek-v4.1-flash';
 
 /** Parses are cached by AI Gateway for a day: the same request text gets the same query. */
 const GATEWAY_CACHE_SECONDS = 24 * 60 * 60;
@@ -50,6 +52,11 @@ const parserPrompt = (db: Db) => {
   return promptCache.value;
 };
 
+const cheapestEffort = (key: ModelKey) => {
+  const levels = MODELS[key].reasoning;
+  return levels ? levels[0] : undefined;
+};
+
 export type ParseOutcome = ParseResult | { ok: false; error: 'rate_limited' | 'unavailable'; usage: null; ms: 0 };
 
 /** Turns a search request into a query, enforcing the per-IP rate limit on model calls. */
@@ -70,6 +77,8 @@ export const parseRequest = async (db: Db, request: string, clientIp: string): P
     systemPrompt: `${prompt.systemPrompt}\n\n(prompt ${PARSER_PROMPT_VERSION})`,
     jsonSchema: prompt.jsonSchema,
     vocab: prompt.vocab,
-    reasoningEffort: model.reasoning ? model.reasoning[0] : undefined,
+    reasoningEffort: cheapestEffort(key),
+    fallbacks:
+      key === FALLBACK_PARSER_MODEL ? [] : [{ model: MODELS[FALLBACK_PARSER_MODEL].id, reasoningEffort: cheapestEffort(FALLBACK_PARSER_MODEL) }],
   });
 };

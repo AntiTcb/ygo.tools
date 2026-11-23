@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import type { ChatClient, ChatUsage, ReasoningEffort } from './ai';
+import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatUsage, type ReasoningEffort } from './ai';
 import type { PromptVocab } from './prompt';
 import { parserReplySchema, type ParserReply, type SearchQuery, type SearchQueryInput } from './query';
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type Vocab } from './tagSchema';
 
 /** Bump when the parser prompt changes (AI Gateway caches by request, so this also busts the cache). */
-export const PARSER_PROMPT_VERSION = 'q3';
+export const PARSER_PROMPT_VERSION = 'q4';
 
 const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported: string } }[] = [
   {
@@ -85,6 +85,26 @@ const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported:
     reply: { query: { mode: 'cards', card_filter: { card_types: ['monster'], attributes: ['FIRE'], level: { op: 'eq', value: 1 } } } },
   },
   { q: 'Snake-Eye link monsters', reply: { query: { mode: 'cards', card_filter: { archetypes: ['Snake-Eye'], monster_kinds: ['link'] } } } },
+  {
+    q: 'Send Level 2 Aqua monsters to the GY',
+    reply: { query: { mode: 'does', verb: 'send_to_gy', target: { card_types: ['monster'], races: ['Aqua'], level: { op: 'eq', value: 2 } } } },
+  },
+  { q: 'cards that draw 2', reply: { query: { mode: 'does', verb: 'draw' } } },
+  {
+    q: 'spells that destroy all monsters on the field',
+    reply: {
+      query: { mode: 'does', verb: 'destroy', from_zones: ['field'], target: { card_types: ['monster'] }, card_filter: { card_types: ['spell'] } },
+    },
+  },
+  { q: 'cards that mill', reply: { query: { mode: 'does', verb: 'send_to_gy', from_zones: ['deck'] } } },
+  {
+    q: 'Blue-Eyes support',
+    reply: { query: { mode: 'does', verb: 'add_to_hand', target: { archetypes: ['Blue-Eyes'] } } },
+  },
+  {
+    q: "monsters that can't be destroyed by battle",
+    reply: { unsupported: 'Protection effects (cannot be destroyed, unaffected) are not searchable yet.' },
+  },
   { q: 'what is the best deck right now', reply: { unsupported: 'That is not a question about what card effects do.' } },
 ];
 
@@ -110,6 +130,11 @@ Return {"query": {...}} or, if the request isn't about Yu-Gi-Oh! cards or what t
 - card_filter: constraints on the result cards, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that...").
 - Card fields: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}; level / rank / link_rating / atk / def as {"op": "eq|neq|lt|lte|gt|gte", "value": n}; archetypes (e.g. ["Frog"]); names; exclude_names; exclude_monster_kinds; exclude_attributes / exclude_races ("non-WATER", "non-Machine"); any_of (list of alternatives).
 - Leave out anything the request doesn't say. Prefer the broadest reasonable reading.
+- Always produce a query when any part of the request maps to the fields: keep the parts you can express and drop the rest (a number of cards, "once per turn", "all"/"every"), rather than answering unsupported.
+- archetypes and names are only for real Yu-Gi-Oh! archetypes and card names, never ordinary words ("all", "token", "support").
+- "<archetype> support": cards that search or add that archetype (add_to_hand with that archetype as target).
+- "cards like <card>" / "<card> but ...": search for what that card's main effect does ("cards like Pot of Greed" -> draw).
+- "unsupported" is only for requests that aren't about cards at all, or that are only about something no verb covers (protection, continuous restrictions).
 
 ## Verbs
 ${termList(vocab.verbs)}
@@ -182,41 +207,64 @@ export type ParserConfig = {
   jsonSchema: Record<string, unknown>;
   vocab: Vocab;
   reasoningEffort?: ReasoningEffort;
+  /**
+   * Models to try, in order, when `model` is rate limited, down, or keeps returning invalid output. The
+   * model's own capacity limits are low enough that busy minutes (or a tagging run) hit them.
+   */
+  fallbacks?: { model: string; reasoningEffort?: ReasoningEffort }[];
+  /** Wait before retrying a transient error (rate limit, 5xx) on the same model. */
+  retryDelayMs?: number;
 };
 
-/** One model call (plus one corrective retry on invalid output). */
+type Attempt = { reply: ParserReply } | { error: string };
+
+/**
+ * Parses a request: each model gets one corrective retry on invalid output and one retry on a transient
+ * error; then the next fallback model gets a go. An "unsupported" reply is an answer, not a failure.
+ */
 export const parseSearchRequest = async (request: string, cfg: ParserConfig): Promise<ParseResult> => {
   const started = Date.now();
-  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-    { role: 'system', content: cfg.systemPrompt },
-    { role: 'user', content: `Request: ${request.trim().slice(0, 300)}\nOutput:` },
-  ];
   let usage: ChatUsage | null = null;
-  let lastError = '';
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const res = await cfg.client({
-        model: cfg.model,
-        messages,
-        jsonSchema: { name: 'search_query', schema: cfg.jsonSchema },
-        reasoningEffort: cfg.reasoningEffort,
-        temperature: 0,
-        maxTokens: 1200,
-      });
-      usage = usage
-        ? {
-            promptTokens: usage.promptTokens + res.usage.promptTokens,
-            cachedPromptTokens: usage.cachedPromptTokens + res.usage.cachedPromptTokens,
-            completionTokens: usage.completionTokens + res.usage.completionTokens,
-          }
-        : res.usage;
-      const checked = checkParserReply(res.content, cfg.vocab);
-      if ('reply' in checked) return { ok: true, reply: checked.reply, usage, ms: Date.now() - started };
-      lastError = checked.error;
-      messages.push({ role: 'assistant', content: res.content }, { role: 'user', content: `Invalid: ${checked.error}. Return corrected JSON.` });
-    } catch (e) {
-      return { ok: false, error: (e as Error).message, usage, ms: Date.now() - started };
+  const models = [{ model: cfg.model, reasoningEffort: cfg.reasoningEffort }, ...(cfg.fallbacks ?? [])];
+  const errors: string[] = [];
+
+  const tryModel = async (model: string, reasoningEffort: ReasoningEffort | undefined): Promise<Attempt> => {
+    const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+      { role: 'system', content: cfg.systemPrompt },
+      { role: 'user', content: `Request: ${request.trim().slice(0, 300)}\nOutput:` },
+    ];
+    let lastError = '';
+    let transientRetried = false;
+    for (let attempt = 1; attempt <= 2;) {
+      try {
+        const res = await cfg.client({
+          model,
+          messages,
+          jsonSchema: { name: 'search_query', schema: cfg.jsonSchema },
+          reasoningEffort,
+          temperature: 0,
+          maxTokens: 1200,
+        });
+        usage = addUsage(usage ?? ZERO_USAGE, res.usage);
+        const checked = checkParserReply(res.content, cfg.vocab);
+        if ('reply' in checked) return checked;
+        lastError = checked.error;
+        messages.push({ role: 'assistant', content: res.content }, { role: 'user', content: `Invalid: ${checked.error}. Return corrected JSON.` });
+        attempt++;
+      } catch (e) {
+        lastError = (e as Error).message;
+        if (!(e instanceof ChatError && e.retryable) || transientRetried) return { error: lastError };
+        transientRetried = true;
+        await new Promise((r) => setTimeout(r, cfg.retryDelayMs ?? 400));
+      }
     }
+    return { error: lastError };
+  };
+
+  for (const m of models) {
+    const res = await tryModel(m.model, m.reasoningEffort);
+    if ('reply' in res) return { ok: true, reply: res.reply, usage: usage ?? ZERO_USAGE, ms: Date.now() - started };
+    errors.push(`${m.model}: ${res.error}`);
   }
-  return { ok: false, error: lastError, usage, ms: Date.now() - started };
+  return { ok: false, error: errors.join(' | '), usage, ms: Date.now() - started };
 };

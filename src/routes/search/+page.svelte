@@ -2,7 +2,7 @@
   import { afterNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
   import { getArtworksState } from '#lib/assets/yugiohArtwork.svelte.js';
-  import { encodeQuery, QUERY_MODES, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
+  import { encodeQuery, QUERY_MODES, searchQuerySchema, TIERS, type SearchQuery, type Tier } from '#lib/effect-search/query.js';
   import { FACETS, SORTS, writeView, type Facet, type ResultView, type Sort } from '#lib/effect-search/resultView.js';
   import { cleanTarget, pickedFrom, pickedTarget, type PickedTarget } from '#lib/effect-search/targetEdit.js';
   import { describeTarget } from '#lib/effect-search/targetRule.js';
@@ -39,10 +39,27 @@
     'Level 1 FIRE monsters',
   ];
 
-  /** Re-run with an edited query (no model call: the edited query goes in `ast`). */
+  /**
+   * The query the editor shows: the parsed one, or (when the request couldn't be parsed) a blank one to build
+   * the search by hand.
+   */
+  let draft = $state<SearchQuery | null>(null);
+  $effect.pre(() => {
+    // A new request or result starts the hand-built query over.
+    void data.q;
+    void data.query;
+    draft = null;
+  });
+  const query = $derived<SearchQuery | null>(data.query ?? draft ?? (data.q ? searchQuerySchema.parse({ mode: 'does' }) : null));
+
+  /** Re-run with an edited query (no model call: the edited query goes in `ast`). Waits for a verb first. */
   const edit = (patch: Partial<SearchQuery>) => {
-    if (!data.query) return;
-    const next = { ...data.query, ...patch };
+    if (!query) return;
+    const next = { ...query, ...patch };
+    if (next.mode !== 'cards' && !next.verb) {
+      draft = next;
+      return;
+    }
     const url = new URL(page.url.href);
     url.searchParams.set('ast', encodeQuery(next));
     url.searchParams.delete('page');
@@ -67,8 +84,8 @@
   const anyFilter = $derived(Object.values(data.view.filters).some((v) => v.length));
 
   const toggleZone = (zone: string) => {
-    if (!data.query) return;
-    const zones = data.query.from_zones.includes(zone) ? data.query.from_zones.filter((z) => z !== zone) : [...data.query.from_zones, zone];
+    if (!query) return;
+    const zones = query.from_zones.includes(zone) ? query.from_zones.filter((z) => z !== zone) : [...query.from_zones, zone];
     edit({ from_zones: zones });
   };
 
@@ -77,7 +94,7 @@
   /** Switching modes keeps the verb when the new mode has it, else picks the first one. */
   const setMode = (mode: SearchQuery['mode']) => {
     const verbs = verbsFor(mode);
-    const verb = mode === 'cards' || (data.query?.verb && verbs.includes(data.query.verb)) ? (data.query?.verb ?? null) : (verbs[0] ?? null);
+    const verb = mode === 'cards' || (query?.verb && verbs.includes(query.verb)) ? (query?.verb ?? null) : (verbs[0] ?? null);
     edit({ mode, verb });
   };
 
@@ -89,10 +106,10 @@
   };
 
   // The editable card slots of the query.
-  const targetSlot = $derived(pickedFrom(data.query?.target ?? null, data.query?.mode === 'responds_to' && data.query.subject_is_self === true));
-  const causeSlot = $derived(pickedFrom(data.query?.cause_card ?? null));
-  const filterSlot = $derived(pickedFrom(data.query?.card_filter ?? null));
-  const sourceSlot = $derived(pickedFrom(data.query?.source ?? null));
+  const targetSlot = $derived(pickedFrom(query?.target ?? null, query?.mode === 'responds_to' && query.subject_is_self === true));
+  const causeSlot = $derived(pickedFrom(query?.cause_card ?? null));
+  const filterSlot = $derived(pickedFrom(query?.card_filter ?? null));
+  const sourceSlot = $derived(pickedFrom(query?.source ?? null));
 
   const slotSummary = (p: PickedTarget, selfText = 'the card itself') =>
     p.kind === 'any' ? 'any card' : p.kind === 'self' ? selfText : p.kind === 'card' ? `"${p.card}"` : describeTarget(p.target);
@@ -121,8 +138,8 @@
   const noticeText: Record<string, string> = {
     rate_limited: 'Too many searches in a short time. Wait a minute, or edit the query below (edits don’t count).',
     unavailable: 'Search parsing is unavailable right now.',
-    parse_failed: "Couldn't turn that into a query. Showing a plain text search instead.",
-    unsupported: "That doesn't look like a question about card effects. Showing a plain text search instead.",
+    parse_failed: "Couldn't turn that into a query. Build it below, or see the plain text matches further down.",
+    unsupported: "That doesn't look like a question about card effects. Build a query below, or see the plain text matches further down.",
     bad_link: 'That search link is invalid or out of date. Try searching again.',
   };
 </script>
@@ -141,7 +158,7 @@
         maxlength={300} />
       <button class="btn preset-filled-primary-500" type="submit">Search</button>
     </form>
-    {#if !data.q && !data.query}
+    {#if !data.q && !query}
       <div class="flex flex-wrap gap-1 text-xs">
         {#each examples as ex (ex)}
           <a class="chip preset-tonal-surface" href="?q={encodeURIComponent(ex)}">{ex}</a>
@@ -156,30 +173,35 @@
     </section>
   {/if}
 
-  {#if data.query}
+  {#if query}
     <section class="card flex flex-col gap-2 p-3 text-sm" data-testid="search-query">
-      <p class="font-semibold">{data.description}</p>
+      {#if data.query}
+        <p class="font-semibold">{data.description}</p>
+      {:else}
+        <p class="font-semibold">Build the search yourself: pick a verb, and the results update as you edit.</p>
+      {/if}
       <div class="flex flex-wrap items-end gap-2">
         <label class="flex flex-col text-xs">
           Search for
-          <select class="select text-sm" value={data.query.mode} onchange={(e) => setMode(e.currentTarget.value as SearchQuery['mode'])}>
+          <select class="select text-sm" value={query.mode} onchange={(e) => setMode(e.currentTarget.value as SearchQuery['mode'])}>
             {#each QUERY_MODES as m (m)}<option value={m}>{modeLabel[m]}</option>{/each}
           </select>
         </label>
-        {#if data.query.mode !== 'cards'}
+        {#if query.mode !== 'cards'}
           <label class="flex flex-col text-xs">
             Verb
-            <select class="select text-sm" value={data.query.verb} onchange={(e) => edit({ verb: e.currentTarget.value })}>
-              {#each verbsFor(data.query.mode) as v (v)}<option value={v}>{v.replaceAll('_', ' ')}</option>{/each}
+            <select class="select text-sm" value={query.verb ?? ''} onchange={(e) => edit({ verb: e.currentTarget.value })}>
+              {#if !query.verb}<option value="" disabled>choose…</option>{/if}
+              {#each verbsFor(query.mode) as v (v)}<option value={v}>{v.replaceAll('_', ' ')}</option>{/each}
             </select>
           </label>
         {/if}
-        {#if data.query.mode === 'does' || data.query.mode === 'affected_by'}
+        {#if query.mode === 'does' || query.mode === 'affected_by'}
           <label class="flex flex-col text-xs">
             Cost
             <select
               class="select text-sm"
-              value={data.query.is_cost === null ? 'any' : String(data.query.is_cost)}
+              value={query.is_cost === null ? 'any' : String(query.is_cost)}
               onchange={(e) => edit({ is_cost: e.currentTarget.value === 'any' ? null : e.currentTarget.value === 'true' })}>
               <option value="any">either</option>
               <option value="true">only as a cost</option>
@@ -187,12 +209,12 @@
             </select>
           </label>
         {/if}
-        {#if data.query.mode === 'responds_to'}
+        {#if query.mode === 'responds_to'}
           <label class="flex flex-col text-xs">
             Caused by
             <select
               class="select text-sm"
-              value={data.query.cause ?? 'any'}
+              value={query.cause ?? 'any'}
               onchange={(e) => edit({ cause: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['cause']) })}>
               <option value="any">anything</option>
               <option value="cost">a cost</option>
@@ -202,12 +224,12 @@
             </select>
           </label>
         {/if}
-        {#if data.query.mode !== 'cards'}
+        {#if query.mode !== 'cards'}
           <label class="flex flex-col text-xs">
             Side
             <select
               class="select text-sm"
-              value={data.query.from_side ?? 'any'}
+              value={query.from_side ?? 'any'}
               onchange={(e) => edit({ from_side: e.currentTarget.value === 'any' ? null : (e.currentTarget.value as SearchQuery['from_side']) })}>
               <option value="any">any</option>
               <option value="you">yours</option>
@@ -217,20 +239,20 @@
           </label>
         {/if}
       </div>
-      {#if data.query.mode !== 'cards'}
+      {#if query.mode !== 'cards'}
         <div class="flex flex-wrap items-center gap-1 text-xs">
           <span class="opacity-70">From:</span>
           {#each data.vocab.zones as z (z)}
             <button
               type="button"
-              class="chip {data.query.from_zones.includes(z) ? 'preset-filled-primary-500' : 'preset-tonal-surface'}"
+              class="chip {query.from_zones.includes(z) ? 'preset-filled-primary-500' : 'preset-tonal-surface'}"
               onclick={() => toggleZone(z)}>{z.replaceAll('_', ' ')}</button>
           {/each}
         </div>
       {/if}
-      {#if data.query.mode === 'cards'}
+      {#if query.mode === 'cards'}
         <!-- Only the result filter below. -->
-      {:else if data.query.mode === 'affected_by'}
+      {:else if query.mode === 'affected_by'}
         <TargetPicker
           label="Whose effect"
           summary={sourceSlot.kind === 'card'
@@ -243,7 +265,7 @@
           archetypes={data.archetypes}
           idPrefix="source"
           onchange={(p) => edit({ source: pickedTarget(p) })} />
-      {:else if data.query.mode === 'does'}
+      {:else if query.mode === 'does'}
         <TargetPicker
           label="Applies to"
           summary={slotSummary(targetSlot, 'the card itself')}

@@ -178,4 +178,20 @@ export const SEARCH_CASES: SearchCase[] = [
     exclude: ['Blue-Eyes White Dragon', 'Diabellstar the Black Witch'],
     note: 'No effect asked for: just the cards (reported: no results).',
   },
+  {
+    id: 'send-level-2-aqua',
+    request: 'Send Level 2 Aqua monsters to the GY',
+    query: { mode: 'does', verb: 'send_to_gy', target: { card_types: ['monster'], races: ['Aqua'], level: { op: 'eq', value: 2 } } },
+    include: ['Swap Frog', 'Foolish Burial'],
+    exclude: ['Dragon Shrine'],
+    note: 'Reported: the parse dropped the Level 2 Aqua target and returned every card that sends from the Deck.',
+  },
+  {
+    id: 'draw-2',
+    request: 'cards that draw 2',
+    query: { mode: 'does', verb: 'draw' },
+    include: ['Pot of Greed', 'Graceful Charity'],
+    exclude: [],
+    note: 'The number of cards is not a query field; it was parsed as "draw itself".',
+  },
 ];
