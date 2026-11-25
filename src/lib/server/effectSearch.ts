@@ -9,6 +9,7 @@ import {
   PARSER_PROMPT_VERSION,
   type ParseResult,
 } from '#lib/effect-search/queryParser.js';
+import { getCardPool, parserNamedCards } from '#lib/effect-search/searchEngine.js';
 import { env } from 'cloudflare:workers';
 
 /** Default /search parser model; override with SEARCH_PARSER_MODEL (a key of MODELS). */
@@ -69,7 +70,7 @@ export const parseRequest = async (db: Db, request: string, clientIp: string): P
   }
   const key = SEARCH_PARSER_MODEL && isModelKey(SEARCH_PARSER_MODEL) ? SEARCH_PARSER_MODEL : DEFAULT_PARSER_MODEL;
   const model = MODELS[key];
-  const prompt = await parserPrompt(db);
+  const [prompt, pool] = await Promise.all([parserPrompt(db), getCardPool(db)]);
   return parseSearchRequest(request, {
     client,
     model: model.id,
@@ -77,6 +78,7 @@ export const parseRequest = async (db: Db, request: string, clientIp: string): P
     systemPrompt: `${prompt.systemPrompt}\n\n(prompt ${PARSER_PROMPT_VERSION})`,
     jsonSchema: prompt.jsonSchema,
     vocab: prompt.vocab,
+    namedCards: parserNamedCards(pool, request),
     reasoningEffort: cheapestEffort(key),
     fallbacks:
       key === FALLBACK_PARSER_MODEL ? [] : [{ model: MODELS[FALLBACK_PARSER_MODEL].id, reasoningEffort: cheapestEffort(FALLBACK_PARSER_MODEL) }],

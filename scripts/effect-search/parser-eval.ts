@@ -7,6 +7,7 @@ import { MODELS, usageCostUsd } from '../../src/lib/effect-search/ai';
 import { loadVocab } from '../../src/lib/effect-search/db';
 import { isNamedCard, type SearchQuery } from '../../src/lib/effect-search/query';
 import { buildParserJsonSchema, buildParserPrompt, parseSearchRequest } from '../../src/lib/effect-search/queryParser';
+import { getCardPool, parserNamedCards } from '../../src/lib/effect-search/searchEngine';
 import { aiClient, args, effortFor, parseModel, supabase, usd } from './lib';
 
 type Expect = Partial<Pick<SearchQuery, 'mode' | 'verb' | 'from_zones' | 'is_cost' | 'subject_is_self' | 'cause'>> & {
@@ -57,6 +58,7 @@ const { prompt, vocab } = await loadVocab(db);
 const systemPrompt = buildParserPrompt(prompt);
 const jsonSchema = buildParserJsonSchema(vocab);
 const client = aiClient();
+const pool = await getCardPool(db);
 
 const rows = [];
 for (const key of values.models.split(',').map((m) => parseModel(m.trim()))) {
@@ -73,6 +75,7 @@ for (const key of values.models.split(',').map((m) => parseModel(m.trim()))) {
       systemPrompt,
       jsonSchema,
       vocab,
+      namedCards: parserNamedCards(pool, request),
       reasoningEffort: effortFor(key, undefined),
     });
     times.push(res.ms);

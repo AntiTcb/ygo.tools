@@ -194,4 +194,12 @@ export const SEARCH_CASES: SearchCase[] = [
     exclude: [],
     note: 'The number of cards is not a query field; it was parsed as "draw itself".',
   },
+  {
+    id: 'like-called-by-the-grave',
+    request: 'cards like called by the grave',
+    query: { mode: 'does', verb: 'banish', from_zones: ['gy'], from_side: 'opponent' },
+    include: ['Called by the Grave', 'D.D. Crow'],
+    exclude: ['Pot of Greed'],
+    note: 'Was unsupported: the parser had only the card name. It now gets the text of cards a request names.',
+  },
 ];

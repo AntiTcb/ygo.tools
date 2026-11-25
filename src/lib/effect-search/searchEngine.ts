@@ -4,6 +4,7 @@ import { resolveVirtualRuleTree } from '../db/cardFilterResolve';
 import { fetchAll, loadCardPool, type CardPool, type Db, type PoolCard } from './db';
 import { cardTypeLine } from './cardText';
 import { humanizeAction, humanizeTrigger } from './humanize';
+import type { NamedCard } from './queryParser';
 import { isNamedCard, SELF, TIERS, type QueryTarget, type SearchQuery, type Tier } from './query';
 import { applyView, parseView, type Facet, type FacetCount, type ResultView, type Sort, type ViewCard } from './resultView';
 import { currentCardName, makeNameResolver } from './store';
@@ -109,6 +110,71 @@ export const lookupCard = (pool: CardPool, name: string): PoolCard | undefined =
   }
   return undefined;
 };
+
+/** Lowercase words only, so "harpies feather duster" matches "Harpie's Feather Duster". */
+const foldName = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/['’"“”]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+
+// Card names that are also everyday search words ("Reinforcements", "Destruction") would match all the
+// time: a one-word name must be long to count.
+const MIN_ONE_WORD_NAME = 9;
+const MAX_NAMED_CARDS = 3;
+
+const foldedNames = new WeakMap<CardPool, { folded: string; card: PoolCard }[]>();
+const foldedNamesOf = (pool: CardPool) => {
+  let list = foldedNames.get(pool);
+  if (!list) {
+    list = pool.cards
+      .map((card) => ({ folded: foldName(currentCardName(card.name)), card }))
+      .filter(({ folded }) => folded.includes(' ') || folded.length >= MIN_ONE_WORD_NAME)
+      // Longest first, so "Pot of Greed" beats a card named "Greed" inside it.
+      .sort((a, b) => b.folded.length - a.folded.length);
+    foldedNames.set(pool, list);
+  }
+  return list;
+};
+
+/**
+ * Cards whose full names appear in a request, longest names first (at most a few). Their text goes to
+ * the query parser, so "cards like Pot of Greed" can be read as a draw search.
+ */
+export const namedCardsIn = (pool: CardPool, request: string): PoolCard[] => {
+  let text = ` ${foldName(request)} `;
+  const found: PoolCard[] = [];
+  for (const { folded, card } of foldedNamesOf(pool)) {
+    const at = text.indexOf(` ${folded} `);
+    if (at < 0) continue;
+    found.push(card);
+    if (found.length === MAX_NAMED_CARDS) break;
+    // Blank the match out so a shorter name inside it ("Dark Magician" in "Dark Magician Girl") doesn't count.
+    text = `${text.slice(0, at + 1)}${'#'.repeat(folded.length)}${text.slice(at + 1 + folded.length)}`;
+  }
+  if (found.length) return found;
+  // A shortened name after "like"/"by"/"can"/"does" ("cards like ash blossom", "what can Mixousia summon"):
+  // the longest run of words there that names exactly one card (see lookupCard).
+  for (const m of request.matchAll(/\b(?:like|by|can|does)\s+([^,.;?!]+)/gi)) {
+    const words = m[1]!.trim().split(/\s+/).slice(0, 6);
+    for (let n = words.length; n > 0; n--) {
+      const phrase = words.slice(0, n).join(' ');
+      if (n === 1 && phrase.length < 6) break;
+      const card = lookupCard(pool, phrase);
+      if (card) return [card];
+    }
+  }
+  return found;
+};
+
+/** The cards a request names, as reference text for the query parser. */
+export const parserNamedCards = (pool: CardPool, request: string): NamedCard[] =>
+  namedCardsIn(pool, request).map((c) => ({
+    name: currentCardName(c.name),
+    typeLine: cardTypeLine(c, pool.frameNames),
+    text: [c.effect_text, c.pendulum_text].filter(Boolean).join(' / '),
+  }));
 
 /** The query with every card name it names replaced by the full name of the card it resolves to. */
 export const canonicalNames = (pool: CardPool, q: SearchQuery): SearchQuery => {

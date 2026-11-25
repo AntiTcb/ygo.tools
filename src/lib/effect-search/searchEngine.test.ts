@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { CardFilterRow } from '../db/cardFilterEval';
 import type { ComplexFrameTypeRow } from '../db/cardFilterRule';
-import type { PoolCard } from './db';
-import { classify, RuleMatcher, targetSpecificity, type ResolvedTarget } from './searchEngine';
+import type { CardPool, PoolCard } from './db';
+import { classify, namedCardsIn, RuleMatcher, targetSpecificity, type ResolvedTarget } from './searchEngine';
+import { buildNameIndex } from './store';
 import { targetToRule } from './targetRule';
 import type { Target } from './tagSchema';
 
@@ -116,5 +117,38 @@ describe('classify', () => {
   it('gives "match" when the query has no target, and nothing for unknown names', () => {
     expect(classify({ kind: 'none' }, effect({ attributes: ['FIRE'] }), matcher)).toBe('match');
     expect(classify({ kind: 'unknown', name: 'Toadaly', suggestions: [] }, effect(null), matcher)).toBeNull();
+  });
+});
+
+describe('namedCardsIn', () => {
+  const cards = [
+    card('Pot of Greed', { id: 1 }),
+    card('Dark Magician', { id: 2 }),
+    card('Dark Magician Girl', { id: 3 }),
+    card("Harpie's Feather Duster", { id: 4 }),
+    card('Ash Blossom & Joyous Spring', { id: 5 }),
+    card('Barrier', { id: 6 }),
+    card('Greed', { id: 7 }),
+  ];
+  const pool = { cards, byId: new Map(cards.map((c) => [c.id, c])), names: buildNameIndex(cards) } as CardPool;
+  const names = (request: string) => namedCardsIn(pool, request).map((c) => c.name);
+
+  it('finds full names, ignoring case and punctuation', () => {
+    expect(names('cards like pot of greed')).toEqual(['Pot of Greed']);
+    expect(names('cards like harpies feather duster')).toEqual(["Harpie's Feather Duster"]);
+  });
+
+  it('prefers the longest name and skips names inside it', () => {
+    expect(names('Dark Magician Girl support')).toEqual(['Dark Magician Girl']);
+    expect(names('cards like Pot of Greed and Dark Magician')).toEqual(['Dark Magician', 'Pot of Greed']);
+  });
+
+  it('ignores short one-word names that are ordinary words', () => {
+    expect(names('cards that make a barrier')).toEqual([]);
+  });
+
+  it('reads a shortened name after "like"', () => {
+    expect(names('cards like ash blossom')).toEqual(['Ash Blossom & Joyous Spring']);
+    expect(names('cards that draw 2')).toEqual([]);
   });
 });

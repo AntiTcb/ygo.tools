@@ -7,7 +7,7 @@ import { MODELS } from '../../src/lib/effect-search/ai';
 import { loadVocab } from '../../src/lib/effect-search/db';
 import { describeQuery, searchQuerySchema, type SearchQuery } from '../../src/lib/effect-search/query';
 import { buildParserJsonSchema, buildParserPrompt, parseSearchRequest } from '../../src/lib/effect-search/queryParser';
-import { runSearch, textSearch } from '../../src/lib/effect-search/searchEngine';
+import { getCardPool, parserNamedCards, runSearch, textSearch } from '../../src/lib/effect-search/searchEngine';
 import { aiClient, args, effortFor, parseModel, supabase } from './lib';
 
 const { values, positionals } = args({
@@ -34,6 +34,7 @@ if (values.ast) {
     systemPrompt: buildParserPrompt(prompt),
     jsonSchema: buildParserJsonSchema(vocab),
     vocab,
+    namedCards: parserNamedCards(await getCardPool(db), request),
     reasoningEffort: effortFor(key, undefined),
   });
   if (!res.ok) throw new Error(res.error);

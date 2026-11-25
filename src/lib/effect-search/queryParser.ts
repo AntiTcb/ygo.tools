@@ -5,7 +5,7 @@ import { parserReplySchema, type ParserReply, type SearchQuery, type SearchQuery
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type Vocab } from './tagSchema';
 
 /** Bump when the parser prompt changes (AI Gateway caches by request, so this also busts the cache). */
-export const PARSER_PROMPT_VERSION = 'q4';
+export const PARSER_PROMPT_VERSION = 'q5';
 
 const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported: string } }[] = [
   {
@@ -127,13 +127,14 @@ Return {"query": {...}} or, if the request isn't about Yu-Gi-Oh! cards or what t
 - is_cost: true when the request is specifically about costs ("whose cost...", "by paying/discarding as a cost"); otherwise omit.
 - target ("does"): what the action applies to. A specific card name -> {"card": "<exact name as typed>"}. A description -> card fields (below). The cards themselves ("special summon themselves", "this card") -> {"card": "__self__"}. Omit when the request doesn't restrict it.
 - responds_to: subject_is_self true when the event happens to the card itself ("when this card is sent to the GY"); otherwise "target" describes the card the event happens to. cause ("cost", "effect", "battle", "material") and cause_card describe what caused it.
-- card_filter: constraints on the result cards, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that...").
+- card_filter: constraints on the result cards, not on what they affect ("WATER monsters that...", "spells that...", "level 4 or lower warriors that..."). A kind of card after the verb ("take control of a monster", "destroy a spell") is the target, never card_filter.
 - Card fields: card_types ${JSON.stringify(CARD_TYPES)}; attributes ${JSON.stringify(ATTRIBUTE_NAMES)}; races ${JSON.stringify(RACE_NAMES)}; monster_kinds ${JSON.stringify(MONSTER_KINDS)}; spell_trap_types ${JSON.stringify(SPELL_TRAP_TYPES)}; level / rank / link_rating / atk / def as {"op": "eq|neq|lt|lte|gt|gte", "value": n}; archetypes (e.g. ["Frog"]); names; exclude_names; exclude_monster_kinds; exclude_attributes / exclude_races ("non-WATER", "non-Machine"); any_of (list of alternatives).
 - Leave out anything the request doesn't say. Prefer the broadest reasonable reading.
 - Always produce a query when any part of the request maps to the fields: keep the parts you can express and drop the rest (a number of cards, "once per turn", "all"/"every"), rather than answering unsupported.
 - archetypes and names are only for real Yu-Gi-Oh! archetypes and card names, never ordinary words ("all", "token", "support").
 - "<archetype> support": cards that search or add that archetype (add_to_hand with that archetype as target).
 - "cards like <card>" / "<card> but ...": search for what that card's main effect does ("cards like Pot of Greed" -> draw).
+- The text of cards the request names may be given before it, as reference. Use it to work out what a named card does ("cards like X", "X's effect"); a card the request uses as a target or source still goes in by name. For "cards like X", keep only X's main action and what it acts on: never its costs (is_cost), conditions or card type, unless the request asks for them. Pick the verb from the text's own wording: "negate the activation" is negate_activation, "negate that effect" is negate_effect.
 - "unsupported" is only for requests that aren't about cards at all, or that are only about something no verb covers (protection, continuous restrictions).
 
 ## Verbs
@@ -180,6 +181,25 @@ export const queryProblem = (q: SearchQuery, vocab: Vocab): string | null => {
   return null;
 };
 
+const CARD_TYPE_WORDS: Record<string, RegExp> = { monster: /\bmonsters?\b/i, spell: /\bspells?\b/i, trap: /\btraps?\b/i };
+
+/**
+ * Drops a card_filter that only names card types the request never puts on the results. The model
+ * sometimes copies the target's type there ("cards that take control of an opponent's monster" ->
+ * monsters only), which hides every Spell and Trap that does it. The result cards are described before
+ * the first "that"/"which"/"with"; a request without one is left alone.
+ */
+export const dropStrayCardFilter = (request: string, q: SearchQuery): SearchQuery => {
+  if (q.mode === 'cards' || !q.card_filter) return q;
+  const { card_types, ...rest } = q.card_filter as Record<string, unknown>;
+  const onlyTypes = Array.isArray(card_types) && card_types.length && Object.values(rest).every((v) => v == null || (Array.isArray(v) && !v.length));
+  if (!onlyTypes) return q;
+  const head = request.split(/\b(?:that|which|who|whose|with)\b/i)[0]!;
+  if (head === request) return q;
+  const asked = (card_types as string[]).some((t) => !CARD_TYPE_WORDS[t] || CARD_TYPE_WORDS[t].test(head));
+  return asked ? q : { ...q, card_filter: null };
+};
+
 /** Validates a parser reply: shape, and verbs/zones from the vocabulary in the right role. */
 export const checkParserReply = (content: string, vocab: Vocab): { reply: ParserReply } | { error: string } => {
   let raw: unknown;
@@ -200,6 +220,18 @@ export const checkParserReply = (content: string, vocab: Vocab): { reply: Parser
   return { reply: parsed.data };
 };
 
+/** A card the request names, with its text, given to the model as reference. */
+export type NamedCard = { name: string; typeLine: string; text: string };
+
+const NAMED_CARD_TEXT_LIMIT = 700;
+
+/** The user message: reference text for the cards the request names, then the request. */
+export const parserUserMessage = (request: string, namedCards: readonly NamedCard[] = []): string => {
+  const cards = namedCards.map((c) => `- ${c.name} (${c.typeLine}): ${c.text.replace(/\s+/g, ' ').trim().slice(0, NAMED_CARD_TEXT_LIMIT)}`);
+  const ref = cards.length ? `Cards named in the request (reference only):\n${cards.join('\n')}\n\n` : '';
+  return `${ref}Request: ${request.trim().slice(0, 300)}\nOutput:`;
+};
+
 export type ParserConfig = {
   client: ChatClient;
   model: string;
@@ -207,6 +239,8 @@ export type ParserConfig = {
   jsonSchema: Record<string, unknown>;
   vocab: Vocab;
   reasoningEffort?: ReasoningEffort;
+  /** Cards the request names (see namedCardsIn), whose text helps with "cards like X". */
+  namedCards?: readonly NamedCard[];
   /**
    * Models to try, in order, when `model` is rate limited, down, or keeps returning invalid output. The
    * model's own capacity limits are low enough that busy minutes (or a tagging run) hit them.
@@ -231,7 +265,7 @@ export const parseSearchRequest = async (request: string, cfg: ParserConfig): Pr
   const tryModel = async (model: string, reasoningEffort: ReasoningEffort | undefined): Promise<Attempt> => {
     const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
       { role: 'system', content: cfg.systemPrompt },
-      { role: 'user', content: `Request: ${request.trim().slice(0, 300)}\nOutput:` },
+      { role: 'user', content: parserUserMessage(request, cfg.namedCards) },
     ];
     let lastError = '';
     let transientRetried = false;
@@ -263,7 +297,10 @@ export const parseSearchRequest = async (request: string, cfg: ParserConfig): Pr
 
   for (const m of models) {
     const res = await tryModel(m.model, m.reasoningEffort);
-    if ('reply' in res) return { ok: true, reply: res.reply, usage: usage ?? ZERO_USAGE, ms: Date.now() - started };
+    if ('reply' in res) {
+      const reply = 'query' in res.reply ? { query: dropStrayCardFilter(request, res.reply.query) } : res.reply;
+      return { ok: true, reply, usage: usage ?? ZERO_USAGE, ms: Date.now() - started };
+    }
     errors.push(`${m.model}: ${res.error}`);
   }
   return { ok: false, error: errors.join(' | '), usage, ms: Date.now() - started };

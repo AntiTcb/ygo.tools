@@ -11,7 +11,7 @@ import { loadVocab } from '../../src/lib/effect-search/db';
 import { describeQuery, isNamedCard, searchQuerySchema, TIERS, type SearchQuery } from '../../src/lib/effect-search/query';
 import { buildParserJsonSchema, buildParserPrompt, parseSearchRequest } from '../../src/lib/effect-search/queryParser';
 import { parseView } from '../../src/lib/effect-search/resultView';
-import { getCardPool, lookupCard, runSearch } from '../../src/lib/effect-search/searchEngine';
+import { getCardPool, lookupCard, parserNamedCards, runSearch } from '../../src/lib/effect-search/searchEngine';
 import { isPrintedSnippet } from '../../src/lib/effect-search/snippets';
 import { currentCardName } from '../../src/lib/effect-search/store';
 import { aiClient, args, effortFor, parseModel, supabase } from './lib';
@@ -50,7 +50,7 @@ const parser = values.parse
         reasoningEffort: effortFor(key, undefined),
       };
       return async (request: string): Promise<SearchQuery | string> => {
-        const res = await parseSearchRequest(request, opts);
+        const res = await parseSearchRequest(request, { ...opts, namedCards: parserNamedCards(pool, request) });
         if (!res.ok) return `parse failed: ${res.error.slice(0, 120)}`;
         return 'query' in res.reply ? res.reply.query : `unsupported: ${res.reply.unsupported}`;
       };
