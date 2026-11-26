@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ygo-cards": {
+      "type": "http",
+      "url": "https://ygo.alexgravely.dev/mcp"
+    }
+  }
+}

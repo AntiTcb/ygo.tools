@@ -2,7 +2,7 @@
 // Tags specific cards and prints the output, for prompt iteration.
 //
 //   pnpm effect-search:tag "Toadally Awesome" "Swap Frog"
-//   pnpm effect-search:tag 12642 --model glm-5.3-flash --reasoning high
+//   pnpm effect-search:tag 12642 --model gpt-oss-120b --reasoning high
 //   pnpm effect-search:tag "Swap Frog" --store     # also write the tags to the DB
 //
 // Cards with a gold entry are scored against it.
@@ -17,12 +17,12 @@ import { tagOutputSchema } from '../../src/lib/effect-search/tagSchema';
 import { aiClient, args, parseModel, parseReasoning, supabase, taggerConfig, usd } from './lib';
 
 const { values, positionals } = args({
-  model: { type: 'string', default: 'kimi-k2.6' },
+  model: { type: 'string', default: 'glm-5.3' },
   reasoning: { type: 'string' },
   store: { type: 'boolean', default: false },
 });
 if (!positionals.length) {
-  console.error('Usage: pnpm effect-search:tag <name or id>... [--model kimi-k2.6] [--reasoning none|high] [--store]');
+  console.error('Usage: pnpm effect-search:tag <name or id>... [--model glm-5.3] [--reasoning none|high] [--store]');
   process.exit(1);
 }
 

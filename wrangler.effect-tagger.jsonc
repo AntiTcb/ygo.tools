@@ -17,8 +17,8 @@
   },
   "vars": {
     "SUPABASE_URL": "https://sbygo.alexgravely.dev",
-    "TAG_MODEL": "kimi-k2.6",
-    "CLUSTER_MODEL": "kimi-k2.6",
+    "TAG_MODEL": "glm-5.3",
+    "CLUSTER_MODEL": "glm-5.3",
     // Logs, costs and analytics for every model call. "default" is created automatically on first use.
     "AI_GATEWAY_ID": "default",
     "BATCH_SIZE": "20",

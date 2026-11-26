@@ -1,10 +1,12 @@
+import { fixTagEffects } from './tagFixes';
 import { addUsage, ChatError, ZERO_USAGE, type ChatClient, type ChatMessage, type ChatUsage, type ReasoningEffort } from './ai';
 import { buildUserPrompt, type TaggerCard } from './prompt';
+import { repairSnippets } from './snippets';
 import { normalizeTagOutput, repairTagOutput, tagOutputSchema, validateTagOutput, type TagOutput, type Vocab } from './tagSchema';
 
 export type TaggerConfig = {
   client: ChatClient;
-  /** Workers AI model id, e.g. `@cf/moonshotai/kimi-k2.6`. */
+  /** Workers AI model id, e.g. `@cf/zai-org/glm-5.3`. */
   model: string;
   systemPrompt: string;
   jsonSchema: Record<string, unknown>;
@@ -82,7 +84,13 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
 
     lastContent = content;
     const checked = checkTaggerReply(content, cfg.vocab);
-    if ('output' in checked) return { ok: true, output: checked.output, attempts: attempt, usage };
+    if ('output' in checked) {
+      const effects = fixTagEffects(
+        repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText }),
+        [card.effectText, card.pendulumText].filter(Boolean).join('\n'),
+      );
+      return { ok: true, output: { ...checked.output, effects }, attempts: attempt, usage };
+    }
     lastError = checked.errors.join('; ');
     // Broken JSON is usually a degenerate generation (e.g. thousands of blank lines): retry fresh at a
     // higher temperature rather than feeding it back. Valid-but-wrong output gets a correction turn.

@@ -30,11 +30,16 @@ const numCmp = (field: 'level' | 'link_rating' | 'atk' | 'def', c: NumCmp): Rule
 const leafToRule = (leaf: TargetLeaf, resolve: NameResolver, unresolved: Set<string>): RuleNode[] => {
   const parts: RuleNode[] = [];
   // Neuron stores Spells/Traps with level 0 and ATK/DEF 0, so stat constraints must imply a monster.
-  const hasStats = leaf.level || leaf.rank || leaf.link_rating || leaf.atk || leaf.def;
+  // "non-WATER" / "non-Machine" also mean a monster (Spells/Traps have no Type and pseudo-Attributes).
+  const hasStats = leaf.level || leaf.rank || leaf.link_rating || leaf.atk || leaf.def || leaf.exclude_attributes || leaf.exclude_races;
   if (hasStats && !leaf.card_types) parts.push(cond({ kind: 'cat', field: 'card_type', op: 'in', values: [CARD_TYPE_IDS.monster] }));
   if (leaf.card_types) parts.push(cond({ kind: 'cat', field: 'card_type', op: 'in', values: leaf.card_types.map((t) => CARD_TYPE_IDS[t]) }));
   if (leaf.attributes) parts.push(cond({ kind: 'cat', field: 'attribute_id', op: 'in', values: leaf.attributes.map((a) => ATTRIBUTE_IDS[a]) }));
   if (leaf.races) parts.push(cond({ kind: 'cat', field: 'species_id', op: 'in', values: leaf.races.map((r) => RACE_IDS[r]) }));
+  if (leaf.exclude_attributes) {
+    parts.push(cond({ kind: 'cat', field: 'attribute_id', op: 'notIn', values: leaf.exclude_attributes.map((a) => ATTRIBUTE_IDS[a]) }));
+  }
+  if (leaf.exclude_races) parts.push(cond({ kind: 'cat', field: 'species_id', op: 'notIn', values: leaf.exclude_races.map((r) => RACE_IDS[r]) }));
   if (leaf.monster_kinds) {
     parts.push(cond({ kind: 'cat', field: 'frame_subtype', op: 'in', values: leaf.monster_kinds.map((k) => MONSTER_KIND_IDS[k]) }));
   }
@@ -97,8 +102,10 @@ const leafText = (leaf: TargetLeaf): string => {
   if (leaf.level) words.push(`Level ${cmpText(leaf.level)}`);
   if (leaf.rank) words.push(`Rank ${cmpText(leaf.rank)}`);
   if (leaf.link_rating) words.push(`Link ${cmpText(leaf.link_rating)}`);
+  if (leaf.exclude_attributes) words.push(leaf.exclude_attributes.map((a) => `non-${a}`).join(' '));
   if (leaf.attributes) words.push(leaf.attributes.join('/'));
   if (leaf.archetypes) words.push(leaf.archetypes.map((a) => `"${a}"`).join('/'));
+  if (leaf.exclude_races) words.push(leaf.exclude_races.map((r) => `non-${r}`).join(' '));
   if (leaf.races) words.push(leaf.races.join('/'));
   if (leaf.exclude_monster_kinds) words.push(leaf.exclude_monster_kinds.map((k) => `non-${k}`).join(' '));
   if (leaf.monster_kinds) words.push(leaf.monster_kinds.join('/'));
