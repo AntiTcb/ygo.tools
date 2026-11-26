@@ -114,6 +114,13 @@ describe('classify', () => {
     expect(classify(one, effect(null, { nameRefs: [12642] }), matcher)).toBe('name');
   });
 
+  it('ranks an effect on itself as a partial fit for a description', () => {
+    const water = rule({ attributes: ['WATER'] });
+    const want: ResolvedTarget = { kind: 'cards', rule: water, cards: [toadally, tunerFish], key: 'water' };
+    expect(classify(want, effect(null, { isSelf: true, owner: toadally }), matcher)).toBe('partial');
+    expect(classify(want, effect(null, { isSelf: true, owner: card('Fire Guy', { id: 9, attribute_id: 5 }) }), matcher)).toBeNull();
+  });
+
   it('gives "match" when the query has no target, and nothing for unknown names', () => {
     expect(classify({ kind: 'none' }, effect({ attributes: ['FIRE'] }), matcher)).toBe('match');
     expect(classify({ kind: 'unknown', name: 'Toadaly', suggestions: [] }, effect(null), matcher)).toBeNull();

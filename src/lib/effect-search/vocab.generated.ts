@@ -28,6 +28,13 @@ export const EFFECT_ACTION_VERBS = [
   'inflict_damage',
   'gain_lp',
   'lose_lp',
+  'prevent_activation',
+  'prevent_summon',
+  'prevent_attack',
+  'prevent_battle_destruction',
+  'prevent_effect_destruction',
+  'prevent_targeting',
+  'unaffected',
 ] as const;
 
 export const EFFECT_EVENT_VERBS = [

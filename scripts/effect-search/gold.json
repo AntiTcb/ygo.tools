@@ -470,15 +470,11 @@
             { "verb": "draw", "quantity": 1, "to_side": "you" }
           ]
         },
-        { "effect_index": 1, "snippet": "Co-linked monsters you control cannot be destroyed by battle.", "effect_type": "continuous" }
-      ],
-      "unmapped": [
         {
-          "kind": "verb",
-          "as_action": true,
-          "proposed_term": "protect_from_destruction",
-          "description": "Cards cannot be destroyed (by battle and/or card effects)",
-          "phrase": "cannot be destroyed by battle"
+          "effect_index": 1,
+          "snippet": "Co-linked monsters you control cannot be destroyed by battle.",
+          "effect_type": "continuous",
+          "actions": [{ "verb": "prevent_battle_destruction", "from_side": "you" }]
         }
       ]
     }
@@ -683,7 +679,7 @@
           "effect_index": 0,
           "snippet": "Target 1 monster your opponent controls; until the End Phase, take control of that target, but it cannot declare an attack or be Tributed.",
           "effect_type": "activation",
-          "actions": [{ "verb": "take_control", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }]
+          "actions": [{ "verb": "take_control", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }, { "verb": "prevent_attack" }]
         }
       ]
     }
@@ -1138,7 +1134,8 @@
         {
           "effect_index": 0,
           "snippet": "Your opponent cannot activate cards or effects in response to this card's effect activations.",
-          "effect_type": "continuous"
+          "effect_type": "continuous",
+          "actions": [{ "verb": "prevent_activation", "from_side": "opponent" }]
         },
         {
           "effect_index": 1,
@@ -1171,15 +1168,6 @@
             { "verb": "destroy", "from_zones": ["field"], "from_side": "opponent", "quantity": 1 }
           ]
         }
-      ],
-      "unmapped": [
-        {
-          "kind": "verb",
-          "as_action": true,
-          "proposed_term": "prevent_responses",
-          "description": "The opponent cannot chain to this card's effects",
-          "phrase": "Your opponent cannot activate cards or effects in response to this card's effect activations"
-        }
       ]
     }
   },
@@ -1191,7 +1179,8 @@
         {
           "effect_index": 0,
           "snippet": "While you control a \"Rescue-ACE\" monster other than \"Rescue-ACE Hydrant\", your opponent's monsters cannot target this card for attacks, also your opponent cannot target this card with card effects.",
-          "effect_type": "continuous"
+          "effect_type": "continuous",
+          "actions": [{ "verb": "prevent_targeting", "is_self": true }]
         },
         {
           "effect_index": 1,
@@ -1215,15 +1204,6 @@
               "target": { "card_types": ["monster"], "archetypes": ["Rescue-ACE"], "exclude_names": ["Rescue-ACE Hydrant"] }
             }
           ]
-        }
-      ],
-      "unmapped": [
-        {
-          "kind": "verb",
-          "as_action": true,
-          "proposed_term": "protect_from_targeting",
-          "description": "Cards cannot be targeted by attacks and/or card effects",
-          "phrase": "your opponent cannot target this card with card effects"
         }
       ]
     }
@@ -1429,16 +1409,10 @@
           "effect_index": 0,
           "snippet": "Trap Cards, and their effects on the field, cannot be activated. Negate all Trap effects on the field.",
           "effect_type": "continuous",
-          "actions": [{ "verb": "negate_effect", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["trap"] } }]
-        }
-      ],
-      "unmapped": [
-        {
-          "kind": "verb",
-          "as_action": true,
-          "proposed_term": "prevent_activation",
-          "description": "Cards or effects cannot be activated",
-          "phrase": "Trap Cards, and their effects on the field, cannot be activated"
+          "actions": [
+            { "verb": "prevent_activation", "target": { "card_types": ["trap"] } },
+            { "verb": "negate_effect", "from_zones": ["field"], "from_side": "either", "target": { "card_types": ["trap"] } }
+          ]
         }
       ]
     }
