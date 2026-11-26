@@ -255,7 +255,9 @@ export const classify = (
       return eff.contextual ? 'contextual' : 'property';
     }
     case 'cards': {
-      if (eff.isSelf) return matcher.matches(want.rule, eff.owner) ? 'property' : null;
+      // Acting on itself fits only one of the described cards ("negate the effects of Spells" isn't met by
+      // a Spell negating its own effects): rank it with the partial fits, below effects that take any of them.
+      if (eff.isSelf) return matcher.matches(want.rule, eff.owner) ? 'partial' : null;
       // An effect naming one of the described cards fits only that one, unless it is the only one described.
       if (eff.nameRefs.some((n) => want.cards.some((c) => c.id === n))) return want.cards.length === 1 ? 'name' : 'partial';
       if (!eff.rule) return 'unrestricted';

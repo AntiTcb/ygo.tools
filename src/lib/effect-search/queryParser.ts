@@ -5,7 +5,7 @@ import { parserReplySchema, type ParserReply, type SearchQuery, type SearchQuery
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type Vocab } from './tagSchema';
 
 /** Bump when the parser prompt changes (AI Gateway caches by request, so this also busts the cache). */
-export const PARSER_PROMPT_VERSION = 'q5';
+export const PARSER_PROMPT_VERSION = 'q6';
 
 const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported: string } }[] = [
   {
@@ -103,8 +103,17 @@ const EXAMPLES: { q: string; reply: { query: SearchQueryInput } | { unsupported:
   },
   {
     q: "monsters that can't be destroyed by battle",
-    reply: { unsupported: 'Protection effects (cannot be destroyed, unaffected) are not searchable yet.' },
+    reply: { query: { mode: 'does', verb: 'prevent_battle_destruction', target: { card: '__self__' }, card_filter: { card_types: ['monster'] } } },
   },
+  {
+    q: 'prevents Spell Cards from being activated',
+    reply: { query: { mode: 'does', verb: 'prevent_activation', target: { card_types: ['spell'] } } },
+  },
+  {
+    q: 'cards that stop my opponent from attacking',
+    reply: { query: { mode: 'does', verb: 'prevent_attack', from_side: 'opponent' } },
+  },
+  { q: 'how do I get better at the game', reply: { unsupported: 'That is not about what cards do.' } },
   { q: 'what is the best deck right now', reply: { unsupported: 'That is not a question about what card effects do.' } },
 ];
 
@@ -135,7 +144,8 @@ Return {"query": {...}} or, if the request isn't about Yu-Gi-Oh! cards or what t
 - "<archetype> support": cards that search or add that archetype (add_to_hand with that archetype as target).
 - "cards like <card>" / "<card> but ...": search for what that card's main effect does ("cards like Pot of Greed" -> draw).
 - The text of cards the request names may be given before it, as reference. Use it to work out what a named card does ("cards like X", "X's effect"); a card the request uses as a target or source still goes in by name. For "cards like X", keep only X's main action and what it acts on: never its costs (is_cost), conditions or card type, unless the request asks for them. Pick the verb from the text's own wording: "negate the activation" is negate_activation, "negate that effect" is negate_effect.
-- "unsupported" is only for requests that aren't about cards at all, or that are only about something no verb covers (protection, continuous restrictions).
+- Restrictions and protection have verbs: "can't be activated" -> prevent_activation, "can't Special Summon" -> prevent_summon, "can't attack" -> prevent_attack, "can't be destroyed by battle" -> prevent_battle_destruction, "can't be destroyed by card effects" -> prevent_effect_destruction, "can't be targeted" -> prevent_targeting, "unaffected by card effects" -> unaffected. "Monsters that can't be destroyed" means they protect themselves (target {"card": "__self__"}). from_side is who is restricted ("stop my opponent from activating" -> "opponent").
+- "unsupported" is only for requests that aren't about cards at all, or that are only about something no verb covers.
 
 ## Verbs
 ${termList(vocab.verbs)}

@@ -42,9 +42,16 @@ describe('encodeQuery / decodeQuery', () => {
 
 describe('describeQuery', () => {
   it('renders the query in English', () => {
-    expect(describeQuery(toadally)).toBe('Cards that special summon "Toadally Awesome" from gy');
+    expect(describeQuery(toadally)).toBe('Cards that Special Summon "Toadally Awesome" from the GY');
     expect(describeQuery({ ...toadally, is_cost: true })).toContain('as a cost');
-    expect(describeQuery(atlantean)).toMatch(/respond to send to gy of themselves by cost of WATER monster/);
+    expect(describeQuery(atlantean)).toBe('Monsters that activate when they are sent to the GY as a cost for a WATER monster');
+    expect(describeQuery(searchQuerySchema.parse({ mode: 'does', verb: 'negate_effect', target: { card_types: ['spell'] } }))).toBe(
+      'Cards that negate the effects of Spells',
+    );
+    expect(describeQuery(searchQuerySchema.parse({ mode: 'does', verb: 'draw' }))).toBe('Cards that draw');
+    expect(describeQuery(searchQuerySchema.parse({ mode: 'affected_by', verb: 'add_to_hand', source: { card: 'Reinforcement of the Army' } }))).toBe(
+      'Cards that "Reinforcement of the Army" can add to the hand',
+    );
   });
 });
 

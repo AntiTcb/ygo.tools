@@ -44,6 +44,49 @@ export const checkTaggerReply = (content: string, vocab: Vocab): { output: TagOu
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+const fold = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+
+/**
+ * Sentences of the card text that hold an activated effect ("...: You can ...", "...; destroy it")
+ * but appear in no snippet. The model sometimes stops after the first effect or two; this catches it.
+ * Once-per-turn clauses and summoning conditions aren't effects, so they're never reported.
+ */
+export const missingEffectText = (text: string, snippets: readonly string[]): string[] => {
+  const covered = fold(snippets.join(' \n '));
+  // Quoted names keep their punctuation ("Number C39: Utopia Ray"); mask it so it doesn't split or count.
+  const masked = text.replace(/"[^"\n]*"/g, (q) => q.replace(/[.:;]/g, ' '));
+  const missing: string[] = [];
+  let start = 0;
+  for (const end of [...[...masked.matchAll(/\n|\.(?=\s|$)|●/g)].map((m) => m.index! + 1), text.length]) {
+    const lead = /^[\s●]*/.exec(text.slice(start, end))![0].length;
+    const sentence = text.slice(start + lead, end).trim();
+    const activated = /[:;]/.test(masked.slice(start + lead, end));
+    start = end;
+    if (!activated || sentence.length < 20 || /^(you can only|you cannot|cannot be|must be|must first|if you do)/i.test(sentence)) continue;
+    // A sentence split differently than the snippet still counts when its start is there.
+    const f = fold(sentence);
+    if (!covered.includes(f) && !covered.includes(f.slice(0, 40))) missing.push(sentence);
+  }
+  return missing;
+};
+
+/** "...: You can add", "...; destroy it": something an effect does after its condition or cost. */
+const ACTIVATED_CLAUSE = /[:;]\s*(you can |target |special summon |add |destroy |send |banish |draw |negate )/i;
+
+/**
+ * Effects with no actions whose snippet is several sentences including an activated effect: the
+ * model copied a run of the text box (often all of it) into one effect instead of splitting it.
+ */
+export const collapsedEffects = (effects: readonly { snippet: string; actions: readonly unknown[] }[]): number[] =>
+  effects.flatMap((e, i) => {
+    if (e.actions.length || !ACTIVATED_CLAUSE.test(e.snippet)) return [];
+    const sentences = e.snippet
+      .replace(/"[^"]*"/g, 'X')
+      .split(/\.(?:\s|$)/)
+      .filter((x) => x.trim()).length;
+    return sentences >= 3 ? [i] : [];
+  });
+
 /**
  * Tags one card. Invalid output is sent back to the model with the errors for a corrected attempt;
  * transient API failures (429/5xx) are retried with backoff without counting as attempts.
@@ -85,6 +128,34 @@ export const tagCard = async (card: TaggerCard, cfg: TaggerConfig): Promise<TagR
     lastContent = content;
     const checked = checkTaggerReply(content, cfg.vocab);
     if ('output' in checked) {
+      // Stopped early? Ask once for the rest. A second short answer is kept (as before this check), so a
+      // sentence that isn't really an effect can't make a card fail on every run.
+      const missing = missingEffectText(
+        [card.effectText, card.pendulumText].filter(Boolean).join('\n'),
+        checked.output.effects.map((e) => e.snippet),
+      );
+      const collapsed = collapsedEffects(checked.output.effects);
+      if ((missing.length || collapsed.length) && attempt < maxAttempts) {
+        const problems = [
+          ...missing.map(
+            (m) =>
+              `This part of the card text is in none of your effects: "${m}". Add it as its own effect with its actions (or, if it belongs to an effect you listed, include it in that effect's snippet).`,
+          ),
+          ...collapsed.map(
+            (i) =>
+              `effects[${i}] holds several sentences of the text, including an activated effect, but has no actions: split the text into its separate effects and record their actions.`,
+          ),
+        ];
+        messages.push(
+          { role: 'assistant', content },
+          {
+            role: 'user',
+            content: `That output is incomplete:\n${problems.map((p) => `- ${p}`).join('\n')}\nReturn the complete corrected JSON for the same card.`,
+          },
+        );
+        lastError = problems.join(' ');
+        continue;
+      }
       const effects = fixTagEffects(
         repairSnippets(checked.output.effects, { card: card.effectText, pendulum: card.pendulumText }),
         [card.effectText, card.pendulumText].filter(Boolean).join('\n'),

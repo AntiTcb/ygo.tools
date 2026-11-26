@@ -126,6 +126,13 @@ const VERB_TEXT: Record<string, RegExp> = {
   place_on_field: /\bplace\b/i,
   change_stats: /\bATK\b|\bDEF\b|\bLevel|\bRank/i,
   change_position: /\bposition/i,
+  prevent_activation: /\bactivate/i,
+  prevent_summon: /\bSummon/i,
+  prevent_attack: /\battack/i,
+  prevent_battle_destruction: /destroyed by battle/i,
+  prevent_effect_destruction: /\bdestroyed\b/i,
+  prevent_targeting: /\btarget/i,
+  unaffected: /\bunaffected/i,
 };
 
 /** Clauses: sentences, cost/condition parts (";" and ":"), bullets, and ", then" / ", also" continuations. */

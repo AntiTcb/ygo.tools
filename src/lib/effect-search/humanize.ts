@@ -207,6 +207,13 @@ const ACTION_PHRASES: Record<string, { verb: string; implies?: string; suffix?: 
   equip: { verb: 'equips' },
   place_on_field: { verb: 'places', implies: 'field', suffix: 'on the field' },
   change_position: { verb: 'changes the battle position of' },
+  prevent_activation: { verb: 'prevents the activation of' },
+  prevent_summon: { verb: 'prevents the Summon of' },
+  prevent_attack: { verb: 'stops attacks by' },
+  prevent_battle_destruction: { verb: 'protects', suffix: 'from destruction by battle' },
+  prevent_effect_destruction: { verb: 'protects', suffix: 'from destruction by card effects' },
+  prevent_targeting: { verb: 'protects', suffix: 'from being targeted by card effects' },
+  unaffected: { verb: 'makes', suffix: 'unaffected by card effects' },
 };
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -314,4 +321,82 @@ export const humanizeTrigger = (t: TagTrigger): string => {
     );
   }
   return parts.join(' ');
+};
+
+// ---------------------------------------------------------------------------
+// Search queries, for the /search heading: "Cards that negate the effects of Spells"
+// ---------------------------------------------------------------------------
+
+/** "negates the effects of" -> "negate the effects of", "Special Summons" -> "Special Summon". */
+const baseForm = (phrase: string) => {
+  const words = phrase.split(' ');
+  const i = words.findIndex((w) => /s$/.test(w));
+  if (i >= 0) words[i] = /(ch|sh|ss|x)es$/.test(words[i]!) ? words[i]!.slice(0, -2) : words[i]!.slice(0, -1);
+  return words.join(' ');
+};
+
+/** What a verb does to its object, in the base form ("draw", "gain LP"). */
+const verbBase = (verb: string) => {
+  const phrase = ACTION_PHRASES[verb];
+  return phrase
+    ? { text: baseForm(phrase.verb), takesObject: true, suffix: phrase.suffix, implies: phrase.implies }
+    : { text: humanWord(verb), takesObject: false };
+};
+
+type QueryTargetLike = Target | { card: string } | null;
+const isCardRef = (t: QueryTargetLike): t is { card: string } => !!t && 'card' in t && typeof t.card === 'string';
+
+/** "Spells", '"Dark Magician"', "themselves" (selfWord), or the fallback when there is no target. */
+const queryObject = (t: QueryTargetLike, selfWord: string, fallback: string) =>
+  !t ? fallback : isCardRef(t) ? (t.card === '__self__' ? selfWord : `"${t.card}"`) : humanTarget(t, true);
+
+const CAUSE_WORDS = { cost: 'as a cost', effect: 'by a card effect', battle: 'by battle', material: 'as material' } as const;
+
+/** The /search heading for a query. */
+export const humanizeQuery = (q: {
+  mode: 'does' | 'responds_to' | 'affected_by' | 'cards';
+  verb: string | null;
+  from_zones: string[];
+  from_side: Side;
+  is_cost: boolean | null;
+  target: QueryTargetLike;
+  subject_is_self: boolean | null;
+  cause: keyof typeof CAUSE_WORDS | null;
+  cause_card: QueryTargetLike;
+  source: QueryTargetLike;
+  card_filter: Target | null;
+}): string => {
+  const results = q.card_filter ? capitalize(humanTarget(q.card_filter, true)) : 'Cards';
+  if (q.mode === 'cards') return q.card_filter ? results : 'All cards';
+  const from = zonesText(q.from_zones, q.from_side);
+  if (q.mode === 'responds_to') {
+    const event = EVENT_PHRASES[q.verb ?? ''] ?? `is affected by ${humanWord(q.verb ?? 'something')}`;
+    const subject = q.subject_is_self
+      ? 'they'
+      : !q.target
+        ? 'a card'
+        : isCardRef(q.target)
+          ? queryObject(q.target, 'they', 'a card')
+          : subjectText(q.target);
+    const verb = q.subject_is_self
+      ? event
+          .replace(/^is /, 'are ')
+          .replace(/^has /, 'have ')
+          .replace(/^(\w+)s /, '$1 ')
+      : event;
+    const causeCard = !q.cause_card ? '' : isCardRef(q.cause_card) ? queryObject(q.cause_card, 'themselves', 'a card') : subjectText(q.cause_card);
+    const cause = q.cause ? ` ${CAUSE_WORDS[q.cause]}${causeCard ? ` ${q.cause === 'cost' ? 'for' : 'of'} ${causeCard}` : ''}` : '';
+    return `${results} that activate when ${subject} ${verb}${from ? ` from ${from}` : ''}${cause}`;
+  }
+  const v = verbBase(q.verb ?? 'do something to');
+  const zones = from ? ` from ${from}` : '';
+  const suffix = v.suffix && !(q.from_zones.length === 1 && q.from_zones[0] === v.implies) ? ` ${v.suffix}` : '';
+  if (q.mode === 'affected_by') {
+    const source = !q.source ? 'a card' : isCardRef(q.source) ? queryObject(q.source, 'it', 'a card') : subjectText(q.source);
+    const cost = q.is_cost === true ? ' as a cost' : '';
+    return `${results} that ${source} can ${v.text}${zones}${suffix}${cost}`;
+  }
+  const object = v.takesObject ? ` ${queryObject(q.target, 'themselves', 'cards')}` : '';
+  const cost = q.is_cost === true ? ' as a cost' : q.is_cost === false ? ' (not as a cost)' : '';
+  return `${results} that ${v.text}${object}${zones}${suffix}${cost}`;
 };

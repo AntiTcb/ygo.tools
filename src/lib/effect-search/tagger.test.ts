@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ChatError, MODELS, parseChatResponse, usageCostUsd, type ChatClient, type ChatRequest } from './ai';
 import { cardTypeLine, type TaggableCardRow } from './cardText';
-import { checkTaggerReply, tagCard, type TaggerConfig } from './tagger';
+import { checkTaggerReply, collapsedEffects, missingEffectText, tagCard, type TaggerConfig } from './tagger';
 import type { Vocab } from './tagSchema';
 import { EFFECT_ACTION_VERBS, EFFECT_EVENT_VERBS, EFFECT_ZONES } from './vocab.generated';
 
@@ -151,5 +151,73 @@ describe('tagCard retries', () => {
       expect(e!.actions[0]).toMatchObject({ stat_mode: null });
       expect(e!.actions[1]).toMatchObject({ stat_mode: null, stat_amount: 500 });
     }
+  });
+});
+
+describe('missingEffectText', () => {
+  const kingDragun =
+    'Your opponent cannot target Dragon monsters with card effects.\nOnce per turn: You can Special Summon 1 Dragon monster from your hand.';
+
+  it('reports activated effects that no snippet holds', () => {
+    expect(missingEffectText(kingDragun, ['Your opponent cannot target Dragon monsters with card effects.'])).toEqual([
+      'Once per turn: You can Special Summon 1 Dragon monster from your hand.',
+    ]);
+    expect(missingEffectText(kingDragun, kingDragun.split('\n'))).toEqual([]);
+  });
+
+  it('skips material lines, once-per-turn clauses, quoted names and "If you do" follow-ups', () => {
+    const text =
+      '1 Tuner + 1+ non-Tuners\nYou can only use each effect of "Number C39: Utopia Ray" once per turn. If this card is Summoned: You can draw 1 card. If you do: It gains 500 ATK.';
+    expect(missingEffectText(text, ['If this card is Summoned: You can draw 1 card.'])).toEqual([]);
+  });
+});
+
+describe('collapsedEffects', () => {
+  it('finds an action-less effect holding several sentences with an activated one', () => {
+    const whole =
+      'Cannot be targeted. You can only use this effect once per turn. During your Main Phase: You can add 1 card from your Deck to your hand.';
+    expect(collapsedEffects([{ snippet: whole, actions: [] }])).toEqual([0]);
+    expect(collapsedEffects([{ snippet: whole, actions: [{}] }])).toEqual([]);
+    expect(collapsedEffects([{ snippet: 'Cannot be destroyed by battle.', actions: [] }])).toEqual([]);
+  });
+});
+
+describe('tagCard completeness', () => {
+  const twoEffects = {
+    name: 'King Dragun',
+    typeLine: 'Fusion/Effect Monster',
+    effectText:
+      'Your opponent cannot target Dragon monsters with card effects.\nOnce per turn: You can Special Summon 1 Dragon monster from your hand.',
+    pendulumText: null,
+  };
+  const first = {
+    effect_index: 0,
+    snippet: 'Your opponent cannot target Dragon monsters with card effects.',
+    effect_type: 'continuous',
+    actions: [{ verb: 'prevent_targeting' }],
+  };
+  const second = {
+    effect_index: 1,
+    snippet: 'Once per turn: You can Special Summon 1 Dragon monster from your hand.',
+    effect_type: 'ignition',
+    actions: [{ verb: 'special_summon', from_zones: ['hand'] }],
+  };
+  const short = JSON.stringify({ effects: [first] });
+  const full = JSON.stringify({ effects: [first, second] });
+  const withNewVerbs: Vocab = { ...vocab, actionVerbs: [...vocab.actionVerbs, 'prevent_targeting'] };
+
+  it('asks once for effects it left out', async () => {
+    const { client, calls } = scripted([short, full]);
+    const res = await tagCard(twoEffects, { ...cfg(client), vocab: withNewVerbs });
+    expect(res).toMatchObject({ ok: true, attempts: 2 });
+    expect(res.ok && res.output.effects).toHaveLength(2);
+    expect(calls[1]!.messages.at(-1)!.content).toContain('Once per turn: You can Special Summon 1 Dragon monster');
+  });
+
+  it('keeps a second short answer rather than failing the card', async () => {
+    const { client } = scripted([short, short]);
+    const res = await tagCard(twoEffects, { ...cfg(client), vocab: withNewVerbs });
+    expect(res).toMatchObject({ ok: true, attempts: 2 });
+    expect(res.ok && res.output.effects).toHaveLength(1);
   });
 });

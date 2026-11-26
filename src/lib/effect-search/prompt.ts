@@ -1,7 +1,7 @@
 import { ATTRIBUTE_NAMES, CARD_TYPES, MONSTER_KINDS, RACE_NAMES, SPELL_TRAP_TYPES, type TagOutputInput } from './tagSchema';
 
 /** Bump whenever the prompt or labelling conventions change; stored on each tagged card and run. */
-export const TAG_PROMPT_VERSION = 'v6';
+export const TAG_PROMPT_VERSION = 'v7';
 
 export type VocabTerm = { term: string; description: string; usable_as_action?: boolean; usable_as_event?: boolean };
 
@@ -219,7 +219,15 @@ export const buildSystemPrompt = (vocab: PromptVocab): string => {
 - "Activate 1 of these effects" / "You can activate 1 of these effects" followed by bullet points (●) is ONE effect: put the actions of every bullet in that one effect, in printed order. Bullets that list what an effect responds to (Ash Blossom) are also part of the one effect.
 - NOT effects: Fusion/Synchro/Xyz/Link material lines, bare summoning restrictions ("Cannot be Normal Summoned/Set", "You can only Special Summon "X" once per turn", "You cannot Normal Summon/Set the turn you Special Summon this card"), flavor text of Normal Monsters, once-per-turn clauses (those set "opt"), and restrictions a Spell/Trap places on its own activator ("You cannot Summon other monsters the turn you activate this card").
 - Inherent summoning procedures ARE recorded, with effect_type "procedure": "If only your opponent controls a monster, you can Special Summon this card (from your hand)." -> a special_summon action with is_self true and from_zones ["hand"]. Text that says how the card must be Special Summoned ("Must first be Special Summoned (from your hand) to your opponent's field by Tributing 2 monsters they control", "Must be Special Summoned (from your Extra Deck) by sending the above cards you control to the GY") is also a procedure. Anything you must do as part of the procedure is an is_cost action.
-- Effects that only prevent or protect ("Cannot be used as Synchro Material", "cannot be destroyed by battle", "your opponent's monsters cannot declare an attack") are still effects: record them with the actions that fit (often none), and propose terms in "unmapped" for protections and other things worth searching for.
+- Effects that prevent or protect are effects too. Record them as actions with these verbs: is_self true when they apply to this card ("Cannot be destroyed by battle"), otherwise target = the cards they apply to; from_side = whose cards, or which player is restricted ("your opponent cannot activate" -> "opponent", "neither player" -> "either").
+  - prevent_activation: cards or effects that cannot be activated ("Spell Cards cannot be activated", "your opponent cannot activate Trap Cards"). Not negate_activation, which cancels an activation already made. "Your opponent cannot activate cards or effects in response to this card's activation" is prevent_activation of the opponent's cards (target null, from_side "opponent"), not of this card.
+  - prevent_summon: monsters that cannot be Summoned ("Neither player can Special Summon monsters from the Extra Deck"); from_zones = where they would be Summoned from.
+  - prevent_attack: monsters that cannot attack or declare an attack. Limits on what can be attacked ("cannot target this card for attacks", "must attack this card") are not prevent_attack: no action, and an "unmapped" proposal.
+  - prevent_battle_destruction / prevent_effect_destruction: "cannot be destroyed by battle" / "cannot be destroyed by card effects" (any qualifier: "by your opponent's card effects", "by Spell effects"); plain "cannot be destroyed" is both.
+  - prevent_targeting: "cannot be targeted by card effects", "Neither player can target Dragon monsters with card effects".
+  - unaffected: "unaffected by card effects" (any qualifier).
+  - Each prevent verb covers only the restriction it names. A restriction on anything else ("Neither player can add cards from their Deck to their hand except by drawing them", "cannot banish", "cannot draw") is not prevent_activation or prevent_summon: it gets no action, and an "unmapped" proposal.
+  - Locks you place on yourself as the price of an effect ("you cannot Special Summon monsters, except DARK monsters, the turn you activate this effect") are not actions: leave them out, with no "unmapped" entry. Other prevention with no verb ("Cannot be used as Synchro Material", "you take no battle damage") still gets an effect entry with no action, and an "unmapped" proposal.
 - A Normal Monster or a card with no effects has "effects": [].
 - "snippet": the exact sentence(s) of that effect, copied from the card text.
 

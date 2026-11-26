@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { humanizeQuery } from './humanize';
 import { describeTarget } from './targetRule';
 import { targetSchema } from './tagSchema';
 
@@ -113,26 +114,8 @@ export const decodeQuery = (raw: string | null | undefined): SearchQuery | null 
 // English rendering for the chips and the page title
 // ---------------------------------------------------------------------------
 
-const sideWord = { you: 'your', opponent: "your opponent's", either: 'either player’s' } as const;
-
 export const describeQueryTarget = (t: QueryTarget | null): string =>
   !t ? 'any card' : isNamedCard(t) ? (t.card === SELF ? 'itself' : `"${t.card}"`) : describeTarget(t);
 
-export const describeQuery = (q: SearchQuery): string => {
-  const verb = (q.verb ?? 'do something to').replaceAll('_', ' ');
-  const zones = q.from_zones.length ? ` from ${q.from_side ? `${sideWord[q.from_side]} ` : ''}${q.from_zones.join('/')}` : '';
-  const filter = q.card_filter ? `${describeTarget(q.card_filter)}s` : 'Cards';
-  if (q.mode === 'cards') return q.card_filter ? filter : 'All cards';
-  if (q.mode === 'affected_by') {
-    const cost = q.is_cost === true ? ' as a cost' : '';
-    const source = q.source ? (isNamedCard(q.source) ? `"${q.source.card}"` : `a ${describeTarget(q.source)}`) : 'a card';
-    return `${filter} that ${source} can ${verb}${zones}${cost}`;
-  }
-  if (q.mode === 'does') {
-    const cost = q.is_cost === true ? ' as a cost' : q.is_cost === false ? ' (not as a cost)' : '';
-    return `${filter} that ${verb} ${describeQueryTarget(q.target)}${zones}${cost}`;
-  }
-  const subject = q.subject_is_self ? 'themselves' : describeQueryTarget(q.target);
-  const cause = q.cause ? ` by ${q.cause}${q.cause_card ? ` of ${describeQueryTarget(q.cause_card)}` : ''}` : '';
-  return `${filter} that respond to ${verb} of ${subject}${zones}${cause}`;
-};
+/** The query in English, for the page heading: "Cards that negate the effects of Spells". */
+export const describeQuery = (q: SearchQuery): string => humanizeQuery(q);
